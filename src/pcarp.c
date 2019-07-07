@@ -2164,8 +2164,10 @@ DWORD _route_destin (DWORD ip)
 #include "pcdns.h"
 #include "pcbuf.h"
 
+#ifndef __DJGPP__
 static int num_okay = 0;
 static int num_fail = 0;
+#endif
 
 #define TEST(func, args, expect) do {                                   \
                                    HIGH_TEXT();                         \

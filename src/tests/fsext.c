@@ -15,7 +15,9 @@
 int main (void)
 {
   struct sockaddr_in sin;
+#if 0
   struct linger      linger;
+#endif
   int    s, on = 1;
   FILE  *fil;
 
@@ -59,7 +61,7 @@ int main (void)
       perror ("fprintf");
       break;
     }
-    if (fgets(msg,sizeof(msg),fil) < 0)
+    if (fgets(msg,sizeof(msg),fil) == NULL)
     {
       perror ("fgets");
       break;

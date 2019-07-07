@@ -28,7 +28,7 @@ int main (void)
 {
   union REGS regs;
   long  tick, lasttick = 0, key = 0;
-  int   dx, sec, lastsec;
+  int   dx, sec, lastsec = 0;
 
   printf ("Press Esc to quit...\n");
   do

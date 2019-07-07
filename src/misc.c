@@ -1268,7 +1268,9 @@ DWORD get_ss_limit (void)
 
 #else
   THREAD_LOCAL static UINT_PTR stack_bottom = 0;
+# ifndef __DJGPP__
   THREAD_LOCAL static UINT_PTR stack_limit  = 0;
+# endif
 #endif
 
 /* More 'gcc -O0' hackery.
@@ -2025,7 +2027,7 @@ void foo_70 (void) { puts ("I'm foo_70()"); }
 int main (void)
 {
 #if defined(__MSDOS__)
-  BYTE strat;
+  BYTE strat = 0;
 
   printf ("DOS memory allocation strategy: ");
   if (!get_mem_strat(&strat))
