@@ -112,7 +112,8 @@ void str_replace (int ch1, int ch2, char *str)
 
 int make_dirs (char *dir)
 {
-  char *p = strchr (dir, '\0');
+  char *p;
+  int ret;
 
 #if (SLASH == '/')
   str_replace ('\\', SLASH, dir);
@@ -120,25 +121,21 @@ int make_dirs (char *dir)
   str_replace ('/', SLASH, dir);
 #endif
 
-  if (p[-1] != SLASH)
-     *p++ = SLASH, *p = '\0';
-
-  for (p = strchr(dir+1, SLASH); p; p = strchr(p+1, SLASH))
+  for (p = dir + 1; *p; ++p)
   {
-    *p = '\0';
-    if (MKDIR(dir) == -1)
+    if (*p == SLASH)
     {
-      if (errno != EEXIST)
-      {
-        *p = SLASH;
-        return (-1);
-      }
+      *p = '\0';
+      ret = MKDIR(dir);
+      *p = SLASH;
+      if (ret != 0 && errno != EEXIST)
+        return ret;
     }
-    *p = SLASH;
   }
-  return (0);
+  return MKDIR(dir);
 }
 
+#if (SLANG_VERSION >= 20000)
 static int get_win_ver (SLprep_Type *pt, char *expr)
 {
   char *p;
@@ -152,6 +149,7 @@ static int get_win_ver (SLprep_Type *pt, char *expr)
      strcpy (p, "0x0501");
   return (1);
 }
+#endif
 
 int main (int argc, char **argv)
 {
