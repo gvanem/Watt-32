@@ -50,7 +50,7 @@
   #error This program is not needed on CygWin
 #endif
 
-#if defined(__MSDOS__) || defined(WIN32) || defined(_WIN32)
+#if defined(__MSDOS__) || defined(__DOS__) || defined(WIN32) || defined(_WIN32)
   #include <sys/wtypes.h>     /* fd_set, FD_SET() */
 #endif
 
