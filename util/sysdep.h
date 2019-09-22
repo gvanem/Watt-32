@@ -32,6 +32,10 @@
   #include <io.h>
   #include <unistd.h>  /* Assumes only djgpp is used for __MSDOS__ */
 
+#elif defined(__WATCOMC__) && !defined(__UNIX__)
+  #include <direct.h>
+  #include <io.h>
+
 #elif defined(__MINGW32__) || defined(__CYGWIN__) || defined(__WATCOMC__)
   #include <unistd.h>
 
@@ -70,6 +74,10 @@
 #if defined(__DJGPP__)
   #define MKDIR(D) mkdir ((D), 0777)
   #define SLASH    '\\'
+
+#elif defined(__WATCOMC__) && !defined(__UNIX__) /* WATCOM DOS/WIN */
+  #define MKDIR(D)  mkdir ((D))
+  #define SLASH     '\\'
 
 #elif defined(WIN32) || defined(__MSDOS__)  /* MinGW32/MinGW64/MSDOS */
   #define MKDIR(D)  mkdir ((D))
