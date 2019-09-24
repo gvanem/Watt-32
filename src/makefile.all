@@ -1542,8 +1542,8 @@ $(OBJDIR)\pcpkt.obj: asmpkt.nas
 
 @ifdef WATCOM
 $(PKT_STUB): asmpkt.nas
-	$(W32_NASM) -O0 -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
-	$(W32_BIN2C) asmpkt.bin > $@
+	$(%W32_NASM) -O0 -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
+	$(%W32_BIN2C) asmpkt.bin > $@
 
 @else
 
@@ -1697,16 +1697,16 @@ build\visualc\64bit\debug\cflags_buf.h: $(C_ARGS)
 
 @ifdef WATCOM
 build\watcom\small\cflags_buf.h: $(C_ARGS)
-	$(W32_BIN2C) $(C_ARGS)                    > build\watcom\small\cflags_buf.h
+	$(%W32_BIN2C) $(C_ARGS)                    > build\watcom\small\cflags_buf.h
 
 build\watcom\large\cflags_buf.h: $(C_ARGS)
-	$(W32_BIN2C) $(C_ARGS)                    > build\watcom\large\cflags_buf.h
+	$(%W32_BIN2C) $(C_ARGS)                    > build\watcom\large\cflags_buf.h
 
 build\watcom\flat\cflags_buf.h: $(C_ARGS)
-	$(W32_BIN2C) $(C_ARGS)                    > build\watcom\flat\cflags_buf.h
+	$(%W32_BIN2C) $(C_ARGS)                    > build\watcom\flat\cflags_buf.h
 
 build\watcom\win32\cflags_buf.h: $(C_ARGS)
-	$(W32_BIN2C) $(C_ARGS)                    > build\watcom\win32\cflags_buf.h
+	$(%W32_BIN2C) $(C_ARGS)                    > build\watcom\win32\cflags_buf.h
 @endif
 
 @ifdef DJGPP MINGW32 MINGW64 CYGWIN CYGWIN64
