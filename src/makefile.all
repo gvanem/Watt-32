@@ -1525,7 +1525,7 @@ $(OBJDIR)\cflags.h: $(MAKEFIL)
 $(OBJDIR)/pcpkt.o: asmpkt.nas
 
 $(PKT_STUB): asmpkt.nas
-	$(W32_NASM_) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
+	$(W32_NASM_) -O0 -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
 	$(W32_BIN2C_) asmpkt.bin > $@
 
 @elifdef HIGHC
@@ -1533,7 +1533,7 @@ $(PKT_STUB): asmpkt.nas
 $(OBJDIR)/pcpkt.obj: asmpkt.nas
 
 $(PKT_STUB): asmpkt.nas
-	$(W32_NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
+	$(W32_NASM) -O0 -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
 	$(W32_BIN2C) asmpkt.bin > $@
 
 @elifdef FLAT
@@ -1542,13 +1542,13 @@ $(OBJDIR)\pcpkt.obj: asmpkt.nas
 
 @ifdef WATCOM
 $(PKT_STUB): asmpkt.nas
-	$(%W32_NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
+	$(%W32_NASM) -O0 -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
 	$(%W32_BIN2C) asmpkt.bin > $@
 
 @else
 
 $(PKT_STUB): asmpkt.nas
-	$(W32_NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
+	$(W32_NASM) -O0 -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
 	$(W32_BIN2C) asmpkt.bin > $@
 @endif
 
