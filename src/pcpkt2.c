@@ -167,14 +167,13 @@ static DWORD setup_pkt_inf_fast (void)
   return (rm_base);
 }
 
+typedef int _chk_head_size[2 * ((RX_ELEMENT_HEAD_SIZE % 4) == 0) - 1]; /* compile time assert */
 static int setup_rmode_receiver (void)
 {
   WORD rx_seg;
   WORD asmpkt_size_chk;
-  int  head_size = RX_ELEMENT_HEAD_SIZE;
 
   WATT_ASSERT (rm_base);
-  WATT_ASSERT ((head_size % 4) == 0);
 
   rx_seg = _pkt_inf->rm_seg;
 
