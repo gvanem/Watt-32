@@ -1611,7 +1611,7 @@ build\visualc\64bit\debug\watt-32.res: watt-32.rc
 	rc -nologo -DDEBUG=1 -D_MSC_VER -DBITS=64 -Fo build\visualc\64bit\debug\watt-32.res watt-32.rc
 
 build\watcom\win32\watt-32.res: watt-32.rc
-	wrc -dDEBUG=0 -D__WATCOMC__ -q -r -zm -fo=build\watcom\win32\watt-32.res watt-32.rc
+	wrc -dDEBUG=0 -D__WATCOMC__ -q -bt=nt -r -zm -fo=build\watcom\win32\watt-32.res watt-32.rc
 
 #
 # Rules for creating cflags_buf.h. A file with a C-array of the CFLAGS used.
@@ -1717,7 +1717,7 @@ REPLACE = sed -e 's/\(.*\)\.o: /\n$$(OBJDIR)\/\1.o: /'
   #
   # Change this for your CygWin installation:
   #
-  REPLACE += -e 's@/cygdrive/f@f:@'
+REPLACE += -e 's@/cygdrive/f@f:@'
 @endif
 
 DEP_FILE = $(OBJDIR)/watt-32.dep
