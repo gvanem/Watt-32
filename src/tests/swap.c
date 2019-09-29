@@ -88,7 +88,7 @@ static W32_INLINE unsigned long __cdecl naked_fastcall_one (unsigned long x)
 #elif defined(__GNUC__) && !defined(__x86_64__)
 W32_GCC_INLINE unsigned long __cdecl naked_cdecl_one (unsigned long x)
 {
-  __asm__ __volatile (
+  __asm__ __volatile__ (
            "xchgb %b0, %h0\n\t"   /* swap lower bytes  */
            "rorl  $16, %0\n\t"    /* swap words        */
            "xchgb %b0, %h0"       /* swap higher bytes */
@@ -99,7 +99,7 @@ W32_GCC_INLINE unsigned long __cdecl naked_cdecl_one (unsigned long x)
 #define __fastcall __attribute__((__fastcall__))
 W32_GCC_INLINE unsigned long __fastcall naked_fastcall_one (unsigned long x)
 {
-  __asm__ __volatile (
+  __asm__ __volatile__ (
            "xchgb %b0, %h0\n\t"
            "rorl  $16, %0\n\t"
            "xchgb %b0, %h0"
