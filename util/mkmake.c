@@ -132,7 +132,10 @@ int make_dirs (char *dir)
         return ret;
     }
   }
-  return MKDIR(dir);
+  ret = MKDIR(dir);
+  if (ret != 0 && errno != EEXIST)
+    return ret;
+  return 0;
 }
 
 #if (SLANG_VERSION >= 20000)
