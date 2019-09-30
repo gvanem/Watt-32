@@ -80,7 +80,7 @@ msvc/mkmake.exe: mkmake.c
 # Linux binaries:
 #
 linux/mkmake: mkmake.c
-	$(CC) $(CFLAGS) -o $@ $^ $(SLANG_LIB_LINUX)
+	$(CC) -DHAVE_SLANG_SLANG_H $(CFLAGS) -o $@ $^ $(SLANG_LIB_LINUX)
 
 linux/mkdep: mkdep.c
 	$(CC) $(CFLAGS) -o $@ $^

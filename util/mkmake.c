@@ -9,13 +9,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <slang.h>
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
 #include <errno.h>
 #include <time.h>
 #include <sys/stat.h>
+
+#ifdef HAVE_SLANG_SLANG_H
+#include <slang/slang.h>
+#else
+#include <slang.h>
+#endif
 
 #include "sysdep.h"
 
