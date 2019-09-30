@@ -75,6 +75,15 @@ void process_makefile (const char *infname, const char *outfname)
     while (*p == ' ')
          p++;
 #endif
+#if !(defined(__MSDOS__)||defined(_DOS)||defined(_WIN32)||defined(WIN32))
+    /* get rid of CRLF on linux */
+    { char *p1 = strrchr(p, '\r');
+      if (p1) {
+       *p1 = '\n';
+        p1[1] = 0;
+      }
+    }
+#endif
     if (!SLprep_line_ok(p,pt))
        continue;
 
