@@ -3,15 +3,19 @@
 #
 # Contributed by Ozkan Sezer <sezeroz@users.sourceforge.net>
 # for cross-compiling Watt-32 on Linux. Targets are:
-#   djgpp, mingw32, mingw64, cygwin or watcom
+#   djgpp, mingw32, mingw64, cygwin, watcom, or borland
 #
 # What works:
 # - generates suitable target makefile from makefile.all
 # - generates the src/build/<target> objects directory
+# - inc/sys/<target>.err and src/build/<target>/syserr.c
+#   generation for dos targets, i.e. djgpp, watcom and
+#   borland, provided that dosbox is installed.
 #
 # What does not work:
 # - generation of inc/sys/<target>.err, e.g. djgpp.err, and
-#   src/build/<target>/syserr.c won't happen:
+#   src/build/<target>/syserr.c won't happen except for dos
+#   targets (djgpp, watcom and borland work: see above).
 #   util/errnos.c relies on being compiled as a target-exe:
 #   it relies on the sys_nerr value from the target libc and
 #   the strerror() string returned from target's libc.  none
@@ -59,14 +63,14 @@ missing_stuff ()
 bad_usage ()
 {
   echo Unknown option \'$1\'.
-  echo Usage: $0 [djgpp mingw32 mingw64 cygwin watcom all clean]
+  echo Usage: $0 [djgpp mingw32 mingw64 cygwin watcom borland all clean]
   exit 2;
 }
 
 usage ()
 {
   echo Configuring Watt-32 tcp/ip targets.
-  echo Usage: $0 [djgpp mingw32 mingw64 cygwin watcom all clean]
+  echo Usage: $0 [djgpp mingw32 mingw64 cygwin watcom borland all clean]
   exit 1;
 }
 
@@ -80,12 +84,23 @@ gen_djgpp ()
   ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
 
   echo neterr.c: build/djgpp/syserr.c >> build/djgpp/watt32.dep
-# these hacks won't work because errnos.c relies on being compiled as a target-exe.
-# echo "#include <errno.h>" | $DJGPP_PREFIX-gcc -E -dD - | grep "#define E" > ../util/generrno.h
-# echo "#include <sys/version.h>" | $DJGPP_PREFIX-gcc -E -dD - | grep "#define __DJGPP" >> ../util/generrno.h
-# make -C ../util -f errnox.mak dj_err
-# ../util/dj_err -s > build/djgpp/syserr.c
-# ../util/dj_err -e > ../inc/sys/djgpp.err
+
+# requires a dosbox installation: dj_err.exe relies
+# on being compiled as a dos/djgpp exe from errnos.c.
+cat > ../djerr.bat << EOF
+set PATH=c:\\util;%PATH%
+c:
+dj_err.exe -e > inc\\sys\\djgpp.err
+dj_err.exe -s > src\\build\\djgpp\\syserr.c
+exit
+EOF
+  dosbox -noautoexec -c "mount c $WATT_ROOT" -c "c:djerr.bat" -noconsole
+  rm ../djerr.bat
+  mv ../inc/sys/DJGPP.ERR ../inc/sys/djgpp.err 2> /dev/null
+  mv build/djgpp/SYSERR.C build/djgpp/syserr.c 2> /dev/null
+
+  dos2unix ../inc/sys/djgpp.err build/djgpp/syserr.c 2> /dev/null
+  dos2unix djgpp.mak 2> /dev/null
 
   echo Run GNU make to make target:
   echo   make -f djgpp.mak
@@ -171,12 +186,61 @@ gen_watcom ()
   ../util/linux/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/watcom/watt32.dep
 
   echo neterr.c: build/watcom/syserr.c >> build/watcom/watt32.dep
-# these hacks won't work because errnos.c relies on being compiled as a target-exe.
-# ../util/wc_err -s > build/watcom/syserr.c
-# ../util/wc_err -e > ../inc/sys/watcom.err
+
+# requires a dosbox installation: wc_err.exe relies
+# on being compiled as a 16 bit dos exe from errnos.c.
+# note: watcom-dos/win32/os2 share the same errno.h,
+#       but not watcom-linux *does not*.
+cat > ../wcerr.bat << EOF
+set PATH=c:\\util;%PATH%
+c:
+wc_err.exe -e > inc\\sys\\watcom.err
+wc_err.exe -s > src\\build\\watcom\\syserr.c
+exit
+EOF
+  dosbox -noautoexec -c "mount c $WATT_ROOT" -c "c:wcerr.bat" -noconsole
+  rm ../wcerr.bat
+  mv ../inc/sys/WATCOM.ERR ../inc/sys/watcom.err 2> /dev/null
+  mv build/watcom/SYSERR.C build/watcom/syserr.c 2> /dev/null
+
+  dos2unix ../inc/sys/watcom.err build/watcom/syserr.c 2> /dev/null
+  dos2unix watcom*.mak 2> /dev/null
 
   echo Run wmake to make target\(s\):
   echo   E.g. "wmake -f watcom_l.mak" for large model
+}
+
+gen_borland ()
+{
+  echo Generating Borland-C makefiles, directories, errnos and dependencies
+  ../util/linux/mkmake -o bcc_s.mak -d build/borland/small makefile.all BORLAND SMALL
+  ../util/linux/mkmake -o bcc_l.mak -d build/borland/large makefile.all BORLAND LARGE
+  ../util/linux/mkmake -o bcc_f.mak -d build/borland/flat  makefile.all BORLAND FLAT
+  ../util/linux/mkmake -o bcc_w.mak -d build/borland/win32 makefile.all BORLAND WIN32
+
+  ../util/linux/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/borland/watt32.dep
+
+  echo neterr.c: build/borland/syserr.c >> build/borland/watt32.dep
+
+# requires a dosbox installation: bcc_err.exe relies
+# on being compiled as a 16 bit dos exe from errnos.c.
+cat > ../bcerr.bat << EOF
+set PATH=c:\\util;%PATH%
+c:
+bcc_err.exe -e > inc\\sys\\borlandc.err
+bcc_err.exe -s > src\\build\\borland\\syserr.c
+exit
+EOF
+  dosbox -noautoexec -c "mount c $WATT_ROOT" -c "c:bcerr.bat" -noconsole
+  rm ../bcerr.bat
+  mv ../inc/sys/BORLANDC.ERR ../inc/sys/borlandc.err 2> /dev/null
+  mv build/borland/SYSERR.C build/borland/syserr.c 2> /dev/null
+
+  dos2unix ../inc/sys/borlandc.err build/borland/syserr.c 2> /dev/null
+  dos2unix bcc*.mak 2> /dev/null
+
+  echo Run Borland or CBuilder make utility to make target\(s\) :
+  echo   E.g. "%BCCDIR%\\bin\\make -f bcc_l.mak" for large model
 }
 
 gen_all ()
@@ -187,15 +251,16 @@ gen_all ()
   gen_cygwin
   gen_cygwin64
   gen_watcom
+  gen_borland
 }
 
 do_clean ()
 {
-  rm -f djgpp.mak watcom_*.mak MinGW32.mak MinGW64.mak CygWin.mak CygWin_64.mak watcom_w.mak
+  rm -f djgpp.mak watcom*.mak MinGW*.mak CygWin*.mak bcc*.mak
   rm -f build/djgpp/watt32.dep build/MinGW32/watt32.dep build/MinGW64/32bit/watt32.dep build/MinGW64/64bit/watt32.dep
-  rm -f build/CygWin/watt32.dep build/watcom/watt32.dep
-  rm -f build/djgpp/syserr.c build/watcom/syserr.c build/MinGW32/syserr.c build/MinGW64/syserr.c
-  rm -f ../inc/sys/djgpp.err ../inc/sys/watcom.err ../inc/sys/mingw32.err ../inc/sys/mingw64.err
+  rm -f build/CygWin/watt32.dep build/watcom/watt32.dep build/borland/watt32.dep
+  rm -f build/djgpp/syserr.c build/watcom/syserr.c build/borland/syserr.c build/MinGW32/syserr.c build/MinGW64/syserr.c
+  rm -f ../inc/sys/djgpp.err ../inc/sys/watcom.err ../inc/sys/borland.err ../inc/sys/mingw32.err ../inc/sys/mingw64.err
 }
 
 #
@@ -221,7 +286,7 @@ if test $# -lt 1; then
   usage
 fi
 case $1 in
-  djgpp|mingw32|mingw64|cygwin|watcom|all|clean)
+  djgpp|mingw32|mingw64|cygwin|watcom|borland|all|clean)
       ;;
   "-h"|"-?") usage ;;
   *)  bad_usage $1 ;;
@@ -246,6 +311,7 @@ do
   cygwin)    gen_cygwin   ;;
   cygwin64)  gen_cygwin64 ;;
   watcom)    gen_watcom   ;;
+  borland)   gen_borland  ;;
   *)         bad_usage $i;;
  esac
 done
