@@ -40,6 +40,7 @@ if %OS%. ==. goto is_dos
 
 ::
 :: Use these programs under all versions of Windows.
+:: Note: native-Windows version of dj_err.exe is not possible.
 ::
 set     MKMAKE=..\util\win32\mkmake.exe
 set      MKDEP=..\util\win32\mkdep.exe
@@ -49,7 +50,6 @@ set  W32_BIN2C=..\util\win32\bin2c.exe
 set W32_BIN2C_=../util/win32/bin2c.exe
 set   W32_NASM=..\util\win32\nasm.exe
 set  W32_NASM_=../util/win32/nasm.exe
-set    DJ_ERR=..\util\win32\dj_err.exe
 
 :is_dos
 

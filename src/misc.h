@@ -843,7 +843,7 @@ extern const char *short_strerror (int errnum);
 
 /* Macros for sleeping. Reference on djgpp's usleep().
  */
-#if (defined(WIN32) || defined(WIN64)) && !defined(WATT32_DJGPP_MINGW)
+#if defined(WIN32) || defined(WIN64)
   #ifndef __MINGW32__
   #define usleep(us)      Sleep((us)/1000)
   #endif

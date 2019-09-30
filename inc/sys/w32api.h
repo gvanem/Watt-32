@@ -39,33 +39,12 @@
 #endif
 
 /*
- * A C preprocess test using TDM-gcc with djgpp headers.
- */
-#if defined(WATT32_DJGPP_MINGW) && 0
-  #undef  WIN32
-  #undef _WIN32
-  #undef  WIN64
-  #undef _WIN64
-
-  #undef __MINGW32__
-  #undef __MINGW32_VERSION
-  #undef __MINGW32_MAJOR_VERSION
-  #undef __MINGW32_MINOR_VERSION
-  #undef __MINGW64_VERSION_MAJOR
-  #undef __MINGW64_VERSION_MINOR
-#endif
-
-/*
  * Watt-32 should never assume WIN32/WIN64 (or _WIN32/_WIN64) is set for
  * CygWin. It is not defined unless you include <windows.h> first (which
  * we only do in 1 place. See below).
  */
 #if (defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)) || \
     defined(__CYGWIN__)
-
-  #if defined(__DJGPP__)
-  // #error WIN32 defined for Djgpp?
-  #endif
 
   /* Don't include the real <winsock*.h>
    */

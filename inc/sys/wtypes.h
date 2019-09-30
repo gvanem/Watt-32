@@ -59,7 +59,7 @@
   #include <sys/types.h>
 #endif
 
-#if defined(__DJGPP__) && !defined(WATT32_DJGPP_MINGW)
+#if defined(__DJGPP__)
   #include <machine/endian.h>
 #endif
 

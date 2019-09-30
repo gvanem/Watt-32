@@ -27,8 +27,7 @@ PROGRAMS = bcc_err.exe  \
 # of these MUST be used instead of the above.
 #
 WIN_PROGRAMS = win32/wc_err.exe  \
-               win32/bcc_err.exe \
-               win32/dj_err.exe
+               win32/bcc_err.exe
 
 all: $(PROGRAMS) $(WIN_PROGRAMS)
 
@@ -90,9 +89,6 @@ clang_err.exe: errnos.c
 #
 dj_err.exe:
 	$(MAKE) -f dj-errno.mak dj_err.exe
-
-win32/dj_err.exe:
-	$(MAKE) -f dj-errno.mak win32/dj_err.exe
 
 clean:
 	@del bcc_err.exe clang_err.exe wc_err.exe hc_err.exe \

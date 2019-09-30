@@ -35,15 +35,6 @@
 #undef ELOOP
 #endif
 
-/*
- * Just a C preprocess test using TDM-gcc with djgpp headers.
- */
-#if defined(WATT32_DJGPP_MINGW)
-  #ifndef __DJGPP__
-  #define __DJGPP__ 2
-  #endif
-  #include <sys/djgpp.err>
-
   /*
    * '__MINGW32__' is defined by BOTH mingw.org and by the MinGW-w64
    * projects [1,2], because both can target Win32.
@@ -58,7 +49,7 @@
    * Hopefully both Win32 and Win64 targets define the same range of
    * errnos. Hence we use the one generated for '__MINGW64__'.
    */
-#elif defined(W32_IS_MINGW64) || defined(__MINGW64__)
+#if defined(W32_IS_MINGW64) || defined(__MINGW64__)
   #undef EDEADLOCK
   #include <sys/mingw64.err>
 
