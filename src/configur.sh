@@ -113,13 +113,12 @@ gen_mingw32 ()
   ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW32/watt32.dep
 
   echo neterr.c: build/MinGW32/syserr.c >> build/MinGW32/watt32.dep
-# these hacks won't work because errnos.c relies on being compiled as a target-exe.
-# echo "#include <errno.h>" | $MINGW_PREFIX-gcc -E -dD - | grep "#define E" > ../util/generrno.h
-# echo "#define __MINGW32__" >> ../util/generrno.h
-# echo "#include <_mingw.h>" | $MINGW_PREFIX-gcc -E -dD - | grep "#define __MINGW32_M" >> ../util/generrno.h
-# make -C ../util -f errnox.mak mw_err
+
+# not possible, because errnos.c relies on being compiled as a target-exe:
 # ../util/mw_err -s > build/MinGW32/syserr.c
 # ../util/mw_err -e > ../inc/sys/mingw32.err
+  echo ** CANNOT GENERATE mingw32.err and MinGW32/syserr.c **
+  echo ** MW_ERR.EXE MUST BE RUN UNDER WINDOWS FOR THAT !! **
 
   echo Run GNU make to make target:
   echo   make -f MinGW32.mak
@@ -137,14 +136,11 @@ gen_mingw64 ()
   echo neterr.c: build/MinGW64/syserr.c >> build/MinGW64/32bit/watt32.dep
   echo neterr.c: build/MinGW64/syserr.c >> build/MinGW64/64bit/watt32.dep
 
-# these hacks won't work because errnos.c relies on being compiled as a target-exe.
-# echo "#include <errno.h>" | $MINGW64_PREFIX-gcc -E -dD - | grep "#define E" > ../util/generrno.h
-# echo "#define __MINGW32__" >> ../util/generrno.h
-##echo "#define __MINGW64__" >> ../util/generrno.h
-# echo "#include <_mingw.h>" | $MINGW64_PREFIX-gcc -E -dD - | grep "#define __MINGW64_VERSION_M" >> ../util/generrno.h
-# make -C ../util -f errnox.mak mw64_err
+# not possible, because errnos.c relies on being compiled as a target-exe:
 # ../util/mw64_err -s > build/MinGW64/syserr.c
 # ../util/mw64_err -e > ../inc/sys/mingw64.err
+  echo ** CANNOT GENERATE mingw64.err and MinGW64/syserr.c **
+  echo ** MW64_ERR.EXE MUST BE RUN UNDER WINDOWS FOR THAT! **
 
   echo Run GNU make to make target:
   echo   make -f MinGW64_32.mak
