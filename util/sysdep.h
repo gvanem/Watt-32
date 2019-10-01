@@ -7,7 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#if defined(WIN32) && !defined(_WIN32)
+#if defined(__MINGW32__)
   #define WIN32_LEAN_AND_MEAN
 
   #include <io.h>
@@ -22,17 +22,12 @@
   #include <windows.h>
   #include "../src/getopt.c"
 
-  void W32_CALL outsnl (const char *s)
-  {
-    puts (s);
-  }
-
-#elif defined(__MSDOS__)
+#elif defined(__DJGPP__)
   #include <dir.h>
   #include <io.h>
-  #include <unistd.h>  /* Assumes only djgpp is used for __MSDOS__ */
+  #include <unistd.h>
 
-#elif defined(__WATCOMC__) && !defined(__UNIX__)
+#elif defined(__WATCOMC__) && !defined(__UNIX__) /* WATCOM DOS/WIN */
   #include <direct.h>
   #include <io.h>
 
@@ -64,12 +59,12 @@
   #define strupr    my_strupr
 
 #else
-  #error "Unsupported platform or cross-combo"
+  #error "Unsupported platform / cross-compile environment."
 #endif
 
 /*
  * mkdir() hackery.
- * djgpp do support the mode arg, but I'm not sure the value is important.
+ * djgpp does support the mode arg, not sure whether the value matters.
  */
 #if defined(__DJGPP__)
   #define MKDIR(D) mkdir ((D), 0777)
@@ -79,11 +74,11 @@
   #define MKDIR(D)  mkdir ((D))
   #define SLASH     '\\'
 
-#elif defined(WIN32) || defined(__MSDOS__)  /* MinGW32/MinGW64/MSDOS */
+#elif defined(__MINGW32__) || defined(__MSDOS__) /* MinGW / DJGPP */
   #define MKDIR(D)  mkdir ((D))
   #define SLASH     '\\'
 
-#elif defined(_WIN32)                       /* MSVC */
+#elif defined(_WIN32)                            /* MSVC, etc. */
   #define MKDIR(D) _mkdir ((D))
   #define SLASH    '\\'
 
