@@ -19,27 +19,15 @@
   #error "Add '-D_CRT_NO_POSIX_ERROR_CODES' to your CFLAGS."
 #endif
 
-#if defined(__MSDOS__) || defined(WIN32) || defined(_WIN32)
+#if defined(__MSDOS__) || defined(__DOS__) || defined(WIN32) || defined(_WIN32)
   #include <io.h>
-#else /* assume building on unix for cross compilations (BROKEN!) */
+#else
   #include <sys/types.h>
   #include <unistd.h>
+  #error Building on unix for cross-compilations not possible
 #endif
 
-/*
- * Generating a mw64_err.exe for MinGW64 is a major hassle. Since:
- *  1) cannot run a x86-64 program on Win32.
- *  2) cannot use a mingw32-hosted environment that emulates mingw64.
- *
- * Hence we need to run 'i686-w64-mingw32-gcc' to build mw64_err.exe.
- * This MUST be the same gcc version as the 'x86_64-w64-mingw32-gcc'
- * that we're building for. Check with 'x86_64-w64-mingw32-gcc -v'.
- */
-#if defined(MAKE_MINGW64_ERRNOS) && 0
-  #define __MINGW64__
-#else
-  #include <errno.h>
-#endif
+#include <errno.h>
 
 #if defined(__CYGWIN__)
   /*
@@ -114,50 +102,6 @@
   #undef ETXTBSY
   #undef EWOULDBLOCK
 #endif
-
-#if defined(MAKE_MINGW64_ERRNOS) && 0
-  #define EPERM        1
-  #define ENOENT       2
-  #define ENOFILE      ENOENT
-  #define ESRCH        3
-  #define EINTR        4
-  #define EIO          5
-  #define ENXIO        6
-  #define E2BIG        7
-  #define ENOEXEC      8
-  #define EBADF        9
-  #define ECHILD       10
-  #define EAGAIN       11
-  #define ENOMEM       12
-  #define EACCES       13
-  #define EFAULT       14
-  #define EBUSY        16
-  #define EEXIST       17
-  #define EXDEV        18
-  #define ENODEV       19
-  #define ENOTDIR      20
-  #define EISDIR       21
-  #define ENFILE       23
-  #define EMFILE       24
-  #define ENOTTY       25
-  #define EFBIG        27
-  #define ENOSPC       28
-  #define ESPIPE       29
-  #define EROFS        30
-  #define EMLINK       31
-  #define EPIPE        32
-  #define EDOM         33
-  #define EDEADLK      36
-  #define EDEADLOCK    EDEADLK
-  #define ENAMETOOLONG 38
-  #define ENOLCK       39
-  #define ENOSYS       40
-  #define ENOTEMPTY    41
-  #define EINVAL       22
-  #define ERANGE       34
-  #define EILSEQ       42
-#endif   /* MAKE_MINGW64_ERRNOS */
-
 
 static int    print_errno   = 0;
 static int    print_errlist = 0;

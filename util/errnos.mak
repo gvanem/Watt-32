@@ -41,10 +41,10 @@ tcc_err.exe: errnos.c
 	tcc -I..\inc -ml -etcc_err.exe errnos.c
 
 wc_err.exe: errnos.c
-	wcl -I..\inc -ml -zq -fe=wc_err.exe -fr=nul errnos.c
+	wcl -I..\inc -bt=dos -ml -zq -fe=wc_err.exe -fr=nul errnos.c
 
 win32/wc_err.exe: errnos.c
-	wcl386 -I..\inc -mf -zq -fe=win32/wc_err.exe -fr=nul errnos.c
+	wcl386 -I..\inc -bt=nt -mf -zq -fe=win32/wc_err.exe -fr=nul errnos.c
 
 hc_err.exe: errnos.c
 	hc386 -I..\inc -Hldopt=-nomap -Hnocopyr -Hpragma=Offwarn(491) -o hc_err.exe errnos.c
@@ -59,7 +59,7 @@ vc_err.exe: errnos.c
 # See errnos.c for the idea behind this.
 #
 mw64_err.exe: errnos.c
-	gcc -m32 -s -I../inc -DMAKE_MINGW64_ERRNOS -o mw64_err.exe errnos.c
+	gcc -m32 -s -I../inc -o mw64_err.exe errnos.c
 
 mw_err.exe: errnos.c
 	gcc -s -I../inc -o mw_err.exe errnos.c
@@ -94,5 +94,5 @@ clean:
 	@del bcc_err.exe clang_err.exe wc_err.exe hc_err.exe \
              tcc_err.exe dj_err.exe mw_err.exe mw64_err.exe ls_err.exe \
              lcc.exe po_err.exe vc_err.exe win32\wc_err.exe \
-             win32\bcc_err.exe errnos.obj
+             win32\bcc_err.exe errnos.obj errnos.o
 
