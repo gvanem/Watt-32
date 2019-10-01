@@ -110,15 +110,15 @@ gen_mingw32 ()
 {
   echo Generating MinGW32 makefile, directory, errnos and dependencies
   ../util/linux/mkmake -o MinGW32.mak -d build/MinGW32 makefile.all MINGW32 WIN32
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW32/watt32.dep
+  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/MinGW32/watt32.dep
 
   echo neterr.c: build/MinGW32/syserr.c >> build/MinGW32/watt32.dep
 
 # not possible, because errnos.c relies on being compiled as a target-exe:
 # ../util/mw_err -s > build/MinGW32/syserr.c
 # ../util/mw_err -e > ../inc/sys/mingw32.err
-  echo ** CANNOT GENERATE mingw32.err and MinGW32/syserr.c **
-  echo ** MW_ERR.EXE MUST BE RUN UNDER WINDOWS FOR THAT !! **
+  echo \*\* CANNOT GENERATE mingw32.err and MinGW32/syserr.c \*\*
+  echo \*\* MW_ERR.EXE MUST BE RUN UNDER WINDOWS FOR THAT !! \*\*
 
   echo Run GNU make to make target:
   echo   make -f MinGW32.mak
@@ -130,8 +130,8 @@ gen_mingw64 ()
   echo Generating MinGW64-w64 makefile, directory, errnos and dependencies
   ../util/linux/mkmake -o MinGW64_32.mak -d build/MinGW64/32bit makefile.all MINGW64 WIN32
   ../util/linux/mkmake -o MinGW64_64.mak -d build/MinGW64/64bit makefile.all MINGW64 WIN64
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)32bit/ *.c *.h > build/MinGW64/32bit/watt32.dep
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)64bit/ *.c *.h > build/MinGW64/64bit/watt32.dep
+  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/32bit/ *.[ch] > build/MinGW64/32bit/watt32.dep
+  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/64bit/ *.[ch] > build/MinGW64/64bit/watt32.dep
 
   echo neterr.c: build/MinGW64/syserr.c >> build/MinGW64/32bit/watt32.dep
   echo neterr.c: build/MinGW64/syserr.c >> build/MinGW64/64bit/watt32.dep
@@ -139,8 +139,8 @@ gen_mingw64 ()
 # not possible, because errnos.c relies on being compiled as a target-exe:
 # ../util/mw64_err -s > build/MinGW64/syserr.c
 # ../util/mw64_err -e > ../inc/sys/mingw64.err
-  echo ** CANNOT GENERATE mingw64.err and MinGW64/syserr.c **
-  echo ** MW64_ERR.EXE MUST BE RUN UNDER WINDOWS FOR THAT! **
+  echo \*\* CANNOT GENERATE mingw64.err and MinGW64/syserr.c \*\*
+  echo \*\* MW64_ERR.EXE MUST BE RUN UNDER WINDOWS FOR THAT! \*\*
 
   echo Run GNU make to make target:
   echo   make -f MinGW64_32.mak
@@ -153,7 +153,7 @@ gen_cygwin ()
 {
   echo Generating CygWin makefile, directory and dependencies
   ../util/linux/mkmake -o CygWin.mak -d build/CygWin/32bit makefile.all CYGWIN WIN32
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/CygWin/watt32.dep
+  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/CygWin/watt32.dep
 
   echo Run GNU make to make target:
   echo   make -f CygWin.mak
@@ -164,7 +164,7 @@ gen_cygwin64 ()
 {
   echo Generating CygWin64 makefile, directory and dependencies
   ../util/linux/mkmake -o CygWin_64.mak -d build/CygWin/64bit makefile.all CYGWIN WIN64
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/CygWin/watt32.dep
+  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/CygWin/watt32.dep
 
   echo Run GNU make to make target:
   echo   make -f CygWin_64.mak
