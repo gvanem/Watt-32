@@ -56,7 +56,7 @@ vc_err.exe: errnos.c
 	cl -nologo -I..\inc -DWIN32 -Fe./vc_err.exe errnos.c
 
 #
-# See errnos.c for the idea behind this.
+# -m32, so that the resulting exe runs on 32 bits
 #
 mw64_err.exe: errnos.c
 	gcc -m32 -s -I../inc -o mw64_err.exe errnos.c
