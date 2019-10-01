@@ -80,7 +80,7 @@ usage ()
 gen_djgpp ()
 {
   echo Generating DJGPP makefile, directory, errnos and dependencies
-  ../util/linux/mkmake -o djgpp.mak -d build/djgpp makefile.all  DJGPP
+  ../util/linux/mkmake -o djgpp.mak -d build/djgpp makefile.all DJGPP FLAT
   ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
 
   echo neterr.c: build/djgpp/syserr.c >> build/djgpp/watt32.dep
@@ -315,4 +315,3 @@ do
   *)         bad_usage $i;;
  esac
 done
-
