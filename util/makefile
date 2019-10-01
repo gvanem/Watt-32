@@ -18,13 +18,6 @@ SLANG_ROOT_WIN   ?= $(realpath $(MINGW32))/src/TUI/Slang
 SLANG_LIB_WIN    ?= $(SLANG_ROOT_WIN)/src/gw32objs/libslang.a
 SLANG_LIB_WIN_CL ?= $(SLANG_ROOT_WIN)/src/mw32objs/wslang32.lib
 
-#
-# Cross-compiling Watt-32 on Linux using '../src/configur.sh'.
-# We assume S-Lang for Linux is installed in the correct place.
-#
-SLANG_ROOT_LINUX ?=
-SLANG_LIB_LINUX  ?= -lslang
-
 CC     = gcc
 CFLAGS = -Wall -g # -s
 
@@ -79,8 +72,12 @@ msvc/mkmake.exe: mkmake.c
 #
 # Linux binaries:
 #
+# S-lang comes with the distro. Some provide only slang/slang.h,
+# some provide slang.h and symlink slang/slang.h to it. That is
+# the reason for HAVE_SLANG_SLANG_H define.
+#
 linux/mkmake: mkmake.c
-	$(CC) -DHAVE_SLANG_SLANG_H $(CFLAGS) -o $@ $^ $(SLANG_LIB_LINUX)
+	$(CC) -DHAVE_SLANG_SLANG_H $(CFLAGS) -o $@ $^ -lslang
 
 linux/mkdep: mkdep.c
 	$(CC) $(CFLAGS) -o $@ $^
