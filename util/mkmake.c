@@ -35,7 +35,7 @@ char  line_cont_ch = '\\';  /* if this is not '\\' and a line ends in '\\' */
   SLprep_Type *pt;
 #endif
 
-void Usage (void)
+static void Usage (void)
 {
   fprintf (stderr,
            "Usage: mkmake [-v] [-ofile] [-ddir] makefile.all [DEF1 [DEF2 ...]]\n"
@@ -47,7 +47,7 @@ void Usage (void)
   exit (1);
 }
 
-void process_makefile (const char *infname, const char *outfname)
+static int process_makefile (const char *infname, const char *outfname)
 {
   char  buf[1024], *p;
   FILE *out = stdout;
@@ -60,7 +60,7 @@ void process_makefile (const char *infname, const char *outfname)
   if (!in)
   {
     fprintf (stderr, "Cannot open `%s'\n", infname);
-    Usage();
+    return -1;
   }
 
   if (outfname)
@@ -69,7 +69,7 @@ void process_makefile (const char *infname, const char *outfname)
     if (!out)
     {
       fprintf (stderr, "Cannot open `%s'\n", outfname);
-      Usage();
+      return -1;
     }
   }
 
@@ -107,12 +107,14 @@ void process_makefile (const char *infname, const char *outfname)
   }
   if (out != stdout)
      fclose (out);
+
+  return 0;
 }
 
 /*
  * Replace 'ch1' to 'ch2' in string 'str'.
  */
-void str_replace (int ch1, int ch2, char *str)
+static void str_replace (int ch1, int ch2, char *str)
 {
   char *s = str;
 
@@ -124,7 +126,7 @@ void str_replace (int ch1, int ch2, char *str)
   }
 }
 
-int make_dirs (char *dir)
+static int make_dirs (char *dir)
 {
   char *p;
   int ret;
@@ -218,7 +220,10 @@ int main (int argc, char **argv)
     SLdefine_for_ifdef (arg);
   }
 
-  process_makefile (in_makefile, out_makefile);
+  i = process_makefile (in_makefile, out_makefile);
+#if (SLANG_VERSION >= 20000)
+  SLprep_delete(pt);
+#endif
+  if (i < 0) Usage();
   return (0);
 }
-
