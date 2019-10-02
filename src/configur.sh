@@ -213,8 +213,9 @@ gen_borland ()
   ../util/linux/mkmake -o bcc_w.mak -d build/borland/win32 makefile.all BORLAND WIN32
 
   ../util/linux/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/borland/watt32.dep
-
   echo neterr.c: build/borland/syserr.c >> build/borland/watt32.dep
+
+  sed -i 's/\//\\/g' build/borland/watt32.dep
 
 # requires a dosbox installation: bcc_err.exe relies
 # on being compiled as a 16 bit dos exe from errnos.c.
