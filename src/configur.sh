@@ -100,7 +100,6 @@ EOF
   mv build/djgpp/SYSERR.C build/djgpp/syserr.c 2> /dev/null
 
   dos2unix ../inc/sys/djgpp.err build/djgpp/syserr.c 2> /dev/null
-  dos2unix djgpp.mak 2> /dev/null
 
   echo Run GNU make to make target:
   echo   make -f djgpp.mak
@@ -200,7 +199,6 @@ EOF
   mv build/watcom/SYSERR.C build/watcom/syserr.c 2> /dev/null
 
   dos2unix ../inc/sys/watcom.err build/watcom/syserr.c 2> /dev/null
-  dos2unix watcom*.mak 2> /dev/null
 
   echo Run wmake to make target\(s\):
   echo   E.g. "wmake -f watcom_l.mak" for large model
@@ -233,7 +231,6 @@ EOF
   mv build/borland/SYSERR.C build/borland/syserr.c 2> /dev/null
 
   dos2unix ../inc/sys/borlandc.err build/borland/syserr.c 2> /dev/null
-  dos2unix bcc*.mak 2> /dev/null
 
   echo Run Borland or CBuilder make utility to make target\(s\) :
   echo   E.g. "%BCCDIR%\\bin\\make -f bcc_l.mak" for large model
