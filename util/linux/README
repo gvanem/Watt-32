@@ -1,3 +1,5 @@
 This file is here for UnZip to generated this directory.
 This directory will contain the Linux compiled mk* programs
 used by ./src/configure.sh.
+The precompiled ones here are static i386 binaries. Remove
+them and rebuild to match your system, if you like.
