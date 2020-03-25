@@ -1285,7 +1285,7 @@ DWORD get_ss_limit (void)
      * Warning! W202: Symbol 'stack_limit' has been defined, but not referenced
      * But it does not work.
      */
-    #pragma warning 202 10
+    #pragma warning 202 5
   #endif
 
   THREAD_LOCAL static UINT_PTR stack_bottom = 0;
