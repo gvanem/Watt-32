@@ -53,11 +53,14 @@
 #undef USE_DYNIP_CLI   /* Support DynDNS.org name/IP client */
 #undef USE_SCTP        /* Stream Control Transfer Protocol; experimental */
 
+#if (DOSX == 0)
 /*
+ * This handle only 16-bit builds
+ *
  * Building small-model applications doesn't leave
  * much room for the fancy stuff :-(
  */
-#if !defined(OPT_DEFINED) && defined(__SMALL__) && !defined(__SMALL32__)
+#if !defined(OPT_DEFINED) && defined(__SMALL__)
   #define USE_UDP_ONLY     /* test udp-only (cookie,ping) */
   #define OPT_DEFINED
 #endif
@@ -77,7 +80,11 @@
   #define OPT_DEFINED
 #endif
 
+#else   /* !(DOSX == 0) */
+
 /*
+ * This handle only 32-bit and 64-bit code
+ *
  * Otherwise, for all targets define these options:
  */
 #if !defined(OPT_DEFINED)
@@ -112,6 +119,8 @@
 //#define USE_SCTP
   #define USE_DEAD_GWD
 #endif
+
+#endif  /* (DOSX == 0) */
 
 #if defined(__DJGPP__)
   #define USE_FSEXT
@@ -331,4 +340,3 @@
 #endif
 
 #endif /* _w32_CONFIG_H */
-
