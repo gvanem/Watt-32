@@ -463,12 +463,8 @@ $(OBJDIR)\cpumodel.obj: cpumodel.asm
 
 .EXTENSIONS: .l
 
-#
-# Replace 'wcc386' with 'wcc' for Watcom 1.9 or older.
-# And possibly add '-0' to 'CFLAGS'.
-#
 @ifdef SMALL
-CC      = wcc
+CC      = *wcc
 CFLAGS  = -ms -0 -os -zc -s -zlf -bt=dos
 AFLAGS  = -bt=dos
 TARGET  = ..\lib\wattcpws.lib
@@ -476,7 +472,7 @@ OBJDIR  = build\watcom\small
 MAKEFIL = watcom_s.mak
 
 @elifdef LARGE
-CC      = wcc
+CC      = *wcc
 CFLAGS  = -ml -0 -os -zc -s -zlf -bt=dos
 AFLAGS  = -bt=dos
 TARGET  = ..\lib\wattcpwl.lib
@@ -484,7 +480,7 @@ OBJDIR  = build\watcom\large
 MAKEFIL = watcom_l.mak
 
 @elifdef FLAT
-CC      = wcc386
+CC      = *wcc386
 CFLAGS  = -mf -3r -zff -zgf -zm -s -zlf -bt=dos -oilrtfm # -I$(%PHARLAP)\include
 AFLAGS  = -bt=dos -3r -dDOSX -dDOS4GW
 TARGET  = ..\lib\wattcpwf.lib
@@ -492,8 +488,8 @@ OBJDIR  = build\watcom\flat
 MAKEFIL = watcom_f.mak
 
 @elifdef WIN32
-CC       = wcc386
-CFLAGS   = -mf -3r -zm -zw -bd -bm -d3 -zlf -bt=nt -fp6 -oilrtfm -zri
+CC       = *wcc386
+CFLAGS   = -mf -3r -zm -bd -bm -d3 -zlf -bt=nt -fp6 -oilrtfm -zri
 AFLAGS   = -bt=nt -3s -dDOSX
 LDFLAGS  = system nt dll
 TARGET   = ..\lib\wattcpww.lib ..\lib\wattcpww_imp.lib
@@ -503,7 +499,7 @@ MAKEFIL  = watcom_w.mak
 RESOURCE = $(OBJDIR)\watt-32.res
 
 @elifdef SMALL32
-CC      = wcc386
+CC      = *wcc386
 CFLAGS  = -ms -oaxt -s -zlf -bt=dos
 AFLAGS  = -3 -bt=dos -dDOSX
 TARGET  = ..\lib\wattcpw3.lib
@@ -516,7 +512,7 @@ MAKEFIL = watcom_3.mak
 
 LIBARG  = $(OBJDIR)\wlib.arg
 LINKARG = $(OBJDIR)\wlink.arg
-C_ARGS  = $(OBJDIR)\$(CC).arg
+C_ARGS  = $(OBJDIR)\wcc.arg
 
 AFLAGS += -zq -fr=nul -w3 -d1
 CFLAGS += -zq -fr=nul -wx -fpi
@@ -558,14 +554,14 @@ EXTRA_CFLAGS = -DWATT32_BUILD -I. -I..\inc -I$(%WATCOM)\h
 #      s:     favour code size over execution time
 #
 
-AS = wasm
-AR = wlib -q -b -c
+AS = *wasm
+AR = *wlib -q -b -c
 
 all: $(PKT_STUB) $(C_ARGS) $(OBJDIR)\cflags.h $(OBJDIR)\cflagsbf.h $(TARGET)
 
 @ifdef WIN32
 $(WATTDLL) ..\lib\wattcpww_imp.lib: $(OBJS) $(RESOURCE) $(LINKARG)
-	wlink $(LDFLAGS) name $(WATTDLL) @$(LINKARG)
+	*wlink $(LDFLAGS) name $(WATTDLL) @$(LINKARG)
 @endif
 
 ..\lib\wattcpww.lib: $(OBJS) $(LIBARG)
@@ -591,11 +587,11 @@ $(OBJDIR)\cpumodel.obj: cpumodel.asm
 
 .ERASE
 .c{$(OBJDIR)}.obj:
-	*$(CC) $[@ @$(C_ARGS) -fo=$@
+	$(CC) $[@ @$(C_ARGS) -fo=$@
 
 .ERASE
 .asm{$(OBJDIR)}.obj:
-	*$(AS) $[@ $(AFLAGS) -fo=$@
+	$(AS) $[@ $(AFLAGS) -fo=$@
 
 $(C_ARGS): $(MAKEFIL)
 	%create $^@
@@ -603,6 +599,8 @@ $(C_ARGS): $(MAKEFIL)
 
 clean: .SYMBOLIC
 	- @del $(OBJDIR)\*.obj
+	- @del $(OBJDIR)\cflags.h
+	- @del $(OBJDIR)\cflagsbf.h
 	- @del $(TARGET)
 	- @del $(C_ARGS)
 	- @del $(LIBARG)
@@ -1627,7 +1625,7 @@ build\visualc\64bit\debug\watt-32.res: watt-32.rc
 	rc -nologo -DDEBUG=1 -D_MSC_VER -DBITS=64 -Fo build\visualc\64bit\debug\watt-32.res watt-32.rc
 
 build\watcom\win32\watt-32.res: watt-32.rc
-	wrc -dDEBUG=0 -D__WATCOMC__ -q -r -zm -fo=build\watcom\win32\watt-32.res watt-32.rc
+	*wrc -dDEBUG=0 -D__WATCOMC__ -q -r -zm -fo=build\watcom\win32\watt-32.res watt-32.rc
 
 #
 # Rules for creating 'cflagsbf.h'. A file with a C-array of the 'CFLAGS' used.
