@@ -178,13 +178,13 @@ int main (int argc, char **argv)
 #if (SLANG_VERSION < 20000)
   SLprep_open_prep (&_pt);
   pt = &_pt;
-  pt->preprocess_char = '@';
+  pt->preprocess_char = ':';
   pt->comment_char    = '#';
   pt->flags           = SLPREP_BLANK_LINES_OK | SLPREP_COMMENT_LINES_OK;
 #else
   pt = SLprep_new();
   assert (pt != NULL);
-  SLprep_set_prefix (pt, "@");
+  SLprep_set_prefix (pt, ":");
   SLprep_set_comment (pt, "#", "#");
   SLprep_set_flags (pt, SLPREP_BLANK_LINES_OK | SLPREP_COMMENT_LINES_OK);
 #endif
