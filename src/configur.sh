@@ -189,11 +189,11 @@ gen_clang ()
 gen_watcom ()
 {
   echo "Generating Watcom makefiles, directories, errnos and dependencies"
-  ../util/linux/mkmake -o watcom_s.mak -d build/watcom/small   makefile.all WATCOM SMALL
-  ../util/linux/mkmake -o watcom_l.mak -d build/watcom/large   makefile.all WATCOM LARGE
-  ../util/linux/mkmake -o watcom_f.mak -d build/watcom/flat    makefile.all WATCOM FLAT
-  ../util/linux/mkmake -o watcom_w.mak -d build/watcom/win32   makefile.all WATCOM WIN32
-  ../util/linux/mkmake -o watcom_3.mak -d build/watcom/small32 makefile.all WATCOM SMALL32
+  ../util/linux/mkmake -w -o watcom_s.mak -d build/watcom/small   makefile.all WATCOM SMALL
+  ../util/linux/mkmake -w -o watcom_l.mak -d build/watcom/large   makefile.all WATCOM LARGE
+  ../util/linux/mkmake -w -o watcom_f.mak -d build/watcom/flat    makefile.all WATCOM FLAT
+  ../util/linux/mkmake -w -o watcom_w.mak -d build/watcom/win32   makefile.all WATCOM WIN32
+  ../util/linux/mkmake -w -o watcom_3.mak -d build/watcom/small32 makefile.all WATCOM SMALL32
 
   ../util/linux/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/watcom/watt32.dep
 
