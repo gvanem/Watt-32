@@ -411,7 +411,7 @@ MAKEFIL = bcc_w.mak
 !error Unknown BORLAND model
 @endif
 
-OBJPATH = $(OBJDIR)\
+OBJPATH = $(OBJDIR)\ #
 
 C_ARGS  = $(OBJPATH)bcc.arg
 
@@ -736,7 +736,7 @@ OBJDIR  = build\visualc\$(BITS)bit\release
 MAKEFIL = visualc-release_$(BITS).mak
 @endif
 
-OBJPATH = $(OBJDIR)\
+OBJPATH = $(OBJDIR)\ #
 
 CC      = cl
 LDFLAGS = -dll -nologo -map -debug -debugtype:cv -incremental:no -verbose $(LDFLAGS)
@@ -839,7 +839,7 @@ CFLAGS  = -g2 -O -A -I. -I../inc -DWATT32_BUILD
 OBJDIR  = build\lcc
 TARGETS = ..\lib\wattcp_lcc.lib ..\lib\wattcp_lcc_imp.lib ..\bin\watt-32.dll
 MAKEFIL = lcc.mak
-OBJPATH = $(OBJDIR)\
+OBJPATH = $(OBJDIR)\ #
 
 AS       = tasm32
 AFLAGS   = -DDOSX -mx -m2 -t -l
@@ -1072,7 +1072,7 @@ AFLAGS  = -DDOSX -DDOS4GW -mx -m2 -t -l
 OBJDIR  = build\ladsoft
 MAKEFIL = ladsoft.mak
 TARGET  = ..\lib\wattcplf.lib
-OBJPATH = $(OBJDIR)\
+OBJPATH = $(OBJDIR)\ #
 
 .SWAP
 
@@ -1333,7 +1333,7 @@ WINLIB  = $(PELLESC)\lib\Win
 
 MAKEFIL = pellesc_$(BITS).mak
 OBJDIR  = build\pellesc\$(BITS)bit
-OBJPATH = $(OBJDIR)\
+OBJPATH = $(OBJDIR)\ #
 
 CC      = pocc
 CFLAGS  = $(CFLAGS) -DWATT32_BUILD -MT -X -Ox -Ob1 -Ze -Zi -W1 -Go \
