@@ -51,21 +51,24 @@ ifeq ($(W32_BIN2C_),)
 endif
 @endif
 
+@ifdef BORLAND
+!if "$(BCCDIR)" == ""
+!error "'BCCDIR' is not defined. Do a 'set BCCDIR=root of you Borland (or CBuilder) install root'."
+!endif
+@endif
+
 @ifdef WATCOM
-!ifndef %W32_BIN2C
-!ifdef __UNIX__
+!ifdef %W32_BIN2C
+W32_BIN2C = $(%W32_BIN2C)
+!else ifdef __UNIX__
 W32_BIN2C = ../util/linux/bin2c
 !else
 !error W32_BIN2C is not defined. Try running 'configur.bat watcom' again.
 !endif
-!else
-W32_BIN2C = $(%W32_BIN2C)
-!endif
-@endif
-
-@ifdef BORLAND
-!if "$(BCCDIR)" == ""
-!error "'BCCDIR' is not defined. Do a 'set BCCDIR=root of you Borland (or CBuilder) install root'."
+!ifdef %W32_NASM
+W32_NASM = $(%W32_NASM)
+!else ifdef __UNIX__
+W32_NASM = nasm
 !endif
 @endif
 
@@ -1421,6 +1424,9 @@ $(LIB_ARGS): $(OBJS) $(MAKEFILE_LIST)
 $(LINK_ARGS): $(OBJS) $(RESOURCE)
 	$(call create_response_file, $@, $^ $(EX_LIBS))
 
+@endif
+
+@ifdef HIGHC DJGPP MINGW32 MINGW64 CLANG CYGWIN32 CYGWIN64 CLANG
   #
   # GNU-Make rules uses shell 'sh' commands:
   #
@@ -1430,13 +1436,9 @@ $(OBJPATH)cflags.h: $(MAKEFILE_LIST)
 
 @elifdef WATCOM
 $(OBJPATH)cflags.h: $(__MAKEFILES__)
-!ifdef __UNIX__
-	echo 'const char *w32_cflags = "$(CFLAGS)";' > $(OBJPATH)cflags.h
-	echo 'const char *w32_cc     = "$(CC)";'    >> $(OBJPATH)cflags.h
-!else
-	echo const char *w32_cflags = '"$(CFLAGS)";' > $(OBJPATH)cflags.h
-	echo const char *w32_cc     = '"$(CC)";'    >> $(OBJPATH)cflags.h
-!endif
+	%create $^@
+	%append $^@ const char *w32_cflags = "$(CFLAGS)";
+	%append $^@ const char *w32_cc     = "$(CC)";
 
 @elifdef BORLAND
 $(OBJPATH)cflags.h: $(MAKEFIL)
@@ -1467,18 +1469,11 @@ $(PKT_STUB): asmpkt.nas
 @elifdef FLAT SMALL32
 $(OBJPATH)pcpkt.obj: asmpkt.nas
 
-@ifdef WATCOM
-$(PKT_STUB): asmpkt.nas
-	$(%W32_NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
-	$(W32_BIN2C) asmpkt.bin > $@
-
-@else
 $(PKT_STUB): asmpkt.nas
 	$(W32_NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
 	$(W32_BIN2C) asmpkt.bin > $@
-@endif
 
-@endif  # FLAT
+@endif  # FLAT SMALL32
 
 @ifdef BORLAND
 $(OBJPATH)watt-32.res: watt-32.rc
@@ -1538,15 +1533,7 @@ $(OBJPATH)watt-32.res: watt-32.rc
 $(OBJPATH)cflagsbf.h: $(C_ARGS)
 	$(W32_BIN2C) $(C_ARGS)                     > $(OBJPATH)cflagsbf.h
 
-@elifdef LADSOFT
-$(OBJPATH)cflagsbf.h:
-	echo $(CFLAGS) | $(W32_BIN2C)            - > $(OBJPATH)cflagsbf.h
-
-@elifdef LCC
-$(OBJPATH)cflagsbf.h:
-	echo $(CFLAGS) | $(W32_BIN2C)            - > $(OBJPATH)cflagsbf.h
-
-@elifdef PELLESC
+@elifdef LADSOFT LCC PELLESC
 $(OBJPATH)cflagsbf.h:
 	echo $(CFLAGS) | $(W32_BIN2C)            - > $(OBJPATH)cflagsbf.h
 
@@ -1554,9 +1541,6 @@ $(OBJPATH)cflagsbf.h:
 $(OBJPATH)cflagsbf.h:
 	- echo $(CFLAGS) | $(W32_BIN2C)          - > $(OBJPATH)cflagsbf.h
 
-#
-# Nmake doesn't like these rules. Hence inside this block.
-#
 @elifdef CYGWIN32 CYGWIN64 MINGW32 MINGW64
 $(OBJPATH)cflagsbf.h:
 	echo $(CFLAGS) | $(W32_BIN2C_)           - > $(OBJPATH)cflagsbf.h
