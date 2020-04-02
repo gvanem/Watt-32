@@ -942,7 +942,6 @@ AR      += -ignore:4221
 LDFLAGS += -subsystem:console,5.02
 
 EX_LIBS  = user32.lib advapi32.lib
-RESOURCE = $(OBJDIR)/watt-32.res
 
 @ifdef DEBUG
 WATTLIB  = ../lib/$(CPU)/wattcp_clang_d.lib
@@ -955,6 +954,7 @@ WATTILIB = ../lib/$(CPU)/wattcp_clang_imp.lib
 WATTDLL  = ../bin/watt-32$(SUFFIX).dll
 OBJDIR  = build/clang/$(BITS)bit/release
 @endif
+RESOURCE = $(OBJDIR)/watt-32.res
 
 @ifdef WIN64
   AS     = ml64
@@ -1495,43 +1495,43 @@ DEBUGRC = 0
 
 @ifdef BORLAND
 $(RESOURCE): watt-32.rc
-        $(BRC32) -DDEBUG=0 -D__BORLANDC__ -r -i..\inc -fo $(RESOURCE) watt-32.rc
+	$(BRC32) -DDEBUG=0 -D__BORLANDC__ -r -i..\inc -fo $(RESOURCE) watt-32.rc
 
 @elifdef CLANG
 $(RESOURCE): watt-32.rc
-        rc -nologo -DRC_DATE="$(DATE)" -DDEBUG=$(DEBUGRC) -D__clang__ -DBITS=$(BITS) -Fo $(RESOURCE) watt-32.rc
+	rc -nologo -DRC_DATE="$(DATE)" -DDEBUG=$(DEBUGRC) -D__clang__ -DBITS=$(BITS) -Fo $(RESOURCE) watt-32.rc
 
 @elifdef LCC
 $(RESOURCE): watt-32.rc
-        lrc -DDEBUG=0 -D__LCC__ -i..\inc -o$(RESOURCE) watt-32.rc
+	lrc -DDEBUG=0 -D__LCC__ -i..\inc -o$(RESOURCE) watt-32.rc
 
 @elifdef MINGW32
 $(RESOURCE): watt-32.rc
-        windres -DRC_DATE="$(DATE)" --target=pe-i386 -D__MINGW32__ -DDEBUG=0 -O coff -o $@ -i watt-32.rc
+	windres -DRC_DATE="$(DATE)" --target=pe-i386 -D__MINGW32__ -DDEBUG=0 -O coff -o $@ -i watt-32.rc
 
 @elifdef MINGW64
 $(RESOURCE): watt-32.rc
   @ifdef WIN64
-        windres -DRC_DATE="$(DATE)" -DBITS=64 --target=pe-x86-64 -D__MINGW64__ -DDEBUG=0 -O coff -o $@ -i watt-32.rc
+	windres -DRC_DATE="$(DATE)" -DBITS=64 --target=pe-x86-64 -D__MINGW64__ -DDEBUG=0 -O coff -o $@ -i watt-32.rc
   @else
-        windres -DRC_DATE="$(DATE)" -DBITS=32 --target=pe-i386 -D__MINGW64__ -DDEBUG=0 -O coff -o $@ -i watt-32.rc
+	windres -DRC_DATE="$(DATE)" -DBITS=32 --target=pe-i386 -D__MINGW64__ -DDEBUG=0 -O coff -o $@ -i watt-32.rc
   @endif
 
 @elifdef CYGWIN32 CYGWIN64
 $(RESOURCE): watt-32.rc
-        windres -DRC_DATE="$(DATE)" -DBITS=$(BITS) -I../inc -DDEBUG=0 -D__CYGWIN__ -O coff -o $@ -i watt-32.rc
+	windres -DRC_DATE="$(DATE)" -DBITS=$(BITS) -I../inc -DDEBUG=0 -D__CYGWIN__ -O coff -o $@ -i watt-32.rc
 
 @elifdef PELLESC
 $(RESOURCE): watt-32.rc
-        porc -DDEBUG=0 -D__POCC__ -DBITS=$(BITS) -I..\inc -Fo$(RESOURCE) watt-32.rc
+	porc -DDEBUG=0 -D__POCC__ -DBITS=$(BITS) -I..\inc -Fo$(RESOURCE) watt-32.rc
 
 @elifdef VISUALC
 $(RESOURCE): watt-32.rc
-        rc -nologo -DDEBUG=$(DEBUGRC) -D_MSC_VER -DBITS=$(BITS) -Fo $(RESOURCE) watt-32.rc
+	rc -nologo -DDEBUG=$(DEBUGRC) -D_MSC_VER -DBITS=$(BITS) -Fo $(RESOURCE) watt-32.rc
 
 @elifdef WATCOM
 $(RESOURCE): watt-32.rc
-        *wrc -dDEBUG=0 -D__WATCOMC__ -q -r -zm -fo=$@ $<
+	*wrc -dDEBUG=0 -D__WATCOMC__ -q -r -zm -fo=$@ $<
 
 @endif
 @endif  # WIN32 WIN64
@@ -1552,31 +1552,31 @@ $(RESOURCE): watt-32.rc
 
 @ifdef BORLAND
 $(OBJDIR)\cflagsbf.h: $(C_ARGS)
-        $(W32_BIN2C) $(C_ARGS)                     > $(OBJDIR)\cflagsbf.h
+	$(W32_BIN2C) $(C_ARGS)                     > $(OBJDIR)\cflagsbf.h
 
 @elifdef LADSOFT LCC PELLESC
 $(OBJDIR)\cflagsbf.h:
-        echo $(CFLAGS) | $(W32_BIN2C)            - > $(OBJDIR)\cflagsbf.h
+	echo $(CFLAGS) | $(W32_BIN2C)            - > $(OBJDIR)\cflagsbf.h
 
 @elifdef VISUALC
 $(OBJDIR)\cflagsbf.h:
-        - echo $(CFLAGS) | $(W32_BIN2C)          - > $(OBJDIR)\cflagsbf.h
+	- echo $(CFLAGS) | $(W32_BIN2C)          - > $(OBJDIR)\cflagsbf.h
 
 @elifdef CYGWIN32 CYGWIN64 MINGW32 MINGW64
 $(OBJDIR)/cflagsbf.h:
-        echo $(CFLAGS) | $(W32_BIN2C_)           - > $(OBJDIR)/cflagsbf.h
+	echo $(CFLAGS) | $(W32_BIN2C_)           - > $(OBJDIR)/cflagsbf.h
 
 @elifdef HIGHC
 $(OBJDIR)/cflagsbf.h:
-        echo "$(CFLAGS)" | $(W32_BIN2C_)         - > $(OBJDIR)/cflagsbf.h
+	echo "$(CFLAGS)" | $(W32_BIN2C_)         - > $(OBJDIR)/cflagsbf.h
 
 @elifdef WATCOM
 $(OBJDIR)\cflagsbf.h: $(C_ARGS)
-        $(W32_BIN2C) $(C_ARGS) > $@
+	$(W32_BIN2C) $(C_ARGS) > $@
 
 @elifdef CLANG
 $(OBJDIR)/cflagsbf.h: $(C_ARGS)
-        $(W32_BIN2C_) $(C_ARGS) > $@
+	$(W32_BIN2C_) $(C_ARGS) > $@
 
 @endif
 
