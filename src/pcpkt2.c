@@ -61,15 +61,15 @@ static DWORD setup_pkt_inf_fast (void)
 
   if (rdata_size >= 64*1024UL)
   {
-    CONSOLE_MSG (0, ("%s (%u): Development error:\nsize %u too large\n",
-                     __FILE__, __LINE__, (unsigned int)rdata_size));
+    TRACE_CONSOLE (0, "%s (%u): Development error:\nsize %u too large\n",
+                   __FILE__, __LINE__, (unsigned int)rdata_size);
     return (0);
   }
   if (stub_size < 0xC0)
   {
-    CONSOLE_MSG (0, ("%s (%u): Development error:\n\"pkt_stub.h\""
-                     " seems truncated (%d bytes)\n",
-                     __FILE__, __LINE__, SIZEOF(real_stub_array)));
+    TRACE_CONSOLE (0, "%s (%u): Development error:\n\"pkt_stub.h\""
+                      " seems truncated (%d bytes)\n",
+                   __FILE__, __LINE__, SIZEOF(real_stub_array));
     return (0);
   }
 
@@ -189,20 +189,20 @@ static int setup_rmode_receiver (void)
   asmpkt_size_chk = *(WORD*) (real_stub_array + size_chk);
   if (asmpkt_size_chk != sizeof(PKT_INFO))
   {
-    CONSOLE_MSG (0, ("%s (%u): Development error:\n"
-                     "  sizeof(pkt_info) = %ld in pcpkt.h\n"
-                     "  sizeof(pkt_info) = %u in asmpkt.nas, (diff %ld)\n",
-                     __FILE__, __LINE__,
-                     (long)sizeof(PKT_INFO), asmpkt_size_chk,
-                     (long)(sizeof(PKT_INFO) - asmpkt_size_chk)));
+    TRACE_CONSOLE (0, "%s (%u): Development error:\n"
+                      "  sizeof(pkt_info) = %ld in pcpkt.h\n"
+                      "  sizeof(pkt_info) = %u in asmpkt.nas, (diff %ld)\n",
+                   __FILE__, __LINE__,
+                   (long)sizeof(PKT_INFO), asmpkt_size_chk,
+                   (long)(sizeof(PKT_INFO) - asmpkt_size_chk));
     return (-1);
   }
 
   if (*(WORD*)&real_stub_array[PktReceiver]   != 0xA80F ||  /* push gs */
       *(WORD*)&real_stub_array[PktReceiver+2] != 0xA00F)    /* push fs */
   {
-    CONSOLE_MSG (0, ("%s (%u): Development error:\n"
-                     "  PktReceiver misaligned\n", __FILE__, __LINE__));
+    TRACE_CONSOLE (0, "%s (%u): Development error:\n"
+                      "  PktReceiver misaligned\n", __FILE__, __LINE__);
     return (-1);
   }
 
@@ -211,11 +211,11 @@ static int setup_rmode_receiver (void)
     DWORD patch_it = (*(WORD*) &real_stub_array[patch_nop]) +
                      (DWORD) &real_stub_array;
 
-    CONSOLE_MSG (4, ("patch_it (%04X): %02X,%02X,%02X\n",
-                     *(WORD*)&real_stub_array[patch_nop],
-                     ((BYTE*)patch_it)[0],
-                     ((BYTE*)patch_it)[1],
-                     ((BYTE*)patch_it)[2]));
+    TRACE_CONSOLE (4, "patch_it (%04X): %02X,%02X,%02X\n",
+                   *(WORD*)&real_stub_array[patch_nop],
+                   ((BYTE*)patch_it)[0],
+                   ((BYTE*)patch_it)[1],
+                   ((BYTE*)patch_it)[2]);
 
     ((BYTE*)patch_it) [0] = 0x90;  /* NOP */
     ((BYTE*)patch_it) [1] = 0x90;
@@ -340,7 +340,7 @@ struct pkt_rx_element *pkt_poll_recv (void)
     }
     else
     {
-      CONSOLE_MSG (1, ("pkt-error %s\n", pkt_error));
+      TRACE_CONSOLE (1, "pkt-error %s\n", pkt_error);
       rc = NULL;
     }
 

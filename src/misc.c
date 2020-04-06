@@ -569,7 +569,7 @@ static void __cdecl crtdbg_exit (void)
      * from where abort() was called; skip the 2 first CRT locations (raise, abort).
      * Indent the printout 2 spaces.
      */
-    CONSOLE_MSG (0, ("\nGot _CRT_ASSERT. Backtrace:\n"));
+    TRACE_CONSOLE (0, "\nGot _CRT_ASSERT. Backtrace:\n");
     ShowStack (GetCurrentThread(), &ctx, NULL);
   }
 
@@ -592,7 +592,7 @@ static void __cdecl crtdbg_exit (void)
      */
     if (_CrtMemDifference(&diff_state, &last_state, &new_state))
     {
-      CONSOLE_MSG (0, ("\nA significant difference in the mem-state.\n"));
+      TRACE_CONSOLE (0, "\nA significant difference in the mem-state.\n");
 
       _CrtMemDumpAllObjectsSince (&last_state);
       _CrtMemDumpStatistics (&last_state);
@@ -600,7 +600,7 @@ static void __cdecl crtdbg_exit (void)
       _CrtDumpMemoryLeaks();
     }
     else
-      CONSOLE_MSG (0, ("\nNo significant difference in the mem-state.\n"));
+      TRACE_CONSOLE (0, "\nNo significant difference in the mem-state.\n");
   }
 }
 
@@ -621,7 +621,7 @@ void memdbg_init (void)
   if (getenv("WATT32-CRTDBG"))
      _watt_crtdbg_check = TRUE;
 
-  CONSOLE_MSG (2, ("memdbg_init(): _watt_crtdbg_check = %d\n", _watt_crtdbg_check));
+  TRACE_CONSOLE (2, "memdbg_init(): _watt_crtdbg_check = %d\n", _watt_crtdbg_check);
 
   if (_watt_crtdbg_check)
   {

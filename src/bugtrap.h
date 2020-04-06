@@ -19,10 +19,6 @@
 #pragma once
 #endif
 
-#if defined(_MSC_VER) && defined(_MANAGED) && !defined(_UNICODE)
-  #error Managed version of BugTrap requires Unicode character set
-#endif
-
 /*
  * The following ifdef block is the standard way of creating macros which make exporting
  * from a DLL simpler. All files within this DLL are compiled with the BUGTRAP_EXPORTS
@@ -51,24 +47,24 @@ extern "C" {
  */
 typedef enum BUGTRAP_ACTIVITY_tag
 {
-	/**
-	 * @brief Display BugTrap dialog to allow user selecting desirable
-	 * option. This is the default option.
-	 */
-	BTA_SHOWUI       = 1,
-	/**
-	 * @brief Automatically save error report to file.
-	 * Use BT_SetReportFilePath() to specify report path.
-	 */
-	BTA_SAVEREPORT   = 2,
-	/**
-	 * @brief Automatically send error report by e-mail.
-	 */
-	BTA_MAILREPORT   = 3,
-	/**
-	 * @brief Automatically send bug report to support server.
-	 */
-	BTA_SENDREPORT   = 4
+    /**
+     * @brief Display BugTrap dialog to allow user selecting desirable
+     * option. This is the default option.
+     */
+    BTA_SHOWUI       = 1,
+    /**
+     * @brief Automatically save error report to file.
+     * Use BT_SetReportFilePath() to specify report path.
+     */
+    BTA_SAVEREPORT   = 2,
+    /**
+     * @brief Automatically send error report by e-mail.
+     */
+    BTA_MAILREPORT   = 3,
+    /**
+     * @brief Automatically send bug report to support server.
+     */
+    BTA_SENDREPORT   = 4
 }
 BUGTRAP_ACTIVITY;
 
@@ -78,81 +74,81 @@ BUGTRAP_ACTIVITY;
  */
 typedef enum BUGTRAP_FLAGS_tag
 {
-	/**
-	 * @brief Equivalent of no options.
-	 */
-	BTF_NONE           = 0x000,
-	/**
-	 * @brief In detailed mode BugTrap generates mini-dump and
-	 * packs custom log files within the report.
-	 */
-	BTF_DETAILEDMODE   = 0x001,
-	/**
-	 * @brief BugTrap may open its own editor for e-mail messages
-	 * instead of the editor used by the system. Use this
-	 * option if you aren't aware of the type of e-mail
-	 * client installed on user computers.
-	 */
-	BTF_EDITMAIL       = 0x002,
-	/**
-	 * @brief Specify this option to attach bug report to e-mail
-	 * messages. Be careful with this option. It's potentially
-	 * dangerous for the detailed mode because of even zipped
-	 * mini-dump may require huge size. It may exceed the
-	 * maximum size of e-mail message supported by Internet
-	 * provider.
-	 */
-	BTF_ATTACHREPORT   = 0x004,
-	/**
-	 * @brief Set this flag to add list of all processes and loaded
-	 * modules to the report. Disable this option to speedup report
-	 * generation.
-	 */
-	BTF_LISTPROCESSES  = 0x008,
-	/**
-	 * @brief By default BugTrap displays simplified dialog on the
-	 * screen allowing user to perform only common actions. Enable
-	 * this flag to immediately display dialog with advanced error
-	 * information.
-	 */
-	BTF_SHOWADVANCEDUI = 0x010,
-	/**
-	 * @brief Bug report in detailed error mode may also include a
-	 * screen shot automatically captured by BugTrap. By default this
-	 * option is disabled to minimize report size, but it may be useful
-	 * if you want to know which dialogs were shown on the screen.
-	 */
-	BTF_SCREENCAPTURE  = 0x020,
+    /**
+     * @brief Equivalent of no options.
+     */
+    BTF_NONE           = 0x000,
+    /**
+     * @brief In detailed mode BugTrap generates mini-dump and
+     * packs custom log files within the report.
+     */
+    BTF_DETAILEDMODE   = 0x001,
+    /**
+     * @brief BugTrap may open its own editor for e-mail messages
+     * instead of the editor used by the system. Use this
+     * option if you aren't aware of the type of e-mail
+     * client installed on user computers.
+     */
+    BTF_EDITMAIL       = 0x002,
+    /**
+     * @brief Specify this option to attach bug report to e-mail
+     * messages. Be careful with this option. It's potentially
+     * dangerous for the detailed mode because of even zipped
+     * mini-dump may require huge size. It may exceed the
+     * maximum size of e-mail message supported by Internet
+     * provider.
+     */
+    BTF_ATTACHREPORT   = 0x004,
+    /**
+     * @brief Set this flag to add list of all processes and loaded
+     * modules to the report. Disable this option to speedup report
+     * generation.
+     */
+    BTF_LISTPROCESSES  = 0x008,
+    /**
+     * @brief By default BugTrap displays simplified dialog on the
+     * screen allowing user to perform only common actions. Enable
+     * this flag to immediately display dialog with advanced error
+     * information.
+     */
+    BTF_SHOWADVANCEDUI = 0x010,
+    /**
+     * @brief Bug report in detailed error mode may also include a
+     * screen shot automatically captured by BugTrap. By default this
+     * option is disabled to minimize report size, but it may be useful
+     * if you want to know which dialogs were shown on the screen.
+     */
+    BTF_SCREENCAPTURE  = 0x020,
 #ifdef _MANAGED
-	/**
-	 * @brief Generate native stack trace and modules information along
-	 * with managed exception information. Disable this option to speedup
-	 * report generation.
-	 */
-	 BTF_NATIVEINFO    = 0x040,
+    /**
+     * @brief Generate native stack trace and modules information along
+     * with managed exception information. Disable this option to speedup
+     * report generation.
+     */
+     BTF_NATIVEINFO    = 0x040,
 #endif // _MANAGED
-	 /**
-	  * @brief When enabled, BugTrap injects fake SetUnhandledExceptionFilter()
-	  * to handle the most severe C runtime errors. Usually such errors
-	  * are not being reported to custom unhandled exception filters. This
-	  * flag vanishes any attempts of C runtime library to override
-	  * unhandled exception filter defined in BugTrap. This option should
-	  * be used with caution, because such technique may be incompatible
-	  * with future Windows versions.
-	  */
-	 BTF_INTERCEPTSUEF = 0x080,
-	 /**
-	  * @brief When report is being sent over TCP/HTTP protocol, BugTrap could
-	  * ask user to provide verbal description of the problem if this option is
-	  * enabled. BugTrap always prompts user to describe error for reports
-	  * transmitted over email regardless this option.
-	  */
-	 BTF_DESCRIBEERROR = 0x100,
-	 /**
-	  * @brief Automatically restart the application after the crash has been
-	  * handled.
-	  */
-	 BTF_RESTARTAPP    = 0x200
+     /**
+      * @brief When enabled, BugTrap injects fake SetUnhandledExceptionFilter()
+      * to handle the most severe C runtime errors. Usually such errors
+      * are not being reported to custom unhandled exception filters. This
+      * flag vanishes any attempts of C runtime library to override
+      * unhandled exception filter defined in BugTrap. This option should
+      * be used with caution, because such technique may be incompatible
+      * with future Windows versions.
+      */
+     BTF_INTERCEPTSUEF = 0x080,
+     /**
+      * @brief When report is being sent over TCP/HTTP protocol, BugTrap could
+      * ask user to provide verbal description of the problem if this option is
+      * enabled. BugTrap always prompts user to describe error for reports
+      * transmitted over email regardless this option.
+      */
+     BTF_DESCRIBEERROR = 0x100,
+     /**
+      * @brief Automatically restart the application after the crash has been
+      * handled.
+      */
+     BTF_RESTARTAPP    = 0x200
 }
 BUGTRAP_FLAGS;
 
@@ -163,19 +159,19 @@ BUGTRAP_FLAGS;
  */
 typedef enum BUGTRAP_EXITMODE_tag
 {
-	/**
-	 * @brief BugTrap executes desirable action (usually displays the dialog).
-	 * The application is being terminated when user closes the dialog. This is default action.
-	 */
-	BTEM_TERMINATEAPP,
-	/**
-	 * @brief BugTrap executes desirable action and continues to search up the stack for a handler.
-	 */
-	BTEM_CONTINUESEARCH,
-	/**
-	 * @brief BugTrap executes desirable action and transfers control to the exception handlers.
-	 */
-	BTEM_EXECUTEHANDLER
+    /**
+     * @brief BugTrap executes desirable action (usually displays the dialog).
+     * The application is being terminated when user closes the dialog. This is default action.
+     */
+    BTEM_TERMINATEAPP,
+    /**
+     * @brief BugTrap executes desirable action and continues to search up the stack for a handler.
+     */
+    BTEM_CONTINUESEARCH,
+    /**
+     * @brief BugTrap executes desirable action and transfers control to the exception handlers.
+     */
+    BTEM_EXECUTEHANDLER
 }
 BUGTRAP_EXITMODE;
 
@@ -184,34 +180,34 @@ BUGTRAP_EXITMODE;
  */
 typedef enum BUGTRAP_LOGLEVEL_tag
 {
-	/**
-	 * @brief All message levels are prohibited.
-	 */
-	BTLL_NONE      = 0,
-	/**
-	 * @brief Error message.
-	 */
-	BTLL_ERROR     = 1,
-	/**
-	 * @brief Waning message.
-	 */
-	BTLL_WARNING   = 2,
-	/**
-	 * @brief Important information message.
-	 */
-	BTLL_IMPORTANT = 3,
-	/**
-	 * @brief Regular information message.
-	 */
-	BTLL_INFO      = 4,
-	/**
-	 * @brief Verbose information message.
-	 */
-	BTLL_VERBOSE   = 5,
-	/**
-	 * @brief All levels of messages are accepted.
-	 */
-	BTLL_ALL       = BTLL_INFO
+    /**
+     * @brief All message levels are prohibited.
+     */
+    BTLL_NONE      = 0,
+    /**
+     * @brief Error message.
+     */
+    BTLL_ERROR     = 1,
+    /**
+     * @brief Waning message.
+     */
+    BTLL_WARNING   = 2,
+    /**
+     * @brief Important information message.
+     */
+    BTLL_IMPORTANT = 3,
+    /**
+     * @brief Regular information message.
+     */
+    BTLL_INFO      = 4,
+    /**
+     * @brief Verbose information message.
+     */
+    BTLL_VERBOSE   = 5,
+    /**
+     * @brief All levels of messages are accepted.
+     */
+    BTLL_ALL       = BTLL_INFO
 }
 BUGTRAP_LOGLEVEL;
 
@@ -220,22 +216,22 @@ BUGTRAP_LOGLEVEL;
  */
 typedef enum BUGTRAP_LOGECHOTYPE_tag
 {
-	/**
-	 * @brief Do not duplicate log output to file.
-	 */
-	BTLE_NONE   = 0x00,
-	/**
-	 * @brief Send a copy of log output to STDOUT (mutually exclusive with STDERR mode).
-	 */
-	BTLE_STDOUT = 0x01,
-	/**
-	 * @brief Send a copy of log output to STDERR (mutually exclusive with STDOUT mode).
-	 */
-	BTLE_STDERR = 0x02,
-	/**
-	 * @brief Send a copy of log output to the debugger (can accompany STDOUT or STDERR mode).
-	 */
-	BTLE_DBGOUT = 0x04
+    /**
+     * @brief Do not duplicate log output to file.
+     */
+    BTLE_NONE   = 0x00,
+    /**
+     * @brief Send a copy of log output to STDOUT (mutually exclusive with STDERR mode).
+     */
+    BTLE_STDOUT = 0x01,
+    /**
+     * @brief Send a copy of log output to STDERR (mutually exclusive with STDOUT mode).
+     */
+    BTLE_STDERR = 0x02,
+    /**
+     * @brief Send a copy of log output to the debugger (can accompany STDOUT or STDERR mode).
+     */
+    BTLE_DBGOUT = 0x04
 }
 BUGTRAP_LOGECHOTYPE;
 
@@ -244,19 +240,19 @@ BUGTRAP_LOGECHOTYPE;
  */
 typedef enum BUGTRAP_LOGFLAGS_tag
 {
-	/**
-	 * @brief Do not show any additional entries in the log.
-	 */
-	BTLF_NONE          = 0x00,
-	/**
-	 * @brief Use this option if you want to store message levels in a file.
-	 */
-	BTLF_SHOWLOGLEVEL  = 0x01,
-	/**
-	 * @brief Use this option if you want to store message timestamps in a file.
-	 * Timestamps are stored in universal (locale independent) format: YYYY/MM/DD HH:MM:SS
-	 */
-	BTLF_SHOWTIMESTAMP = 0x02
+    /**
+     * @brief Do not show any additional entries in the log.
+     */
+    BTLF_NONE          = 0x00,
+    /**
+     * @brief Use this option if you want to store message levels in a file.
+     */
+    BTLF_SHOWLOGLEVEL  = 0x01,
+    /**
+     * @brief Use this option if you want to store message timestamps in a file.
+     * Timestamps are stored in universal (locale independent) format: YYYY/MM/DD HH:MM:SS
+     */
+    BTLF_SHOWTIMESTAMP = 0x02
 }
 BUGTRAP_LOGFLAGS;
 
@@ -265,14 +261,14 @@ BUGTRAP_LOGFLAGS;
  */
 typedef enum BUGTRAP_REPORTFORMAT_tag
 {
-	/**
-	 * @brief Report stored in structured XML format.
-	 */
-	BTRF_XML  = 1,
-	/**
-	 * @brief Report stored in plain text format.
-	 */
-	BTRF_TEXT = 2
+    /**
+     * @brief Report stored in structured XML format.
+     */
+    BTRF_XML  = 1,
+    /**
+     * @brief Report stored in plain text format.
+     */
+    BTRF_TEXT = 2
 }
 BUGTRAP_REPORTFORMAT;
 
@@ -281,24 +277,24 @@ BUGTRAP_REPORTFORMAT;
  */
 typedef enum BUGTRAP_LOGFORMAT_tag
 {
-	/**
-	 * @brief Log stored in structured XML format.
-	 * Log data is entirely stored in memory until application exists or crashes.
-	 * It is designed for fast IO and it cannot handle large logs.
-	 */
-	BTLF_XML    = 1,
-	/**
-	 * @brief Log stored in plain text format.
-	 * Log data is entirely stored in memory until application exists or crashes.
-	 * It is designed for fast IO and it cannot handle large logs.
-	 */
-	BTLF_TEXT   = 2,
-	/**
-	 * @brief Log stored in plain text format.
-	 * Unlike @a BTLF_XML and @a BTLF_TEXT log data is not cached in memory.
-	 * This type of log is optimized for large logs.
-	 */
-	BTLF_STREAM = 3
+    /**
+     * @brief Log stored in structured XML format.
+     * Log data is entirely stored in memory until application exists or crashes.
+     * It is designed for fast IO and it cannot handle large logs.
+     */
+    BTLF_XML    = 1,
+    /**
+     * @brief Log stored in plain text format.
+     * Log data is entirely stored in memory until application exists or crashes.
+     * It is designed for fast IO and it cannot handle large logs.
+     */
+    BTLF_TEXT   = 2,
+    /**
+     * @brief Log stored in plain text format.
+     * Unlike @a BTLF_XML and @a BTLF_TEXT log data is not cached in memory.
+     * This type of log is optimized for large logs.
+     */
+    BTLF_STREAM = 3
 }
 BUGTRAP_LOGFORMAT;
 
@@ -307,14 +303,14 @@ BUGTRAP_LOGFORMAT;
  */
 typedef enum BUGTRAP_DIALOGMESSAGE_tag
 {
-	/**
-	 * @brief 1st line of introduction message.
-	 */
-	BTDM_INTRO1 = 1,
-	/**
-	 * @brief A bunch of lines of introduction message.
-	 */
-	BTDM_INTRO2 = 2
+    /**
+     * @brief 1st line of introduction message.
+     */
+    BTDM_INTRO1 = 1,
+    /**
+     * @brief A bunch of lines of introduction message.
+     */
+    BTDM_INTRO2 = 2
 }
 BUGTRAP_DIALOGMESSAGE;
 
@@ -323,14 +319,14 @@ BUGTRAP_DIALOGMESSAGE;
  */
 typedef enum BUGTRAP_LOGTYPE_tag
 {
-	/**
-	 * @brief Regular log file maintained by the user.
-	 */
-	BTLT_LOGFILE,
-	/**
-	 * @brief Log file that's exported from the registry.
-	 */
-	BTLT_REGEXPORT
+    /**
+     * @brief Regular log file maintained by the user.
+     */
+    BTLT_LOGFILE,
+    /**
+     * @brief Log file that's exported from the registry.
+     */
+    BTLT_REGEXPORT
 }
 BUGTRAP_LOGTYPE;
 
@@ -339,10 +335,10 @@ BUGTRAP_LOGTYPE;
  */
 typedef struct BUGTRAP_LOGFILEENTRY_tag
 {
-	/**
-	 * @brief Log file name.
-	 */
-	TCHAR szLogFileName[MAX_PATH];
+    /**
+     * @brief Log file name.
+     */
+    TCHAR szLogFileName[MAX_PATH];
 }
 BUGTRAP_LOGFILEENTRY;
 
@@ -351,14 +347,14 @@ BUGTRAP_LOGFILEENTRY;
  */
 typedef struct BUGTRAP_REGEXPORTENTRY_tag
 {
-	/**
-	 * @brief Log file name.
-	 */
-	TCHAR szLogFileName[MAX_PATH];
-	/**
-	 * @brief Exported registry key.
-	 */
-	TCHAR szRegKey[MAX_PATH];
+    /**
+     * @brief Log file name.
+     */
+    TCHAR szLogFileName[MAX_PATH];
+    /**
+     * @brief Exported registry key.
+     */
+    TCHAR szRegKey[MAX_PATH];
 }
 BUGTRAP_REGEXPORTENTRY;
 

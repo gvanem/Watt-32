@@ -203,16 +203,16 @@ static void W32_CALL udp_handler (sock_type *s, void *data, int len,
 {
   if (s == (sock_type*)udp_echo_sock)
   {
-    TCP_CONSOLE_MSG (2, ("echo (udp): looping %d bytes from %s\n",
-                     len, _inet_ntoa(NULL,intel(ph->src))));
+    TRACE_CONSOLE (2, "echo (udp): looping %d bytes from %s\n",
+                   len, _inet_ntoa(NULL,intel(ph->src)));
 
     if (!sock_enqueue(s, (const BYTE*)data, len))
        sock_close (s);
   }
   else   /* discard packet */
   {
-    TCP_CONSOLE_MSG (2, ("discard (udp): dropping %d bytes from %s\n",
-                     len, _inet_ntoa(NULL,intel(ph->src))));
+    TRACE_CONSOLE (2, "discard (udp): dropping %d bytes from %s\n",
+                   len, _inet_ntoa(NULL,intel(ph->src)));
   }
   ARGSUSED (ph);
   ARGSUSED (udp);

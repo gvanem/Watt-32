@@ -758,20 +758,11 @@ W32_FUNC int W32_CALL watt_getopt (int argc, char *const *argv, const char *opt_
 #endif
 
 #if defined(WATT32_ON_WINDOWS)
-  /* to-do */
+  /** \todo
+   */
   W32_DATA wchar_t *    _w_watt_optarg;
   W32_DATA wchar_t *    _w_watt_optswchar;
   W32_FUNC int W32_CALL _w_watt_getopt (int argc, wchar_t *const *argv, const wchar_t *opt_str);
-
-  #if (defined(UNICODE) || defined(_UNICODE)) && !defined(_tgetopt)
-    #define _toptarg           _w_watt_optarg
-    #define _toptswchar        _w_watt_optswchar
-    #define _tgetopt(c, a, o)  _w_watt_getopt (c, a, o)
-  #else
-    #define _toptarg           watt_optarg
-    #define _toptswchar        watt_optswchar
-    #define _tgetopt(c, a, o)  watt_getopt (c, a, o)
-  #endif
 #endif
 
 /*

@@ -163,10 +163,10 @@ BOOL icmp6_add_gateway4 (void)
     *(DWORD*) &ip[12] = intel (icmp6_6to4_gateway);
     ce = icmp6_ncache_insert_fix (&ip, eth);
   }
-  TCP_CONSOLE_MSG (1, ("Adding %s as 6-to-4 gateway, ARP %s, Insert %s\n",
-                   _inet_ntoa(NULL,intel(icmp6_6to4_gateway)),
-                   arp_ok ? "OK" : "failed",
-                   ce     ? "OK" : "failed"));
+  TRACE_CONSOLE (1, "Adding %s as 6-to-4 gateway, ARP %s, Insert %s\n",
+                 _inet_ntoa(NULL,intel(icmp6_6to4_gateway)),
+                 arp_ok ? "OK" : "failed",
+                 ce     ? "OK" : "failed");
   return (arp_ok && ce);
 }
 

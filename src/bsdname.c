@@ -357,7 +357,7 @@ int _get_machine_name (char *buf, int size)
   else rc = GetComputerNameA (buf, &sz);
 
   rc = rc ? 0 : -1;
-  TCP_CONSOLE_MSG (2, ("_get_machine_name(): \"%s\", rc %d\n", buf, rc));
+  TRACE_CONSOLE (2, "_get_machine_name(): \"%s\", rc %d\n", buf, rc);
   return (rc);
 }
 

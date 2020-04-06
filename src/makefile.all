@@ -362,8 +362,12 @@ C_ARGS    = $(OBJPATH)bcc.arg
 MAKE_FILE = bcc_l.mak
 
 @elifdef FLAT
-CC        = bcc32
-CFLAGS    = -4- -RT- -O2 -WX -f- -Z -H -H=$(TEMP)\bcc_f.pch
+CC = f:\gv\Borland55\Bin\bcc32
+#
+# This is just a test. Old 'bcc32' such as the above v5.5 will no
+# longer work in Watt-32. So dropping support for Borland (small, large, flat) is imminent.
+#
+CFLAGS    = -4- -RT- -O2 -H -H=$(TEMP)\bcc_f.pch -D_M_IX86=1 -D__BORLANDC__=0x0550
 AFLAGS    = -mx -m2 -t -l -DDOSX
 STAT_LIB  = ..\lib\wattcpbf.lib
 LIBFLAG   = /P32

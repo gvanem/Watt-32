@@ -66,28 +66,17 @@ extern "C" {
 
 #elif defined(__CYGWIN__)
   /*
-   * More CygWin quirks. No <tchar.h>
+   * More CygWin quirks.
    */
   #include <string.h>
   #include <strings.h>
-  #include <wchar.h>
 
-  #if defined(UNICODE) || defined(_UNICODE)
-    #define _T(str)                L##str
-    #define _tcsicmp(s1, s2)       wcsncmp (s1, s2)
-    #define _tcsncpy(s1, s2, len)  wcsncpy (s1, s2, len)
-  #else
-    #define _T(str)                str
-    #define _tcsicmp(s1, s2)       strcasecmp (s1, s2)
-    #define _tcsncpy(s1, s2, len)  strncpy (s1, s2, len)
-  #endif
-
-  #define stricmp(s1, s2)          strcasecmp (s1, s2)
-  #define strnicmp(s1, s2, len)    strncasecmp (s1, s2, len)
+  #define stricmp(s1, s2)        strcasecmp (s1, s2)
+  #define strnicmp(s1, s2, len)  strncasecmp (s1, s2, len)
 
   /* Use kbhit(), getch() below
    */
-#else                                   /* no other option */
+#else                            /* no other option */
   #include <conio.h>
 #endif
 
@@ -285,8 +274,8 @@ extern const char *qword_str (uint64 val);
 
   extern BOOL        WinDnsQuery_A4     (const char *name, DWORD *ip4);
   extern BOOL        WinDnsQuery_A6     (const char *name, void *ip6);
-  extern BOOL        WinDnsQuery_PTR4   (DWORD ip4, TCHAR *name, size_t size);
-  extern BOOL        WinDnsQuery_PTR6   (const void *ip6, TCHAR *name, size_t size);
+  extern BOOL        WinDnsQuery_PTR4   (DWORD ip4, char *name, size_t size);
+  extern BOOL        WinDnsQuery_PTR6   (const void *ip6, char *name, size_t size);
   extern BOOL        WinDnsCachePut_A4  (const char *name, DWORD ip4);
   extern BOOL        WinDnsCachePut_A6  (const char *name, const void *ip6);
   extern BOOL        get_file_version   (const char *file, char *buf, size_t buf_len);
@@ -365,7 +354,8 @@ extern const char *qword_str (uint64 val);
 /* Printing a wide string on Windows.
  * E.g. printf (buf, "%"WIDESTR_FMT, wide_str);
  *
- * Note: we don't build with -D_UNICODE. Hence Ascii formats sometimes
+ * Note: We do not support building with '-D_UNICODE'.
+ *       Hence Ascii formats sometimes
  *       need to print wide-chars using this format.
  */
 #if defined(__GNUC__) || defined(__BORLANDC__)

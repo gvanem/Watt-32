@@ -70,7 +70,5 @@ test_script:
 #
 cache:
   - '%APPVEYOR_BUILD_FOLDER%\CI-temp'
-  - '%APPVEYOR_BUILD_FOLDER%\src\build'
-  - '%APPVEYOR_BUILD_FOLDER%\lib'
   - 'c:\Program Files (x86)\LLVM'
 

@@ -283,8 +283,8 @@ int _ip4_send_fragments (sock_type *s, BYTE proto, DWORD dest,
            break;
 
       default:
-           TCP_CONSOLE_MSG (0, ("%s (%d): Illegal protocol %04X\n",
-                            __FILE__, __LINE__, proto));
+           TRACE_CONSOLE (0, "%s (%d): Illegal protocol %04X\n",
+                          __FILE__, __LINE__, proto);
            return (0);
     }
 

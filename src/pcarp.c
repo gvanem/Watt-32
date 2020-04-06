@@ -1407,8 +1407,8 @@ BOOL W32_CALL _arp_cache_add (DWORD ip, const void *eth, BOOL expires)
     ae->flags = (ARP_FLG_INUSE | ARP_FLG_FIXED);
     memcpy (&ae->hardware, eth, sizeof(ae->hardware));
 
-    CONSOLE_MSG (4, ("_arp_cache_add(): ip: %s, eth: %s, ARP_TOP_FIXED: %d, flags: %02X\n",
-                    _inet_ntoa(NULL,ip), MAC_address(eth), ARP_TOP_FIXED-1, ae->flags));
+    TRACE_CONSOLE (4, "_arp_cache_add(): ip: %s, eth: %s, ARP_TOP_FIXED: %d, flags: %02X\n",
+                   _inet_ntoa(NULL,ip), MAC_address(eth), ARP_TOP_FIXED-1, ae->flags);
   }
   return (TRUE);
 }

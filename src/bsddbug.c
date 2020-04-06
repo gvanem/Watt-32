@@ -115,8 +115,8 @@ int MS_CDECL _sock_debugf (const char *fmt, ...)
 
   if (rc == EOF)
   {
-    TCP_CONSOLE_MSG (1, ("%s (%d): write failed; %s\n",
-                     __FILE__, __LINE__, strerror(err)));
+    TRACE_CONSOLE (1, "%s (%d): write failed; %s\n",
+                   __FILE__, __LINE__, strerror(err));
     bsddbug_close();
   }
   else
@@ -175,9 +175,9 @@ void _sock_dbug_open (void)
   }
 #endif  /* USE_PRINTK */
 
-  TCP_CONSOLE_MSG (2, ("%s (%d): dbg_file `%s', handle %d, errno %d\n",
-                   __FILE__, __LINE__, dbg_fname,
-                   dbg_file ? fileno(dbg_file) : -1, errno));
+  TRACE_CONSOLE (2, "%s (%d): dbg_file `%s', handle %d, errno %d\n",
+                 __FILE__, __LINE__, dbg_fname,
+                 dbg_file ? fileno(dbg_file) : -1, errno);
 }
 
 /*

@@ -268,7 +268,7 @@ void test_swap_speed (const char *buf)
 
 void test_swap_speed2 (const char *buf)
 {
-  puts ("");
+  puts ("Calling the same via 'TIME_IT()' macro:");
   TIME_IT (simple_cdecl_ntohl,   (buf, swap_size/4), loops);
   TIME_IT (naked_cdecl_ntohl,    (buf, swap_size/4), loops);
   TIME_IT (naked_fastcall_ntohl, (buf, swap_size/4), loops);

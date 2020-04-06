@@ -56,32 +56,28 @@ extern   void dbug_flush (void);
                              __FILE__, __LINE__);            \
           } while (0)
 
-  /* Generic trace to wattcp.dbg file
+
+  /* Trace to console if 'debug_on >= ' specified 'level'.
    */
-  #define TCP_TRACE_MSG(args)    \
+  #define TRACE_CONSOLE(level, args, ...)        \
+          do {                                   \
+            if (debug_on >= level)               \
+              (*_printf) (args, ## __VA_ARGS__); \
+          } while (0)
+
+  /* Generic trace to wattcp.dbg file. No level is used here.
+   */
+  #define TRACE_FILE(args, ...)  \
           do {                   \
             if (dbug_file())     \
-               dbug_printf args; \
-          } while (0)
-
-  /* Trace to console
-   */
-  #define TCP_CONSOLE_MSG(lvl, args) \
-          do {                       \
-            if (debug_on >= lvl) {   \
-              (*_printf) args;       \
-              fflush (stdout);       \
-            }                        \
+               dbug_printf (args, ## __VA_ARGS__); \
           } while (0)
 #else
-  #define DEBUG_RX(sock, ip)         ((void)0)
-  #define DEBUG_TX(sock, ip)         ((void)0)
-  #define TCP_TRACE_MSG(args)        ((void)0)
-  #define TCP_CONSOLE_MSG(args, lvl) ((void)0)
+  #define DEBUG_RX(sock, ip)               ((void)0)
+  #define DEBUG_TX(sock, ip)               ((void)0)
+  #define TRACE_FILE(args, ...)            ((void)0)
+  #define TRACE_CONSOLE(level, args, ...)  ((void)0)
 #endif
-
-#define TRACE_MSG   TCP_TRACE_MSG
-#define CONSOLE_MSG TCP_CONSOLE_MSG
 
 #endif
 

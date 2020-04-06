@@ -34,12 +34,6 @@
 #define flag_SYN_ACK  (tcp_FlagSYN | tcp_FlagACK)
 #define flag_FIN_ACK  (tcp_FlagFIN | tcp_FlagACK)
 
-#if 1
-  #define TCP_TRACE  TCP_TRACE_MSG
-#else
-  #define TCP_TRACE  ((void)0)
-#endif
-
 typedef int (*tcp_StateProc)  (_tcp_Socket**,    /* in/out: TCP socket, can change on output */
                                const in_Header*, /* in: IP header */
                                tcp_Header*,      /* in: TCP header */
@@ -134,7 +128,7 @@ int _tcp_fsm (_tcp_Socket **sp, const in_Header *ip)
     const char *st_in  = tcpStateName (in_state);
     const char *st_out = tcpStateName (s->state);
 
-    TCP_CONSOLE_MSG (3, ("tcp-state: %s -> %s\n", st_in, st_out));
+    TRACE_CONSOLE (3, "tcp-state: %s -> %s\n", st_in, st_out);
   }
 #endif
 
@@ -353,8 +347,8 @@ static int tcp_estab_state (_tcp_Socket **sp, const in_Header *ip,
 
   if (!tcp_process_ACK(s,&ldiff))
   {
-    TCP_CONSOLE_MSG (2, ("_tcp_fsm() confused so set unacked "
-                     "back to 0 from %ld\n", s->send_una));
+    TRACE_CONSOLE (2, "_tcp_fsm() confused so set unacked "
+                      "back to 0 from %ld\n", s->send_una);
     STAT (tcpstats.tcps_persistdrop++); /* !! a better counter? */
     s->send_una = 0;
   }
@@ -391,7 +385,7 @@ static int tcp_estab_state (_tcp_Socket **sp, const in_Header *ip,
       TCP_SEND (s);
       did_tx = TRUE;
 
-      TCP_CONSOLE_MSG (2, ("tcp_estab_state(): got FIN\n"));
+      TRACE_CONSOLE (2, "tcp_estab_state(): got FIN\n");
 
       s->locflags |= LF_GOT_FIN;
       s->flags    |= tcp_FlagFIN;    /* for tcp_Retransmitter() */
@@ -421,11 +415,11 @@ static int tcp_estab_state (_tcp_Socket **sp, const in_Header *ip,
      */
     if (ldiff > 0 || s->adv_win < s->max_seg)
     {
-      TCP_TRACE (("tcp_estab_state (%u): FastACK: ldiff %ld, "
+      TRACE_FILE ("tcp_estab_state (%u): FastACK: ldiff %ld, "
                   "UNA %ld, MS-right %ld\n",
                   __LINE__, ldiff, s->send_una,
                   s->missed_seq[0] != s->missed_seq[1] ?
-                  (u_long)(s->missed_seq[0] - s->recv_next) : 0));
+                  (u_long)(s->missed_seq[0] - s->recv_next) : 0);
       s->karn_count = 0;
       s->flags |= tcp_FlagPUSH;
       TCP_SEND (s);
@@ -451,7 +445,7 @@ static int tcp_estab_state (_tcp_Socket **sp, const in_Header *ip,
       (s->state == tcp_StateESTAB))
   {
     s->locflags |= LF_KEEPALIVE;
-    TCP_TRACE (("tcp_process_ACK(): Got keepalive ACK\n"));
+    TRACE_FILE ("tcp_process_ACK(): Got keepalive ACK\n");
     TCP_SEND (s);
   }
   return (0);
@@ -601,7 +595,7 @@ static int tcp_finwt2_state (_tcp_Socket **sp, const in_Header *ip,
 
   if (flags & tcp_FlagFIN)
   {
-    TCP_CONSOLE_MSG (2, ("tcp_finwt2_state(): got FIN\n"));
+    TRACE_CONSOLE (2, "tcp_finwt2_state(): got FIN\n");
     s->locflags |= LF_GOT_FIN;
   }
 
@@ -660,7 +654,7 @@ static int tcp_lastack_state (_tcp_Socket **sp, const in_Header *ip,
   {
     /* they lost our two packets, back up
      */
-    TCP_CONSOLE_MSG (2, ("tcp_lastack_state(): got FIN\n"));
+    TRACE_CONSOLE (2, "tcp_lastack_state(): got FIN\n");
 
     s->locflags |= LF_GOT_FIN;
     s->flags     = flag_FIN_ACK;
@@ -738,7 +732,7 @@ static void tcp_process_options (_tcp_Socket *s, const tcp_Header *tcp,
              max_seg = intel16 (*(WORD*)(opt+2));
              if (!s->max_seg || max_seg < s->max_seg)
              {
-               TCP_CONSOLE_MSG (2, ("Setting MSS %u\n", max_seg));
+               TRACE_CONSOLE (2, "Setting MSS %u\n", max_seg);
                s->max_seg = max_seg;
              }
            }
@@ -857,8 +851,8 @@ static void tcp_process_options (_tcp_Socket *s, const tcp_Header *tcp,
 static void
 copy_in_order (_tcp_Socket *s, const BYTE *data, unsigned len)
 {
-  TCP_TRACE (("copy_in_order (%u): Append %u bytes at %u-%u\n",
-              __LINE__, len, s->rx_datalen, s->rx_datalen + len));
+  TRACE_FILE ("copy_in_order (%u): Append %u bytes at %u-%u\n",
+              __LINE__, len, s->rx_datalen, s->rx_datalen + len);
   memcpy (s->rx_data + s->rx_datalen, data, len);
   s->recv_next  += len;
   s->rx_datalen += len;
@@ -900,8 +894,8 @@ data_in_order (_tcp_Socket *s, const BYTE *data, unsigned len, unsigned diff)
 
     /* Update offset and length to incorporate out-of-order data.
      */
-    TCP_TRACE (("data_in_order (%u): Use %lu out-of-order bytes\n",
-                __LINE__, (u_long)(s->missed_seq[1] - s->missed_seq[0])));
+    TRACE_FILE ("data_in_order (%u): Use %lu out-of-order bytes\n",
+                __LINE__, (u_long)(s->missed_seq[1] - s->missed_seq[0]));
     s->rx_datalen   += (s->missed_seq[1] - s->missed_seq[0]);
     s->recv_next     = s->missed_seq[1];
     s->missed_seq[0] = s->missed_seq[1] = 0;
@@ -914,12 +908,12 @@ data_in_order (_tcp_Socket *s, const BYTE *data, unsigned len, unsigned diff)
     }
   }
 
-  TCP_TRACE (("data_in_order (%u): edges %lu/%lu, recv.next %lu\n",
+  TRACE_FILE ("data_in_order (%u): edges %lu/%lu, recv.next %lu\n",
               __LINE__, (u_long)s->missed_seq[0], (u_long)s->missed_seq[1],
-              (u_long)s->recv_next));
+              (u_long)s->recv_next);
 
-  TCP_TRACE (("data_in_order (%u): new data now ends at %u\n",
-              __LINE__, s->rx_datalen));
+  TRACE_FILE ("data_in_order (%u): new data now ends at %u\n",
+              __LINE__, s->rx_datalen);
 }
 
 /*
@@ -930,8 +924,8 @@ prepend_out_of_order (_tcp_Socket *s, const BYTE *data, unsigned len)
 {
   unsigned start = s->missed_seq[0] - s->recv_next + s->rx_datalen - len;
 
-  TCP_TRACE (("prepend_out_of_order (%u): Prepend %u bytes at %u-%u\n",
-              __LINE__, len, start, start + len));
+  TRACE_FILE ("prepend_out_of_order (%u): Prepend %u bytes at %u-%u\n",
+              __LINE__, len, start, start + len);
   memcpy (s->rx_data + start, data, len);
   s->missed_seq[0] -= len;
 }
@@ -944,8 +938,8 @@ append_out_of_order (_tcp_Socket *s, const BYTE *data, unsigned len)
 {
   unsigned start = s->missed_seq[1] - s->recv_next + s->rx_datalen;
 
-  TCP_TRACE (("append_out_of_order (%u): Append %u bytes at %u-%u\n",
-              __LINE__, len, start, start + len));
+  TRACE_FILE ("append_out_of_order (%u): Append %u bytes at %u-%u\n",
+              __LINE__, len, start, start + len);
   memcpy (s->rx_data + start, data, len);
   s->missed_seq[1] += len;
 }
@@ -993,8 +987,8 @@ data_out_of_order (_tcp_Socket *s, const BYTE *data, unsigned len, unsigned diff
     }
   }
 
-  TCP_TRACE (("data_out_of_order (%u): edges %lu/%lu, recv.next %lu\n",
-              __LINE__, (u_long)s->missed_seq[0], (u_long)s->missed_seq[1], (u_long)s->recv_next));
+  TRACE_FILE ("data_out_of_order (%u): edges %lu/%lu, recv.next %lu\n",
+              __LINE__, (u_long)s->missed_seq[0], (u_long)s->missed_seq[1], (u_long)s->recv_next);
 }
 
 /**
@@ -1035,8 +1029,7 @@ static int tcp_process_data (_tcp_Socket *s, const tcp_Header *tcp,
   else
     len -= data_ofs;    /* remove the header length */
 
-  TCP_TRACE (("tcp_process_data (%u): len %u, ldiff %ld\n",
-              __LINE__, len, ldiff));
+  TRACE_FILE ("tcp_process_data (%u): len %u, ldiff %ld\n", __LINE__, len, ldiff);
 
   /** \todo Handle Out-of-Order urgent data. Raise SIGURG.
    */
@@ -1101,8 +1094,8 @@ static int tcp_process_data (_tcp_Socket *s, const tcp_Header *tcp,
        */
       (ldiff > len) )
   {
-    TCP_TRACE (("tcp_process_data (%u): packet ends outside %lu/%lu\n",
-                __LINE__, (u_long)s->recv_next, (u_long)(s->recv_next + s->adv_win)));
+    TRACE_FILE ("tcp_process_data (%u): packet ends outside %lu/%lu\n",
+                __LINE__, (u_long)s->recv_next, (u_long)(s->recv_next + s->adv_win));
     STAT (tcpstats.tcps_rcvpackafterwin++);
     return (0);
   }
@@ -1124,7 +1117,7 @@ static int tcp_process_data (_tcp_Socket *s, const tcp_Header *tcp,
    */
   if (*flags & tcp_FlagFIN)
   {
-    TCP_TRACE (("tcp_process_data (%u): clearing FIN\n", __LINE__));
+    TRACE_FILE ("tcp_process_data (%u): clearing FIN\n", __LINE__);
     *flags &= ~tcp_FlagFIN;
   }
 
@@ -1216,8 +1209,8 @@ static void tcp_set_window (_tcp_Socket *s, const tcp_Header *tcp)
     size = window + 8;       /* add size for markers */
     buf  = malloc (size);
 
-    TCP_TRACE (("tcp_set_window (%u): buf %p, size %lu, datalen %u\n",
-                __LINE__, buf, (u_long)size, s->tx_datalen));
+    TRACE_FILE ("tcp_set_window (%u): buf %p, size %lu, datalen %u\n",
+                __LINE__, buf, (u_long)size, s->tx_datalen);
     if (!buf)
        return;
 

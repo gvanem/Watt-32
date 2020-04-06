@@ -927,8 +927,6 @@ UINT PacketSendPacket (const ADAPTER *adapter, const void *buf, UINT len)
   DWORD sent = 0UL;
   int   rc;
 
-  TCP_CONSOLE_MSG (4, ("%s(%u): Calling WriteFile()\n", __FILE__, __LINE__));
-
   rc = WriteFile (adapter->hFile, buf, len, &sent, NULL);
 
   winpkt_trace_func = "PacketSendPacket";

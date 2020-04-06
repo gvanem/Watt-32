@@ -227,9 +227,7 @@ int reverse_resolve_ip4 (DWORD ip, char *result, size_t size)
   memset (&dom_a4list, 0, sizeof(dom_a4list));
 
 #if defined(WIN32)
-  /* The 'result' could be a wide-str if _UNICODE is used. Caller needs to test.
-   */
-  if (WinDnsQuery_PTR4(ip, (TCHAR*)result, size))
+  if (WinDnsQuery_PTR4(ip, result, size))
      return (1);
 #endif
   return do_reverse_resolve (&q, len, result, size);
@@ -306,9 +304,7 @@ int reverse_resolve_ip6 (const void *addr, char *result, size_t size)
   memset (&dom_a6list, 0, sizeof(dom_a6list));
 
 #if defined(WIN32)
-  /* The 'result' could be a wide-str if _UNICODE is used. Caller needs to test.
-   */
-  if (WinDnsQuery_PTR6(addr, (TCHAR*)result, size))
+  if (WinDnsQuery_PTR6(addr, result, size))
      return (1);
 #endif
   return do_reverse_resolve (&q, len, result, size);

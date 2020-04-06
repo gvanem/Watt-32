@@ -498,8 +498,8 @@ _tcp_Socket *_tcp_abort (_tcp_Socket *s, const char *file, unsigned line)
 {
   SET_ERR_MSG (s, _LANG("TCP Abort"));
 
-  TCP_TRACE_MSG (("_tcp_abort(%" ADDR_FMT ") called from %s (%u). State %s\n",
-                  ADDR_CAST(s), file, line, tcpStateName(s->state)));
+  TRACE_FILE ("_tcp_abort(%" ADDR_FMT ") called from %s (%u). State %s\n",
+              ADDR_CAST(s), file, line, tcpStateName(s->state));
 
   if (s->state >= tcp_StateSYNSENT &&
       s->state <= tcp_StateLASTACK)
@@ -795,7 +795,7 @@ _tcp_Socket *_tcp_handler (const in_Header *ip, BOOL broadcast)
       SEQ_GEQ(seq, s->recv_next) &&
       SEQ_LEQ(seq, s->recv_next+s->adv_win+1))
   {
-    TCP_TRACE_MSG (("_tcp_handler(): got RST, SEQ %lu\n", (u_long)seq));
+    TRACE_FILE ("_tcp_handler(): got RST, SEQ %lu\n", (u_long)seq);
     tcp_sockreset (s, FALSE);
     return (NULL);
   }
@@ -834,8 +834,8 @@ static BOOL udp_checksum (const in_Header *ip, const udp_Header *udp, int len)
 
   if (CHECKSUM(&ph,sizeof(ph)) != 0xFFFF)
   {
-    TCP_CONSOLE_MSG (1, (_LANG("Bad udp checksum. ")));
-    TCP_TRACE_MSG (("Bad udp checksum\n"));
+    TRACE_CONSOLE (1, "Bad udp checksum. ");
+    TRACE_FILE ("Bad udp checksum\n");
     STAT (udpstats.udps_badsum++);
     return (FALSE);
   }
@@ -1156,7 +1156,7 @@ _udp_Socket *_udp_handler (const in_Header *ip, BOOL broadcast)
   /* Figure out the pcdhcp.c problems
    */
   if (udp->srcPort == 67 || udp->dstPort == 67)
-     TCP_CONSOLE_MSG (1, ("DHCP-data len: %d\n", len));
+     TRACE_CONSOLE (1, "DHCP-data len: %d\n", len);
 
   if (s->protoHandler)
   {
@@ -1270,8 +1270,8 @@ void tcp_Retransmitter (BOOL force)
       {
         s->rtt_time = 0UL;           /* stop RTT timer */
 
-        TCP_CONSOLE_MSG (3, ("Regular retran TO set unacked back to "
-                             "0 from %ld\n", s->send_una));
+        TRACE_CONSOLE (3, "Regular retran TO set unacked back to "
+                          "0 from %ld\n", s->send_una);
 
         /* strategy handles closed windows.  JD + EE
          */
@@ -1319,9 +1319,8 @@ void tcp_Retransmitter (BOOL force)
         {
           /**< \todo Allow for 3 SYN before giving up
            */
-          TCP_TRACE_MSG (("SYN (re)sent in tcp_Retransmitter(), "
-                          " rtt_time %ld\n",
-                          get_timediff(s->rtt_time,set_timeout(0))));
+          TRACE_FILE ("SYN (re)sent in tcp_Retransmitter(), rtt_time %ld\n",
+                      get_timediff(s->rtt_time,set_timeout(0)));
         }
       }
 
@@ -1379,7 +1378,7 @@ WORD W32_CALL tcp_tick (sock_type *s)
 
   if (tick_active > 0)
   {
-    TCP_CONSOLE_MSG (1, ("tcp_tick() reentered\n"));
+    TRACE_CONSOLE (1, "tcp_tick() reentered\n");
     return (s ? s->tcp.ip_type : 0);
   }
   tick_active++;
@@ -1589,8 +1588,8 @@ static void sock_reduce_mss (sock_type *s, WORD MTU)
          tcp->max_seg -= MSS_REDUCE;
     tcp->max_seg = min (max(MSS_MIN, tcp->max_seg), _mss);
 
-    TCP_TRACE_MSG (("MSS for %s reduced to %u\n",
-                    _inet_ntoa(NULL,tcp->hisaddr), tcp->max_seg));
+    TRACE_FILE ("MSS for %s reduced to %u\n",
+                _inet_ntoa(NULL,tcp->hisaddr), tcp->max_seg);
 #endif
   }
   else
@@ -1958,7 +1957,7 @@ static void tcp_sockreset (_tcp_Socket *s, BOOL proxy)
     s->timeout     = 0;
     s->karn_count  = 0;
     s->state       = tcp_StateLISTEN;
-    TCP_TRACE_MSG (("tcp_sockreset(): continue to LISTEN\n"));
+    TRACE_FILE ("tcp_sockreset(): continue to LISTEN\n");
   }
   else
   {
@@ -2014,8 +2013,8 @@ static BOOL tcp_checksum (const in_Header *ip, const tcp_Header *tcp, int len)
   if (CHECKSUM(&ph,sizeof(ph)) != 0xFFFF)
   {
     STAT (tcpstats.tcps_rcvbadsum++);
-    TCP_CONSOLE_MSG (1, (_LANG("Bad tcp checksum. ")));
-    TCP_TRACE_MSG (("Bad tcp checksum\n"));
+    TRACE_CONSOLE (1, "Bad tcp checksum. ");
+    TRACE_FILE ("Bad tcp checksum\n");
     return (FALSE);
   }
   return (TRUE);
@@ -2033,8 +2032,8 @@ static void tcp_rtt_win (_tcp_Socket *s)
    */
   if (s->karn_count == 2)    /* Wake up from slow-start */
   {
-    TCP_CONSOLE_MSG (2, ("Finally got it safely zapped from %ld to ???\n",
-                     s->send_una));
+    TRACE_CONSOLE (2, "Finally got it safely zapped from %ld to ???\n",
+                   s->send_una);
   }
   else if (s->vj_last)     /* We expect an immediate response */
   {
@@ -2075,10 +2074,10 @@ static void tcp_rtt_win (_tcp_Socket *s)
 
     tcp_rtt_add (s, s->rto, _mtu);
 
-    TCP_CONSOLE_MSG (2, ("RTO %u  sa %lu  sd %lu  cwindow %u"
-                     "  wwindow %u  unacked %ld\n",
-                     s->rto, (u_long)s->vj_sa, (u_long)s->vj_sd, s->cwindow,
-                     s->wwindow, s->send_una));
+    TRACE_CONSOLE (2, "RTO %u  sa %lu  sd %lu  cwindow %u"
+                      "  wwindow %u  unacked %ld\n",
+                   s->rto, (u_long)s->vj_sa, (u_long)s->vj_sd, s->cwindow,
+                   s->wwindow, s->send_una);
   }
 
   s->karn_count = 0;
@@ -2125,7 +2124,7 @@ static void tcp_upd_win (_tcp_Socket *s, unsigned line)
   if (winfree < s->max_seg/2)
   {
     _tcp_send (s, __FILE__, line);  /* update window now */
-    TCP_CONSOLE_MSG (2, ("tcp_upd_win(%d): win-free %u\n", line, winfree));
+    TRACE_CONSOLE (2, "tcp_upd_win(%d): win-free %u\n", line, winfree);
   }
 }
 
@@ -2474,10 +2473,10 @@ int _tcp_send (_tcp_Socket *s, const char *file, unsigned line)
 
   s->send_una = start_data;  /* relative start of tx_data[] buffer */
 
-  TCP_CONSOLE_MSG (2, ("tcp_send (called from %s/%u): sent %u bytes in %u "
-                   "packets with (%ld) unacked. SND.NXT %lu\n",
-                   file, line, send_tot_len, pkt_num, s->send_una,
-                   (u_long)s->send_next));
+  TRACE_CONSOLE (2, "tcp_send (called from %s/%u): sent %u bytes in %u "
+                    "packets with (%ld) unacked. SND.NXT %lu\n",
+                    file, line, send_tot_len, pkt_num, s->send_una,
+                    (u_long)s->send_next);
 
   s->vj_last = 0UL;
   if (s->karn_count == 2)

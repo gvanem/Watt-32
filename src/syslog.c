@@ -341,7 +341,7 @@ void W32_CALL openlog (const char *ident, int logstat, int logfac)
 
   if (syslog_mask)
   {
-    TCP_CONSOLE_MSG (2, ("setlogmask(0x%04X)\n", syslog_mask));
+    TRACE_CONSOLE (2, "setlogmask(0x%04X)\n", syslog_mask);
     setlogmask (syslog_mask);
   }
 

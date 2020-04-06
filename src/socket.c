@@ -482,8 +482,8 @@ static int W32_CALL sock_packet_peek (const union link_Packet *pkt)
 #if defined(USE_DEBUG)
         if (!pktq_check(q))
         {
-          TCP_CONSOLE_MSG (0, ("%s(%u): SOCK_PACKET queue munged, "
-                           "fd %d\n", __FILE__, __LINE__, sock->fd));
+          TRACE_CONSOLE (0, "%s(%u): SOCK_PACKET queue munged, "
+                            "fd %d\n", __FILE__, __LINE__, sock->fd);
           pktq_clear (q);
           continue;
         }
@@ -491,7 +491,7 @@ static int W32_CALL sock_packet_peek (const union link_Packet *pkt)
         if (pktq_in_index(q) == q->out_index)   /* no room */
         {
           q->num_drop++;
-          TCP_CONSOLE_MSG (0, ("SOCK_PACKET drops %lu\n", (u_long)q->num_drop));
+          TRACE_CONSOLE (0, "SOCK_PACKET drops %lu\n", (u_long)q->num_drop);
           continue;
         }
 

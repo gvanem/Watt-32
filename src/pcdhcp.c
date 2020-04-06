@@ -1700,7 +1700,7 @@ static int std_write_config (void)
   return (rc);
 
 fail:
-  TCP_CONSOLE_MSG (0, ("Writing %s failed; %s\n", fname, strerror(errno)));
+  TRACE_CONSOLE (0, "Writing %s failed; %s\n", fname, strerror(errno));
   return (0);
 }
 

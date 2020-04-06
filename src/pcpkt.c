@@ -392,7 +392,7 @@ static int pkt_drvr_info (void)
 
   if (!PKT_API(&regs))
   {
-    CONSOLE_MSG (0, ("Warning: old-type PKTDRVR\n"));
+    TRACE_CONSOLE (1, "Warning: old-type PKTDRVR\n");
     _pktdevclass  = PDCLASS_ETHER;      /* assume Ethernet */
     _pkt_ip_ofs   = sizeof(eth_Header);
     _pkt_type_ofs = offsetof (struct eth_Header, type);
@@ -644,8 +644,8 @@ static int pkt16_drvr_init (mac_address *mac_addr)
   if (_pktdevlevel >= 5 && _pktdevlevel < 255) /* high-performance driver */
   {
     if (!pkt_get_params(&pkt_params))
-       CONSOLE_MSG (1, ("Failed to get PKTDRVR params; %s\n",
-                    pkt_strerror(_pkt_errno)));
+       TRACE_CONSOLE (1, "Failed to get PKTDRVR params; %s\n",
+                      pkt_strerror(_pkt_errno));
   }
 
 #if defined(USE_STATISTICS)
@@ -662,8 +662,8 @@ static int pkt16_drvr_init (mac_address *mac_addr)
       (_pkt_forced_rxmode < -1 ||
        _pkt_forced_rxmode > RXMODE_PROMISCOUS))
   {
-    CONSOLE_MSG (0, ("Illegal Rx-mode (%d) specified\n",
-                 _pkt_forced_rxmode));
+    TRACE_CONSOLE (0, "Illegal Rx-mode (%d) specified\n",
+                   _pkt_forced_rxmode);
     _pkt_forced_rxmode = -1;
   }
 
@@ -787,7 +787,7 @@ static void release_real_mem (void)
     {
       (*_printf) ("%s (%u): DPMI/DOS error %04Xh\n",
                   __FILE__, __LINE__, __dpmi_error);
-      TCP_TRACE_MSG (("release_real_mem: dpmi_error %u\n", __dpmi_error));
+      TRACE_FILE ("release_real_mem: dpmi_error %u\n", __dpmi_error);
     }
   }
   rm_base = (DWORD)-1;  /* crash if used after freed */
@@ -1358,7 +1358,7 @@ void pkt_free_pkt (const void *pkt)
 
   if (pkt != (const void*) (pktq_out_buf(q) + _pkt_ip_ofs))
   {
-    CONSOLE_MSG (0, ("%s: freeing illegal packet 0x%p.\n", __FILE__, pkt));
+    TRACE_CONSOLE (0, "%s: freeing illegal packet 0x%p.\n", __FILE__, pkt);
     pktq_clear (q);
   }
   else
@@ -1471,8 +1471,8 @@ int pkt_eth_init (mac_address *addr)
     {
       rc = pkt32_drvr_init (pm_driver, addr);
       if (rc == 0)
-         CONSOLE_MSG (2, ("Using Pmode `%s' driver at %08lX\n",
-                      pkt32_drvr_name(pm_driver), (DWORD)_pkt32_drvr));
+         TRACE_CONSOLE (2, "Using Pmode `%s' driver at %08lX\n",
+                        pkt32_drvr_name(pm_driver), (DWORD)_pkt32_drvr);
     }
     if (rc)  /* pmode driver failed, try real-mode driver */
 #endif
@@ -1849,15 +1849,15 @@ static int setup_pkt_inf (void)
   if (pkt_use_near)
   {
     if (!(_crt0_startup_flags & _CRT0_FLAG_NEARPTR))
-       CONSOLE_MSG (1, ("Near-pointers not enabled\n"));
+       TRACE_CONSOLE (1, "Near-pointers not enabled\n");
     else
     {
       _pkt_inf->use_near_ptr = TRUE;
-      CONSOLE_MSG (1, ("Near-pointers enabled\n"));
+      TRACE_CONSOLE (1, "Near-pointers enabled\n");
     }
   }
   else if (_crt0_startup_flags & _CRT0_FLAG_NEARPTR)
-       CONSOLE_MSG (1, ("Near-pointers on, but \"PKT.NEAR_PTR = 0\"\n"));
+       TRACE_CONSOLE (1, "Near-pointers on, but \"PKT.NEAR_PTR = 0\"\n");
 #endif
 
   return (1);

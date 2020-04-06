@@ -7,14 +7,6 @@
 
 #if defined(WIN32)  /* Rest of file */
 
-#if !defined(__CYGWIN__)
-/*
- * Ref.
- *  http://stackoverflow.com/questions/4168748/tchar-h-not-found-on-cygwin
- */
-  #include <tchar.h>
-#endif
-
 /* Generic table for loading DLLs and functions from them.
  */
 struct LoadTable {
@@ -29,12 +21,6 @@ extern size_t           dyn_funcs_num;
 
 extern int load_dynamic_table   (struct LoadTable *tab, int tab_size);
 extern int unload_dynamic_table (struct LoadTable *tab, int tab_size);
-
-#if defined(UNICODE) || defined(_UNICODE)
-  #define TSTR2ASCII_FMT  WIDESTR_FMT   /* "ws" or "S" (GNU-C) */
-#else
-  #define TSTR2ASCII_FMT  "s"
-#endif
 
 #ifndef IN
 #define IN

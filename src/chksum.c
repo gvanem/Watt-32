@@ -201,7 +201,7 @@ int do_checksum (const BYTE *buf, BYTE protocol, unsigned len)
          break;
 
     default:
-        TCP_CONSOLE_MSG (2, ("do_checksum: unknown protocol %d\n", protocol));
+        TRACE_CONSOLE (2, "do_checksum: unknown protocol %d\n", protocol);
         return (-1);
   }
   return (1);

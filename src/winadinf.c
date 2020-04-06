@@ -371,7 +371,7 @@ static int  verbose_level = 0;
 
 static void print_wlan_bss_list (const WLAN_BSS_LIST *bss_list);
 
-#define ADD_VALUE(dll, func)  { NULL, _T(dll), #func, (void**)&p_##func }
+#define ADD_VALUE(dll, func)  { NULL, dll, #func, (void**)&p_##func }
 
 static struct LoadTable dyn_funcs2[] = {
                         ADD_VALUE ("ws2_32.dll",   WSAStartup),
@@ -1348,16 +1348,12 @@ static const struct search_list arp_types[] = {
                   { MIB_IPNET_TYPE_STATIC,  "Static" }
                 };
 
-#if defined(__WATCOMC__)
-  #define NlnsStale  NlnsState  /* typo in Watcom's <ntdef.h> */
-#endif
-
 static const struct search_list neighbour_states[] = {
                   { NlnsUnreachable, "Unreachable" },
                   { NlnsIncomplete,  "Incomplete" },
                   { NlnsProbe,       "Probe" },
                   { NlnsDelay,       "Delay" },
-                  { NlnsStale,       "Stale" },
+                  { 4,               "Stale" },  /* typo in Watcom's <nt/nldef.h> calls this 'NlnsState' */
                   { NlnsReachable,   "Reachable" },
                   { NlnsPermanent,   "Permanent" }
                 };
@@ -2793,7 +2789,7 @@ static int _pkt_win_print_RasEnumConnections (void)
       PRINT_RAS_ERROR ("    ", ret);
       continue;
     }
-    (*_printf) ("  Statistics for connection \"%" TSTR2ASCII_FMT "\":\n", ras_conn->szEntryName);
+    (*_printf) ("  Statistics for connection \"%s\":\n", ras_conn->szEntryName);
     (*_printf) ("    Bytes Xmited:            %s\n", dword_string(stats.dwBytesXmited));
     (*_printf) ("    Bytes Received:          %s\n", dword_string(stats.dwBytesRcved));
     (*_printf) ("    Frames Xmited:           %s\n", dword_string(stats.dwFramesXmited));
@@ -2853,7 +2849,7 @@ static int _pkt_win_print_RasEnumConnections (void)
       (*_printf) ("    Server Auth protocol:    %s\n", _list_lookup(pppLcp.dwServerAuthenticationProtocol, auth_proto, DIM(auth_proto)));
       (*_printf) ("    Client Auth data:        %s\n", _list_lookup(pppLcp.dwAuthenticationData, auth_data, DIM(auth_data)));
       (*_printf) ("    Server Auth data:        %s\n", _list_lookup(pppLcp.dwServerAuthenticationData, auth_data, DIM(auth_data)));
-      (*_printf) ("    Authentication message:  %" TSTR2ASCII_FMT "\n", pppLcp.szReplyMessage[0] ? pppLcp.szReplyMessage : _T(NONE_STR));
+      (*_printf) ("    Authentication message:  %s\n", pppLcp.szReplyMessage[0] ? pppLcp.szReplyMessage : NONE_STR);
 
       (*_printf) ("    EAP type:                %s\n", pppLcp.dwServerAuthenticationProtocol == RASLCPAP_EAP ?
                                                        itoa(pppLcp.dwServerEapTypeId,work_buf,10) : NA_STR);

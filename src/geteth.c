@@ -140,10 +140,10 @@ void W32_CALL ReadEthersFile (void)
      */
     if (!h)
     {
-      CONSOLE_MSG (4, ("ReadEthersFile(): gethostbyname() failed\n"));
+      TRACE_CONSOLE (4, "ReadEthersFile(): gethostbyname() failed\n");
       continue;
     }
-    CONSOLE_MSG (4, ("\n"));
+    TRACE_CONSOLE (4, "\n");
 
     e = calloc (sizeof(*e), 1);
     if (!e)
@@ -202,7 +202,7 @@ static int get_ether_entry (char *in_buf, eth_address *e,
                        &eth[3], &eth[4], &eth[5]) == DIM(eth));
   if (!ok)
   {
-    CONSOLE_MSG (1, ("get_ether_entry(): sscanf() failed\n"));
+    TRACE_CONSOLE (1, "get_ether_entry(): sscanf() failed\n");
     return (0);
   }
 
@@ -211,7 +211,7 @@ static int get_ether_entry (char *in_buf, eth_address *e,
 
   if (!token || !ip_name || (len = strlen(ip_name)) < 1 || len > name_max)
   {
-    CONSOLE_MSG (1, ("get_ether_entry(): short line or malformed ip_name '%s'\n", ip_name));
+    TRACE_CONSOLE (1, "get_ether_entry(): short line or malformed ip_name '%s'\n", ip_name);
     return (0);
   }
 
@@ -222,8 +222,8 @@ static int get_ether_entry (char *in_buf, eth_address *e,
   for (i = 0; i < sizeof(*e); i++)
       ((BYTE*)e)[i] = eth[i];
 
-  CONSOLE_MSG (4, ("get_ether_entry(): ip: %s, eth: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                   ip_name, eth[0],eth[1],eth[2],eth[3],eth[4],eth[5]));
+  TRACE_CONSOLE (4, "get_ether_entry(): ip: %s, eth: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                 ip_name, eth[0],eth[1],eth[2],eth[3],eth[4],eth[5]);
 
   return (1);
 }

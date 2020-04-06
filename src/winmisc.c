@@ -243,20 +243,19 @@ BOOL get_file_version (const char *file_name,
 
   if (!p_GetFileVersionInfoSizeA || !p_GetFileVersionInfoA || !p_VerQueryValueA)
   {
-    CONSOLE_MSG (2, ("Missing functions from version.dll\n"));
+    TRACE_CONSOLE (2, "Missing functions from version.dll\n");
     return (FALSE);
   }
 
   /* Pull out the version information
    */
   ver_info_size = (*p_GetFileVersionInfoSizeA) ((char*)file_name, &ver_hnd);
-  CONSOLE_MSG (2, ("file %s, ver-size %lu\n", file_name, (u_long)ver_info_size));
+  TRACE_CONSOLE (2, "file %s, ver-size %lu\n", file_name, (u_long)ver_info_size);
 
   if (!ver_info_size)
   {
     err = GetLastError();
-    CONSOLE_MSG (2, ("failed to call GetFileVersionInfoSizeA; %s\n",
-                     win_strerror(err)));
+    TRACE_CONSOLE (2, "failed to call GetFileVersionInfoSizeA; %s\n", win_strerror(err));
     return (FALSE);
   }
 
@@ -266,8 +265,7 @@ BOOL get_file_version (const char *file_name,
                                  ver_info_size, vff_info))
   {
     err = GetLastError();
-    CONSOLE_MSG (2, ("failed to call GetFileVersionInfoA; %s\n",
-                     win_strerror(err)));
+    TRACE_CONSOLE (2, "failed to call GetFileVersionInfoA; %s\n", win_strerror(err));
     return (FALSE);
   }
 
@@ -278,8 +276,7 @@ BOOL get_file_version (const char *file_name,
       bytes_read < sizeof(*lang_info))
   {
     err = GetLastError();
-    CONSOLE_MSG (2, ("failed to call VerQueryValueA; %s\n",
-                     win_strerror(err)));
+    TRACE_CONSOLE (2, "failed to call VerQueryValueA; %s\n", win_strerror(err));
     return (FALSE);
   }
 
@@ -297,17 +294,16 @@ BOOL get_file_version (const char *file_name,
   if (!(*p_VerQueryValueA) (vff_info, sub_block, &res_buf, &bytes_read))
   {
     err = GetLastError();
-    CONSOLE_MSG (2, ("failed to call VerQueryValueA; %s\n",
-                     win_strerror(err)));
+    TRACE_CONSOLE (2, "failed to call VerQueryValueA; %s\n", win_strerror(err));
     return (FALSE);
   }
 
-  CONSOLE_MSG (2, ("sub-block '%s' -> '%.*s'\n",
-                   sub_block, bytes_read, (const char*)res_buf));
+  TRACE_CONSOLE (2, "sub-block '%s' -> '%.*s'\n",
+                 sub_block, bytes_read, (const char*)res_buf);
 
   if (strlen(res_buf) >= version_buf_len)
   {
-    CONSOLE_MSG (2, ("GetFileVersionA(): input buffer too small\n"));
+    TRACE_CONSOLE (2, "GetFileVersionA(): input buffer too small\n");
     return (FALSE);
   }
   strcpy (version_buf, res_buf);
@@ -331,7 +327,7 @@ static void MS_CDECL new_abort_handler (int sig)
    * from where abort() was called; skip the 2 first CRT locations (raise, abort).
    * Indent the printout 2 spaces.
    */
-  CONSOLE_MSG (0, ("\nabort() called. Backtrace:\n"));
+  TRACE_CONSOLE (0, "\nabort() called. Backtrace:\n");
   ShowStack (GetCurrentThread(), &ctx, NULL);
 
   if (orig_abort_handler)
@@ -362,7 +358,7 @@ static void CALLBACK pre_err_handler (INT_PTR arg)
   if (!handle)
      return;
 
-  (*p_BT_InsLogEntryF) (handle, BTLL_INFO, _T("Starting Watt-32 crash-report:"));
+  (*p_BT_InsLogEntryF) (handle, BTLL_INFO, "Starting Watt-32 crash-report:");
 
   if (_watt_assert_buf[0])
      (*p_BT_InsLogEntryF) (handle, BTLL_IMPORTANT, _watt_assert_buf);
@@ -452,8 +448,7 @@ BOOL init_win_misc (void)
   }
 #endif
 
-  CONSOLE_MSG (2, ("IsWow64Process(): rc: %d, wow64: %d.\n",
-                   rc, wow64));
+  TRACE_CONSOLE (2, "IsWow64Process(): rc: %d, wow64: %d.\n", rc, wow64);
 
   if (_watt_use_bugtrap)
   {
@@ -490,8 +485,7 @@ static BOOL WinDnsQueryCommon (WORD type, const void *what,
 
   rc = (*p_DnsQuery_A) ((const char*)what, type, opt, NULL, &dr, NULL);
 
-  CONSOLE_MSG (2, ("DnsQuery_A: type %d, dr %p: %s\n",
-                   type, dr, win_strerror(rc)));
+  TRACE_CONSOLE (2, "DnsQuery_A: type %d, dr %p: %s\n", type, dr, win_strerror(rc));
 
   if (rc != ERROR_SUCCESS || !dr)
      return (FALSE);
@@ -501,7 +495,7 @@ static BOOL WinDnsQueryCommon (WORD type, const void *what,
 
   for (rr = dr; rr; rr = rr->pNext)
   {
-    CONSOLE_MSG (2, ("RR-type: %d: ", rr->wType));
+    TRACE_CONSOLE (2, "RR-type: %d: ", rr->wType);
 
     /* Use only 1st A/AAAA record
      */
@@ -509,8 +503,8 @@ static BOOL WinDnsQueryCommon (WORD type, const void *what,
     {
       DWORD ip = ntohl (rr->Data.A.IpAddress);
 
-      CONSOLE_MSG (2, ("A: %s, ttl %lus\n",
-                       _inet_ntoa(NULL,ip), (u_long)rr->dwTtl));
+      TRACE_CONSOLE (2, "A: %s, ttl %lus\n",
+                     _inet_ntoa(NULL,ip), (u_long)rr->dwTtl);
       if (!found)
          *(DWORD*) result = ip;
       found = TRUE;
@@ -521,7 +515,7 @@ static BOOL WinDnsQueryCommon (WORD type, const void *what,
     {
       const void *ip6 = &rr->Data.AAAA.Ip6Address.IP6Dword[0];
 
-      CONSOLE_MSG (2, ("AAAA: %s\n", _inet6_ntoa(ip6)));
+      TRACE_CONSOLE (2, "AAAA: %s\n", _inet6_ntoa(ip6));
       if (!found)
          memcpy (result, ip6, size);
       found = TRUE;
@@ -530,21 +524,16 @@ static BOOL WinDnsQueryCommon (WORD type, const void *what,
 
     else if (rr->wType == DNS_TYPE_PTR && type == DNS_TYPE_PTR)
     {
-      _tcsncpy (result, dr->Data.PTR.pNameHost, size);
-      CONSOLE_MSG (2, ("PTR: %" TSTR2ASCII_FMT "\n", (const TCHAR*)result));
+      _strlcpy (result, dr->Data.PTR.pNameHost, size);
+      TRACE_CONSOLE (2, "PTR: %s\n", (const char*)result);
     }
     else if (rr->wType == DNS_TYPE_CNAME)
     {
-#ifdef UNICODE
-       const char *src = wstring_acp (dr->Data.CNAME.pNameHost);
-#else
-       const char *src = dr->Data.CNAME.pNameHost;
-#endif
-      _strlcpy (dom_cname, src, sizeof(dom_cname));
-      CONSOLE_MSG (2, ("CNAME: %s\n", dom_cname));
+      _strlcpy (dom_cname, dr->Data.CNAME.pNameHost, sizeof(dom_cname));
+      TRACE_CONSOLE (2, "CNAME: %s\n", dom_cname);
     }
     else
-      CONSOLE_MSG (2, ("\n"));
+      TRACE_CONSOLE (2, "\n");
   }
   (*p_DnsFree) (dr, DnsFreeRecordList);
   from_windns = found;
@@ -625,12 +614,7 @@ BOOL WinDnsCachePut_A4 (const char *name, DWORD ip4)
      return (FALSE);
 
   memset (&rr, 0, sizeof(rr));
-
-#ifdef UNICODE
-  rr.pName = _tcsdup (astring_acp(name));
-#else
   rr.pName = strdup (name);
-#endif
 
   rr.wType = DNS_TYPE_A;
   rr.Data.A.IpAddress = htonl (ip4);
@@ -645,7 +629,7 @@ BOOL WinDnsCachePut_A4 (const char *name, DWORD ip4)
                                      NULL, NULL, NULL);
   DO_FREE (rr.pName);
 
-  CONSOLE_MSG (2, ("DnsModifyRecordsInSet_A: %s ", win_strerror(rc)));
+  TRACE_CONSOLE (2, "DnsModifyRecordsInSet_A: %s ", win_strerror(rc));
 
   if (rc >= DNS_ERROR_RESPONSE_CODES_BASE && rc <= DNS_ERROR_RCODE_LAST)
      dns_windns &= ~WINDNS_CACHEPUT_A4;  /* don't do this again */
@@ -1009,18 +993,18 @@ void print_thread_times (HANDLE thread)
   if (!GetThreadTimes(thread, &ctime, &etime, &ktime, &utime))
   {
     DWORD err = GetLastError();
-    CONSOLE_MSG (2, ("  GetThreadTimes() %s, ", win_strerror(err)));
+    TRACE_CONSOLE (2, "  GetThreadTimes() %s, ", win_strerror(err));
   }
-  CONSOLE_MSG (2, ("  kernel-time: %.6fs, user-time: %.6fs, life-span: %.6fs",
-               filetime_sec(&ktime), filetime_sec(&utime),
-               filetime_sec(&etime) - filetime_sec(&ctime)));
+  TRACE_CONSOLE (2, "  kernel-time: %.6fs, user-time: %.6fs, life-span: %.6fs",
+                 filetime_sec(&ktime), filetime_sec(&utime),
+                 filetime_sec(&etime) - filetime_sec(&ctime));
 
   if (p_QueryThreadCycleTime)
   {
     ULONG64 cycle_time;
     if (!(*p_QueryThreadCycleTime) (thread, &cycle_time))
-         CONSOLE_MSG (2, (", cycle-time: <failed>"));
-    else CONSOLE_MSG (2, (", cycle-time: %s clocks", qword_str(cycle_time)));
+         TRACE_CONSOLE (2, ", cycle-time: <failed>");
+    else TRACE_CONSOLE (2, ", cycle-time: %s clocks", qword_str(cycle_time));
   }
 
   if (p_NtQueryInformationThread)
@@ -1030,10 +1014,10 @@ void print_thread_times (HANDLE thread)
                                                  &perf_count, sizeof(perf_count),
                                                  NULL);
     if (rc != STATUS_SUCCESS)
-         CONSOLE_MSG (2, (", perf-count: <fail %ld>", (long)rc));
-    else CONSOLE_MSG (2, (", perf-count: %s", qword_str(perf_count.QuadPart)));
+         TRACE_CONSOLE (2, ", perf-count: <fail %ld>", (long)rc);
+    else TRACE_CONSOLE (2, ", perf-count: %s", qword_str(perf_count.QuadPart));
   }
-  CONSOLE_MSG (2, ("\n"));
+  TRACE_CONSOLE (2, "\n");
 }
 
 /*
@@ -1106,7 +1090,7 @@ void print_perf_times (void)
 
   if (!p_NtQuerySystemInformation || num_cpus == 0)
   {
-    CONSOLE_MSG (2, ("  p_NtQuerySystemInformation = NULL!\n"));
+    TRACE_CONSOLE (2, "  p_NtQuerySystemInformation = NULL!\n");
     return;
   }
 
@@ -1117,7 +1101,7 @@ void print_perf_times (void)
   if (rc != 0)
   {
     DWORD err = GetLastError();
-    CONSOLE_MSG (2, ("  NtQuerySystemInformation() %s, ", win_strerror(err)));
+    TRACE_CONSOLE (2, "  NtQuerySystemInformation() %s, ", win_strerror(err));
     return;
   }
 
@@ -1125,18 +1109,18 @@ void print_perf_times (void)
    */
   if ((ret_len % sizeof(info[0])) != 0)
   {
-    CONSOLE_MSG (1, ("NtQuery didn't return expected amount of data\n"
-                     "Expected a multiple of %u, returned %lu\n",
-                     SIZEOF(info[0]), (u_long)ret_len) );
+    TRACE_CONSOLE (1, "NtQuery didn't return expected amount of data\n"
+                      "Expected a multiple of %u, returned %lu\n",
+                   SIZEOF(info[0]), (u_long)ret_len);
     return;
   }
 
   ret_num_CPUs = ret_len / sizeof(info[0]);
   if (ret_num_CPUs != num_cpus)
   {
-    CONSOLE_MSG (1, ("NtQuery didn't return expected amount of data\n"
-                     "Expected data for %i CPUs, returned %lu\n",
-                     num_cpus, (u_long)ret_num_CPUs) );
+    TRACE_CONSOLE (1, "NtQuery didn't return expected amount of data\n"
+                      "Expected data for %i CPUs, returned %lu\n",
+                   num_cpus, (u_long)ret_num_CPUs);
     return;
   }
 
@@ -1147,23 +1131,23 @@ void print_perf_times (void)
   {
     ULONG64 x;
 
-    CONSOLE_MSG (2, ("CPU %lu:%s", (u_long)i, (i == 0) ? "\t\t\t  CPU clocks\n" : "\n"));
+    TRACE_CONSOLE (2, "CPU %lu:%s", (u_long)i, (i == 0) ? "\t\t\t  CPU clocks\n" : "\n");
 
     x = info[i].KernelTime.QuadPart - info[i].IdleTime.QuadPart;
-    CONSOLE_MSG (2, ("  KernelTime:     %18s\n", qword_str(x)));
+    TRACE_CONSOLE (2, "  KernelTime:     %18s\n", qword_str(x));
 
     x = info[i].IdleTime.QuadPart;
-    CONSOLE_MSG (2, ("  IdleTime:       %18s\n", qword_str(x)));
+    TRACE_CONSOLE (2, "  IdleTime:       %18s\n", qword_str(x));
 
     x = info[i].UserTime.QuadPart;
-    CONSOLE_MSG (2, ("  UserTime:       %18s\n", qword_str(x)));
+    TRACE_CONSOLE (2, "  UserTime:       %18s\n", qword_str(x));
 
     x = info[i].DpcTime.QuadPart;
-    CONSOLE_MSG (2, ("  DpcTime:        %18s\n", qword_str(x)));
+    TRACE_CONSOLE (2, "  DpcTime:        %18s\n", qword_str(x));
 
     x = info[i].InterruptTime.QuadPart;
-    CONSOLE_MSG (2, ("  InterruptTime:  %18s\n", qword_str(x)));
-    CONSOLE_MSG (2, ("  InterruptCount: %18s\n", dword_str(info[i].InterruptCount)));
+    TRACE_CONSOLE (2, "  InterruptTime:  %18s\n", qword_str(x));
+    TRACE_CONSOLE (2, "  InterruptCount: %18s\n", dword_str(info[i].InterruptCount));
   }
 }
 #endif  /* WIN32 || WIN64 */

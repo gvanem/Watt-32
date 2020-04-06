@@ -92,14 +92,7 @@ func_WanPacketTestAdapter    p_WanPacketTestAdapter    = NULL;
   func_BT_AddLogFile          p_BT_AddLogFile          = NULL;
 #endif
 
-#if defined(UNICODE) || defined(_UNICODE)
-  #define BUGTRAP_DLL  L"BugTrapU.dll"
-#else
-  #define BUGTRAP_DLL  "BugTrap.dll"
-#endif
-
-#define ADD_VALUE(dll, func)  { NULL, _T(dll),     #func, (void**)&p_##func }
-#define ADD_VALUE_BT(func)    { NULL, BUGTRAP_DLL, #func, (void**)&p_##func }
+#define ADD_VALUE(dll, func)  { NULL, dll, #func, (void**)&p_##func }
 
 /*
  * The DLL names must be grouped together for load_dynamic_table() to work.
@@ -134,20 +127,20 @@ struct LoadTable dyn_funcs [] = {
                  ADD_VALUE ("dnsapi.dll",    DnsModifyRecordsInSet_A),
 #endif
 #if defined(USE_BUGTRAP)
-                 ADD_VALUE_BT (BT_InstallSehFilter),
-                 ADD_VALUE_BT (BT_SetPreErrHandler),
-                 ADD_VALUE_BT (BT_SetAppVersion),
-                 ADD_VALUE_BT (BT_SetAppName),
-                 ADD_VALUE_BT (BT_SetReportFormat),
-                 ADD_VALUE_BT (BT_SetSupportEMail),
-                 ADD_VALUE_BT (BT_SetFlags),
-                 ADD_VALUE_BT (BT_SetLogSizeInEntries),
-                 ADD_VALUE_BT (BT_SetLogFlags),
-                 ADD_VALUE_BT (BT_SetLogEchoMode),
-                 ADD_VALUE_BT (BT_InsLogEntryF),
-                 ADD_VALUE_BT (BT_OpenLogFile),
-                 ADD_VALUE_BT (BT_CloseLogFile),
-                 ADD_VALUE_BT (BT_AddLogFile)
+                 ADD_VALUE ("BugTrap.dll", BT_InstallSehFilter),
+                 ADD_VALUE ("BugTrap.dll", BT_SetPreErrHandler),
+                 ADD_VALUE ("BugTrap.dll", BT_SetAppVersion),
+                 ADD_VALUE ("BugTrap.dll", BT_SetAppName),
+                 ADD_VALUE ("BugTrap.dll", BT_SetReportFormat),
+                 ADD_VALUE ("BugTrap.dll", BT_SetSupportEMail),
+                 ADD_VALUE ("BugTrap.dll", BT_SetFlags),
+                 ADD_VALUE ("BugTrap.dll", BT_SetLogSizeInEntries),
+                 ADD_VALUE ("BugTrap.dll", BT_SetLogFlags),
+                 ADD_VALUE ("BugTrap.dll", BT_SetLogEchoMode),
+                 ADD_VALUE ("BugTrap.dll", BT_InsLogEntryF),
+                 ADD_VALUE ("BugTrap.dll", BT_OpenLogFile),
+                 ADD_VALUE ("BugTrap.dll", BT_CloseLogFile),
+                 ADD_VALUE ("BugTrap.dll", BT_AddLogFile)
 #endif
    };
 
@@ -164,10 +157,10 @@ int load_dynamic_table (struct LoadTable *tab, int tab_size)
   {
     HINSTANCE mod_handle;
 
-    if (!_watt_use_bugtrap && !_tcsicmp(tab->mod_name,BUGTRAP_DLL))
+    if (!_watt_use_bugtrap && !stricmp(tab->mod_name,"BugTrap.dll"))
        continue;
 
-    if (i > 0 && !_tcsicmp(tab->mod_name, (tab-1)->mod_name))
+    if (i > 0 && !stricmp(tab->mod_name, (tab-1)->mod_name))
          mod_handle = (tab-1)->mod_handle;
     else mod_handle = LoadLibrary (tab->mod_name);
 
@@ -176,15 +169,15 @@ int load_dynamic_table (struct LoadTable *tab, int tab_size)
       FARPROC addr = GetProcAddress (mod_handle, tab->func_name);
 
       if (!addr)
-         CONSOLE_MSG (4, ("Function \"%s\" not found in %" TSTR2ASCII_FMT ".\n",
-                          tab->func_name, tab->mod_name));
+         TRACE_CONSOLE (4, "Function \"%s\" not found in %s.\n",
+                        tab->func_name, tab->mod_name);
       *tab->func_addr = addr;
     }
     tab->mod_handle = mod_handle;
 
-    CONSOLE_MSG (4, ("%2d: Module 0x%08lX/%" TSTR2ASCII_FMT ", func \"%s\" -> 0x%" ADDR_FMT ".\n",
-                     i, (u_long)HandleToUlong(tab->mod_handle), tab->mod_name, tab->func_name,
-                     ADDR_CAST(*tab->func_addr)));
+    TRACE_CONSOLE (4, "%2d: Module 0x%08lX/%s, func \"%s\" -> 0x%" ADDR_FMT ".\n",
+                   i, (u_long)HandleToUlong(tab->mod_handle), tab->mod_name, tab->func_name,
+                   ADDR_CAST(*tab->func_addr));
   }
   return (i);
 }
@@ -209,9 +202,9 @@ int unload_dynamic_table (struct LoadTable *tab, int tab_size)
        f_unload = 1;
     *tab->func_addr = NULL;
 
-    CONSOLE_MSG (4, ("%2d: function \"%s\" %s. Module \"%" TSTR2ASCII_FMT "\" %s.\n",
-                     i, tab->func_name, f_unload ? "freed"    : "not used",
-                     tab->mod_name,  m_unload ? "unloaded" : "not used"));
+    TRACE_CONSOLE (4, "%2d: function \"%s\" %s. Module \"%s\" %s.\n",
+                   i, tab->func_name, f_unload ? "freed"    : "not used",
+                   tab->mod_name,  m_unload ? "unloaded" : "not used");
   }
   return (i);
 }

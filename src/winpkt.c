@@ -217,8 +217,7 @@ UINT        winpkt_trace_level = 0;
     fflush (trace_file);
     if (ferror(trace_file))
     {
-      CONSOLE_MSG (1, ("error writing dump file %s; %s\n",
-                   dump_fname, strerror(errno)));
+      TRACE_CONSOLE (1, "error writing dump file %s; %s\n", dump_fname, strerror(errno));
       winpkt_trace_fclose();
     }
     LEAVE_CRIT();
@@ -458,7 +457,7 @@ int W32_CALL pkt_eth_init (mac_address *mac_addr)
     return (WERR_NO_DRIVER);
   }
 
-  CONSOLE_MSG (2, ("device %s\n", _pktdrvrname));
+  TRACE_CONSOLE (2, "device %s\n", _pktdrvrname);
 
   rc = _eth_SwsVpkt   ? open_swsvpkt_adapter   (_pktdrvrname) :
        _eth_wanpacket ? open_wanpacket_adapter (_pktdrvrname) :
@@ -551,8 +550,8 @@ int W32_CALL pkt_eth_init (mac_address *mac_addr)
     _pkt_forced_rxmode &= 0xFFFF;     /* clear bits not set via ARG_ATOX_W */
     if (_pkt_forced_rxmode == 0 || !legal_recv_mode(_pkt_forced_rxmode))
     {
-      CONSOLE_MSG (0, ("Illegal Rx-mode (0x%02X) specified. Forcing default mode (0x%02X).\n",
-                   _pkt_forced_rxmode, RXMODE_DEFAULT));
+      TRACE_CONSOLE (0, "Illegal Rx-mode (0x%02X) specified. Forcing default mode (0x%02X).\n",
+                     _pkt_forced_rxmode, RXMODE_DEFAULT);
       _pkt_forced_rxmode = RXMODE_DEFAULT;
     }
   }
@@ -580,16 +579,16 @@ int W32_CALL pkt_eth_init (mac_address *mac_addr)
     }
 
 #if defined(__CYGWIN__) && 0
-    CONSOLE_MSG (2, ("bp->bh_caplen    at ofs: %ld\n", offsetof(struct bpf_hdr, bh_caplen)));
-    CONSOLE_MSG (2, ("bp->bh_datalen   at ofs: %ld\n", offsetof(struct bpf_hdr, bh_datalen)));
-    CONSOLE_MSG (2, ("bp->bh_bh_hdrlen at ofs: %ld\n", offsetof(struct bpf_hdr, bh_hdrlen)));
+    TRACE_CONSOLE (2, "bp->bh_caplen    at ofs: %ld\n", offsetof(struct bpf_hdr, bh_caplen));
+    TRACE_CONSOLE (2, "bp->bh_datalen   at ofs: %ld\n", offsetof(struct bpf_hdr, bh_datalen));
+    TRACE_CONSOLE (2, "bp->bh_bh_hdrlen at ofs: %ld\n", offsetof(struct bpf_hdr, bh_hdrlen));
 #endif
 
     if (thr_realtime)
        SetThreadPriority (_pkt_inf->recv_thread,
                           THREAD_PRIORITY_TIME_CRITICAL);
 
-    CONSOLE_MSG (2, ("capture thread-id %lu\n", (u_long)thread_id));
+    TRACE_CONSOLE (2, "capture thread-id %lu\n", (u_long)thread_id);
   }
 
 #if defined(USE_DEBUG)
@@ -613,8 +612,7 @@ int W32_CALL pkt_release (void)
 
   adapter = (ADAPTER*) _pkt_inf->adapter;
 
-  CONSOLE_MSG (2, ("pkt_release(): adapter 0x%" ADDR_FMT "\n",
-               ADDR_CAST(adapter)));
+  TRACE_CONSOLE (2, "pkt_release(): adapter 0x%" ADDR_FMT "\n", ADDR_CAST(adapter));
 
   if (adapter && adapter != INVALID_HANDLE_VALUE)
   {
@@ -629,9 +627,8 @@ int W32_CALL pkt_release (void)
 
       GetExitCodeThread (_pkt_inf->recv_thread, &status);
       if (status == STILL_ACTIVE)
-           CONSOLE_MSG (2, ("pkt_release(): killing thread.\n"));
-      else CONSOLE_MSG (2, ("pkt_release(): thread exit code %lu.\n",
-                            (u_long)status));
+           TRACE_CONSOLE (2, "pkt_release(): killing thread.\n");
+      else TRACE_CONSOLE (2, "pkt_release(): thread exit code %lu.\n", (u_long)status);
 
       if (debug_on >= 2)
       {
@@ -674,8 +671,7 @@ int W32_CALL pkt_get_addr (mac_address *eth)
     memcpy (eth, &mac, sizeof(*eth));
     return (1);
   }
-  CONSOLE_MSG (2, ("Failed to get our MAC address; %s\n",
-               win_strerror(GetLastError())));
+  TRACE_CONSOLE (2, "Failed to get our MAC address; %s\n", win_strerror(GetLastError()));
   return (0);
 }
 
@@ -748,8 +744,7 @@ void W32_CALL pkt_free_pkt (const void *pkt)
   delta  = q_tail - pktq_out_buf (q);
   if (delta)
   {
-    CONSOLE_MSG (0, ("%s: freeing illegal packet 0x%p, delta %d.\n",
-                     __FILE__, pkt, delta));
+    TRACE_CONSOLE (0, "%s: freeing illegal packet 0x%p, delta %d.\n", __FILE__, pkt, delta);
     pktq_clear (q);
   }
   else
@@ -827,10 +822,10 @@ static DWORD __stdcall winpcap_recv_thread (void *arg)
       cap_len = bp->bh_caplen;
       hdr_len = bp->bh_hdrlen;
 
-      CONSOLE_MSG (2, ("winpcap_recv_thread(): total_len %d, "
-                       "chunk %d, cap_len %d, hdr_len %d, in-idx %d\n",
-                       total_len, chunk, (int)cap_len, (int)hdr_len,
-                       q->in_index));
+      TRACE_CONSOLE (2, "winpcap_recv_thread(): total_len %d, "
+                        "chunk %d, cap_len %d, hdr_len %d, in-idx %d\n",
+                     total_len, chunk, (int)cap_len, (int)hdr_len,
+                     q->in_index);
 
       num_rx_bytes += total_len - sizeof(*bp);
       num_rx_pkt++;
@@ -868,7 +863,7 @@ static DWORD __stdcall winpcap_recv_thread (void *arg)
     LEAVE_CRIT();
   }
 
-  CONSOLE_MSG (2, ("winpcap_recv_thread(): rc %d\n", rc));
+  TRACE_CONSOLE (2, "winpcap_recv_thread(): rc %d\n", rc);
   fflush (stdout);
   ARGSUSED (arg);
   thr_stopped = TRUE;
@@ -887,7 +882,7 @@ static void swsvpkt_callback (struct SwsVpktUsr *usr, const void *buf, unsigned 
 
   ENTER_CRIT();
 
-  CONSOLE_MSG (2, ("swsvpkt_callback(): len %d, in-idx %d\n", len, q->in_index));
+  TRACE_CONSOLE (2, "swsvpkt_callback(): len %d, in-idx %d\n", len, q->in_index);
 
   if (len > ETH_MAX)
   {
@@ -897,7 +892,7 @@ static void swsvpkt_callback (struct SwsVpktUsr *usr, const void *buf, unsigned 
   else if (pktq_in_index(q) == q->out_index)  /* queue is full, drop it */
   {
     q->num_drop++;
-    CONSOLE_MSG (2, ("swsvpkt_callback(): num_drop %lu\n", (u_long)q->num_drop));
+    TRACE_CONSOLE (2, "swsvpkt_callback(): num_drop %lu\n", (u_long)q->num_drop);
   }
   else
   {
@@ -940,7 +935,7 @@ struct pkt_rx_element *pkt_poll_recv (void)
     GetExitCodeThread (_pkt_inf->recv_thread, &status);
     if (status != STILL_ACTIVE && !thr_stopped)
     {
-      CONSOLE_MSG (2, ("winpcap_recv_thread() is dead. status: %lXh\n", status));
+      TRACE_CONSOLE (2, "winpcap_recv_thread() is dead. status: %lXh\n", status);
       _pkt_inf->thread_stopped = 1;
       Sleep (100);
     }
@@ -1036,8 +1031,8 @@ int W32_CALL pkt_set_rcv_mode (int mode)
        _pkt_rxmode = mode;
   else _pkt_errno = GetLastError();
 
-  CONSOLE_MSG (2, ("pkt_set_rcv_mode(); mode 0x%02X, rc %d; %s\n",
-               mode, rc, !rc ? win_strerror(GetLastError()) : "okay"));
+  TRACE_CONSOLE (2, "pkt_set_rcv_mode(); mode 0x%02X, rc %d; %s\n",
+                 mode, rc, !rc ? win_strerror(GetLastError()) : "okay");
   return (rc);
 }
 
@@ -1414,8 +1409,8 @@ static BOOL ndis_set_loopback (BOOL enable)
   rc = PacketRequest (adapter, FALSE, &oid.oidData);
   options = *(DWORD*) &oid.oidData.Data;
 
- CONSOLE_MSG (2, ("ndis_set_loopback(); rc %d, options 0x%02lX; %s\n",
-              rc, options, !rc ? win_strerror(GetLastError()) : "okay"));
+ TRACE_CONSOLE (2, "ndis_set_loopback(); rc %d, options 0x%02lX; %s\n",
+                rc, options, !rc ? win_strerror(GetLastError()) : "okay");
   if (enable)
        options &= ~opt_bit;
   else options |= opt_bit;
@@ -1428,8 +1423,8 @@ static BOOL ndis_set_loopback (BOOL enable)
   *(DWORD*) &oid.oidData.Data = options;
   rc = PacketRequest (adapter, TRUE, &oid.oidData);
 
- CONSOLE_MSG (2, ("ndis_set_loopback(); rc %d; %s\n",
-              rc, !rc ? win_strerror(GetLastError()) : "okay"));
+  TRACE_CONSOLE (2, "ndis_set_loopback(); rc %d; %s\n",
+                 rc, !rc ? win_strerror(GetLastError()) : "okay");
   return (rc);
 }
 #endif /* NOT_USED */

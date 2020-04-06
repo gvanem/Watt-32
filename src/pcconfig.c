@@ -213,14 +213,14 @@ void _add_server (WORD *counter, DWORD *array, int array_dim, DWORD value)
         if (array[i] == value)
         {
           duplicate = 1;
-          CONSOLE_MSG (3, ("value %lu duplicated in array %p\n", (u_long)value, array));
+          TRACE_CONSOLE (3, "value %lu duplicated in array %p\n", (u_long)value, array);
         }
 
     if (!duplicate)
        array [(*counter)++] = value;
   }
   if (*counter >= array_dim)
-     CONSOLE_MSG (1, ("array %p to small\n", array));
+     TRACE_CONSOLE (1, "array %p to small\n", array);
 }
 
 /**
@@ -486,8 +486,8 @@ int W32_CALL parse_config_table (const struct config_table *tab,
            break;
     }
 
-    CONSOLE_MSG (3, ("ARG_%s, matched `%s' = `%s'\n",
-                     type_name(tab->type), keyword, value));
+    TRACE_CONSOLE (3, "ARG_%s, matched `%s' = `%s'\n",
+                   type_name(tab->type), keyword, value);
     return (1);
   }
   return (0);
@@ -1261,7 +1261,7 @@ long W32_CALL tcp_config (const char *path)
   current_file = name;
   current_line = 0;
 
-  CONSOLE_MSG (2, ("Parsing `%s' (pass %d)\n", fname, pass));
+  TRACE_CONSOLE (2, "Parsing `%s' (pass %d)\n", fname, pass);
 
   len = tcp_parse_file (file, watt_init_cfg);
 

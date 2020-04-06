@@ -56,8 +56,8 @@ int startup_add (_VoidProc func, const char *name, int order,
 
     if (start_list[i].order == order)
     {
-      CONSOLE_MSG (0, ("%s(%u): startup_add (\"%s\",%d): order already "
-                       "in start_list[]\n", file, line, name, order));
+      TRACE_CONSOLE (0, "%s(%u): startup_add (\"%s\",%d): order already "
+                        "in start_list[]\n", file, line, name, order);
       return (-1);
     }
   }
@@ -101,8 +101,8 @@ int rundown_add (_VoidProc func, const char *name, int order,
 
     if (exit_list[i].order == order)
     {
-      CONSOLE_MSG (0, ("%s(%u): rundown_add (\"%s\",%d): order already "
-                       "in exit_list[]\n", file, line, name, order));
+      TRACE_CONSOLE (0, "%s(%u): rundown_add (\"%s\",%d): order already "
+                        "in exit_list[]\n", file, line, name, order);
       return (-1);
     }
   }
@@ -142,8 +142,8 @@ void rundown_run (void)
     if (!oe->func)
        continue;
 
-    CONSOLE_MSG (3, ("Calling rundown-func `%s' at order %d\n",
-                     oe->name, oe->order));
+    TRACE_CONSOLE (3, "Calling rundown-func `%s' at order %d\n",
+                   oe->name, oe->order);
      func = oe->func;
      oe->func = NULL;    /* don't call it again */
      (*func)();
@@ -164,11 +164,11 @@ void rundown_dump (void)
   {
     if (!oe->func)
        continue;
-    CONSOLE_MSG (0, ("  order %3d: `%s'  called from %s (%u)\n",
-                  oe->order, oe->name, oe->file, oe->line));
+    TRACE_CONSOLE (0, "  order %3d: `%s'  called from %s (%u)\n",
+                   oe->order, oe->name, oe->file, oe->line);
     num_active++;
   }
-  CONSOLE_MSG (0, ("  %s\n", num_active == i ? "possible overflow" : "okay"));
+  TRACE_CONSOLE (0, "  %s\n", num_active == i ? "possible overflow" : "okay");
 }
 #endif
 
@@ -201,7 +201,7 @@ int daemon_add (_VoidProc func, const char *name,
   for (i = 0, r = daemon_list; i < DIM(daemon_list); i++, r++)
       if (r->func && r->func == func)
       {
-        CONSOLE_MSG (3, ("\ndaemon_add(): daemon exists\n"));
+        TRACE_CONSOLE (3, "\ndaemon_add(): daemon exists\n");
         return (1);     /* operation can proceed normally */
       }
 
@@ -266,8 +266,8 @@ int daemon_run (void)
         if (r->func && !r->running)
         {
           if (r->name)
-               CONSOLE_MSG (3, ("Running daemon %d (%s)\n", i, r->name));
-          else CONSOLE_MSG (3, ("Running daemon %d (%p)\n", i, r->func));
+               TRACE_CONSOLE (3, "Running daemon %d (%s)\n", i, r->name);
+          else TRACE_CONSOLE (3, "Running daemon %d (%p)\n", i, r->func);
           r->running = TRUE;
           (*r->func)();
           r->running = FALSE;

@@ -438,7 +438,7 @@ static const wchar_t *ascii_string (const char *in_str, UINT cp)
   buf[0] = '\0';
   if (MultiByteToWideChar(cp, 0, in_str, -1, buf, DIM(buf)) == 0)
   {
-    CONSOLE_MSG (2, ("MultiByteToWideChar() failed: %s", win_strerror(GetLastError())));
+    TRACE_CONSOLE (2, "MultiByteToWideChar() failed: %s", win_strerror(GetLastError()));
     return (L"??");
   }
   return (buf);

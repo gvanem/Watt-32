@@ -426,7 +426,7 @@ debug_tx:
     {
       const char err[] = "** Transmit fault **\n";
 
-      TCP_CONSOLE_MSG (1, (err));
+      TRACE_CONSOLE (1, err);
       dbug_printf (err);
     }
   }

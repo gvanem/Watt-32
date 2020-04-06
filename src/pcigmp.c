@@ -127,8 +127,7 @@ int W32_CALL join_mcast_group (DWORD ip)
    */
   if (!_ip4_is_multicast(ip))
   {
-    TCP_CONSOLE_MSG (1, ("%s isn't a multicast address\n",
-                     _inet_ntoa(NULL,ip)));
+    TRACE_CONSOLE (1, "%s isn't a multicast address\n", _inet_ntoa(NULL,ip));
     return (0);
   }
 
@@ -191,8 +190,7 @@ int W32_CALL leave_mcast_group (DWORD ip)
    */
   if (!_ip4_is_multicast(ip))
   {
-    TCP_CONSOLE_MSG (1, ("%s isn't a multicast address\n",
-                     _inet_ntoa(NULL,ip)));
+    TRACE_CONSOLE (1, "%s isn't a multicast address\n", _inet_ntoa(NULL,ip));
     return (0);
   }
 

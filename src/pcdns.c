@@ -953,7 +953,7 @@ int W32_CALL resolve_ip6 (const char *name, void *addr)
   if (!dns_do_ipv6)
   {
     dom_errno = DNS_CLI_NOIPV6;
-    TCP_CONSOLE_MSG (1, ("%s\n", dom_strerror(dom_errno)));
+    TRACE_CONSOLE (1, "%s\n", dom_strerror(dom_errno));
     return (0);
   }
 
@@ -961,7 +961,7 @@ int W32_CALL resolve_ip6 (const char *name, void *addr)
   if (len >= sizeof(namebuf)-1)
   {
     dom_errno = DNS_CLI_TOOBIG;
-    TCP_CONSOLE_MSG (1, ("%s\n", dom_strerror(dom_errno)));
+    TRACE_CONSOLE (1, "%s\n", dom_strerror(dom_errno));
     return (0);
   }
 

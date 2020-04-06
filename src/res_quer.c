@@ -309,7 +309,7 @@ int W32_CALL res_search (const char *name, int Class, int type,
   if (done || h_errno == 0)
      return (1);
 
-  TCP_CONSOLE_MSG (1, ("res_search() / h_errno = %d\n", h_errno));
+  TRACE_CONSOLE (1, "res_search() / h_errno = %d\n", h_errno);
   RDBG (-1);
   return (-1);
 }
