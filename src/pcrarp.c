@@ -19,7 +19,6 @@
 #include "misc.h"
 #include "misc_str.h"
 #include "timer.h"
-#include "rs232.h"
 #include "pcsed.h"
 #include "pctcp.h"
 #include "pcdbug.h"
@@ -51,8 +50,6 @@ static int _rarp_request (void)
  */
 BOOL _rarp_handler (const rarp_Header *rh, BOOL brdcast)
 {
-  SIO_TRACE (("_rarp_handler"));
-
   DEBUG_RX (NULL, rh);
 
   if (!brdcast && rh->opcode == RARP_REPLY && rh->protType == IP4_TYPE &&

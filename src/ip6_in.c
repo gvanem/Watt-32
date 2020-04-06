@@ -43,7 +43,6 @@
 #include "misc.h"
 #include "misc_str.h"
 #include "chksum.h"
-#include "rs232.h"
 #include "language.h"
 #include "sock_ini.h"
 #include "split.h"
@@ -70,8 +69,6 @@
 int _ip6_handler (const in6_Header *ip, BOOL broadcast)
 {
   const struct pkt_split *ps;
-
-  SIO_TRACE (("_ip6_handler"));
 
   if (block_ip)
      return (0);

@@ -15,7 +15,6 @@
 #include "misc.h"
 #include "misc_str.h"
 #include "chksum.h"
-#include "rs232.h"
 #include "pcconfig.h"
 #include "pcigmp.h"
 #include "pcdbug.h"
@@ -40,8 +39,6 @@ int _ip4_handler (const in_Header *ip, BOOL broadcast)
   DWORD  frag_ofs;
   WORD   frag_flg;
   BOOL   delivered = TRUE;   /* assume yes */
-
-  SIO_TRACE (("_ip4_handler"));
 
   if (block_ip || !_chk_ip4_header(ip))
      return (0);

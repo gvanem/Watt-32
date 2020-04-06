@@ -20,15 +20,15 @@
 
 #elif defined(_MSC_VER) && defined(_M_IX86)
   #define TEST_UNDEF_OPCODE
+
+#elif defined(__WATCOMC__) && defined(__386__)
+//#define INVD_CACHE
+  #define TEST_UNDEF_OPCODE
 #endif
 
-#include "wattcp.h"
-#include "misc.h"
-#include "timer.h"
-#include "sock_ini.h"
+#include "sysdep.h"
 #include "gettod.h"
 #include "cpumodel.h"
-#include "sysdep.h"
 
 uint64 start64;
 long   loops     = 20000;
@@ -101,8 +101,7 @@ GCC_INLINE unsigned long cdecl naked_cdecl_one (unsigned long x)
   return (x);
 }
 
-#define __fastcall __attribute__((__fastcall__))
-GCC_INLINE unsigned long __fastcall naked_fastcall_one (unsigned long x)
+GCC_INLINE unsigned long GCC_FASTCALL naked_fastcall_one (unsigned long x)
 {
   __asm__ __volatile (
            "xchgb %b0, %h0\n\t"
@@ -118,8 +117,7 @@ GCC_INLINE unsigned long cdecl naked_cdecl_one (unsigned long x)
   return ntohl (x);
 }
 
-#define __fastcall __attribute__((__fastcall__))
-GCC_INLINE unsigned long __fastcall naked_fastcall_one (unsigned long x)
+GCC_INLINE unsigned long GCC_FASTCALL naked_fastcall_one (unsigned long x)
 {
   return ntohl (x);
 }
@@ -149,7 +147,7 @@ static W32_INLINE unsigned long cdecl naked_fastcall_one (unsigned long x)
 
 int simple_cdecl_ntohl (const void *buf, size_t max)
 {
-  unsigned long *val = (unsigned long*)buf;
+  unsigned long *val = (unsigned long*) buf;
   size_t   i;
 
   for (i = 0; i < max; i++)
@@ -159,7 +157,7 @@ int simple_cdecl_ntohl (const void *buf, size_t max)
 
 int naked_cdecl_ntohl (const void *buf, size_t max)
 {
-  unsigned long *val = (unsigned long*)buf;
+  unsigned long *val = (unsigned long*) buf;
   size_t   i;
 
   for (i = 0; i < max; i++)
@@ -169,7 +167,7 @@ int naked_cdecl_ntohl (const void *buf, size_t max)
 
 int naked_fastcall_ntohl (const void *buf, size_t max)
 {
-  unsigned long *val = (unsigned long*)buf;
+  unsigned long *val = (unsigned long*) buf;
   size_t   i;
 
   for (i = 0; i < max; i++)
@@ -180,22 +178,24 @@ int naked_fastcall_ntohl (const void *buf, size_t max)
 int intrin_byteswap (const void *buf, size_t max)
 {
 #if defined(_MSC_VER)
-  unsigned long *val = (unsigned long*)buf;
+  unsigned long *val = (unsigned long*) buf;
   size_t   i;
 
   for (i = 0; i < max; i++)
       _byteswap_ulong (*val++);
   return (1);
+
 #elif defined(__MINGW32__) || defined(__CYGWIN__)
-  unsigned long *val = (unsigned long*)buf;
+  unsigned long *val = (unsigned long*) buf;
   size_t   i;
 
   for (i = 0; i < max; i++)
       __bswapd (*val++);
   return (1);
-#else
-  (void)buf; (void)max;
 
+#else
+  (void)buf;
+  (void)max;
   printf ("%s() not available for %s.", __FUNCTION__, wattcpBuildCC());
   return (0);
 #endif

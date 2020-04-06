@@ -34,7 +34,6 @@
 #include "powerpak.h"
 #include "wdpmi.h"
 #include "x32vm.h"
-#include "rs232.h"
 #include "misc.h"
 #include "misc_str.h"
 #include "run.h"
@@ -166,7 +165,6 @@ void init_timers (void)
  */
 void W32_CALL init_userSuppliedTimerTick (void)
 {
-  SIO_TRACE (("init_userSuppliedTimerTick"));
   user_tick_active = TRUE;
   user_tick_base = time (NULL);
 #ifdef __MSDOS__
@@ -377,7 +375,6 @@ int hires_timer (int on)
 {
   int old = has_8254;
 
-  SIO_TRACE (("hires_timer %s", on ? "on" : "off"));
   has_8254 = on;
   chk_timeout (0UL);
   return (old);

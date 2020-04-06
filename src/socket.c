@@ -2156,8 +2156,6 @@ int _TCP6_open (Socket *socket, const void *dst, WORD loc_port, WORD rem_port)
   _tcp_Socket *tcp = socket->tcp_sock;
   UINT         rtt;
 
-  SIO_TRACE (("_TCP6_open"));
-
   WATT_LARGE_CHECK (tcp, sizeof(*tcp));
   _tcp_unthread (tcp, FALSE);    /* just in case not totally closed */
 

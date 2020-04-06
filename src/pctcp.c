@@ -41,7 +41,6 @@
 #include "misc_str.h"
 #include "run.h"
 #include "timer.h"
-#include "rs232.h"
 #include "split.h"
 #include "pppoe.h"
 #include "pctcp.h"
@@ -159,8 +158,6 @@ static void (W32_CALL *system_yield)(void) = NULL;
 int W32_CALL udp_listen (_udp_Socket *s, WORD lport, DWORD ip,
                          WORD port, ProtoHandler handler)
 {
-  SIO_TRACE (("udp_listen"));
-
   udp_close (s);
   WATT_LARGE_CHECK (s, sizeof(*s));
   memset (s, 0, sizeof(*s));
@@ -195,8 +192,6 @@ int W32_CALL udp_open (_udp_Socket *s, WORD lport, DWORD ip,
                        WORD port, ProtoHandler handler)
 {
   BOOL bcast;
-
-  SIO_TRACE (("udp_open"));
 
   udp_close (s);
   WATT_LARGE_CHECK (s, sizeof(*s));
@@ -268,8 +263,6 @@ static void udp_close (const _udp_Socket *udp)
 {
   _udp_Socket *s, *prev;
 
-  SIO_TRACE (("udp_close"));
-
   for (s = prev = _udp_allsocs; s; prev = s, s = s->next)
   {
     if (udp != s)
@@ -310,8 +303,6 @@ int W32_CALL udp_SetTTL (_udp_Socket *s, BYTE ttl)
 int W32_CALL tcp_open (_tcp_Socket *s, WORD lport, DWORD ip,
                        WORD rport, ProtoHandler handler)
 {
-  SIO_TRACE (("tcp_open"));
-
   WATT_LARGE_CHECK (s, sizeof(*s));
   _tcp_unthread (s, FALSE);    /* just in case not totally closed */
 
@@ -391,8 +382,6 @@ int W32_CALL tcp_open (_tcp_Socket *s, WORD lport, DWORD ip,
 int W32_CALL tcp_listen (_tcp_Socket *s, WORD lport, DWORD ip,
                          WORD port, ProtoHandler handler, WORD timeout)
 {
-  SIO_TRACE (("tcp_listen"));
-
   WATT_LARGE_CHECK (s, sizeof(*s));
   _tcp_unthread (s, FALSE);     /* just in case not totally closed */
   memset (s, 0, sizeof(*s));
@@ -456,13 +445,8 @@ int W32_CALL tcp_listen (_tcp_Socket *s, WORD lport, DWORD ip,
  */
 void _tcp_close (_tcp_Socket *s)
 {
-  SIO_TRACE (("_tcp_close"));
-
   if (s->ip_type != TCP_PROTO)
-  {
-    SIO_TRACE (("_tcp_close~0"));
-    return;
-  }
+     return;
 
   if (s->state == tcp_StateESTAB ||
       s->state == tcp_StateESTCL ||
@@ -505,7 +489,6 @@ void _tcp_close (_tcp_Socket *s)
     maybe_reuse_localport (s);
     _tcp_unthread (s, FALSE);
   }
-  SIO_TRACE (("_tcp_close~"));
 }
 
 /**
@@ -513,8 +496,6 @@ void _tcp_close (_tcp_Socket *s)
  */
 _tcp_Socket *_tcp_abort (_tcp_Socket *s, const char *file, unsigned line)
 {
-  SIO_TRACE (("_tcp_abort"));
-
   SET_ERR_MSG (s, _LANG("TCP Abort"));
 
   TCP_TRACE_MSG (("_tcp_abort(%" ADDR_FMT ") called from %s (%u). State %s\n",
@@ -558,8 +539,6 @@ int _tcp_sendsoon (_tcp_Socket *s, const char *file, unsigned line)
 {
   DWORD timeout;
 
-  SIO_TRACE (("_tcp_sendsoon"));
-
   if (s->ip_type != TCP_PROTO)
      return (0);
 
@@ -599,8 +578,6 @@ _tcp_Socket *_tcp_unthread (_tcp_Socket *ds, BOOL free_tx)
 {
   _tcp_Socket *s, *prev;
   _tcp_Socket *next = NULL;
-
-  SIO_TRACE (("_tcp_unthread"));
 
   if (ds == NULL)
      return (NULL);
@@ -660,8 +637,6 @@ _tcp_Socket *_tcp_handler (const in_Header *ip, BOOL broadcast)
   DWORD        seq;
   WORD         dstPort, srcPort;
   BOOL         is_ip4 = (ip->ver == 4);
-
-  SIO_TRACE (("_tcp_handler"));
 
   if (is_ip4)
   {
@@ -1057,8 +1032,6 @@ _udp_Socket *_udp_handler (const in_Header *ip, BOOL broadcast)
   const BYTE       *data;
   const udp_Header *udp = NULL;
 
-  TCP_TRACE_MSG (("_udp_handler\n"));
-
   if (is_ip4)
   {
     destin   = intel (ip->destination);
@@ -1227,8 +1200,6 @@ void tcp_Retransmitter (BOOL force)
   _tcp_Socket *s, *next;
 
   static DWORD timeout = 0UL;
-
-  SIO_TRACE (("tcp_Retransmitter"));
 
   /* do this once per tcp_RETRAN_TIME
    */
@@ -1413,8 +1384,6 @@ WORD W32_CALL tcp_tick (sock_type *s)
   }
   tick_active++;
 
-  SIO_TRACE (("tcp_tick"));
-
 #if !defined(USE_UDP_ONLY)
   /*
    * Finish off dead sockets
@@ -1517,8 +1486,6 @@ static int udp_write (_udp_Socket *s, const BYTE *data, int len)
   in_Header   *ip4 = NULL;
   udp_Header  *udp;
 
-  SIO_TRACE (("udp_write"));
-
 #if defined(USE_IPV6)
   if (s->is_ip6)
   {
@@ -1588,8 +1555,6 @@ static int udp_read (_udp_Socket *s, BYTE *buf, int maxlen)
 {
   int len = s->rx_datalen;
 
-  SIO_TRACE (("udp_read"));
-
   if (maxlen < 0)
       maxlen = INT_MAX;
 
@@ -1648,8 +1613,6 @@ void _udp_cancel (const in_Header *ip, int icmp_type, int icmp_code,
   int          len     = in_GetHdrLen (ip);
   udp_Header  *udp     = (udp_Header*) ((BYTE*)ip + len);
   _udp_Socket *s;
-
-  SIO_TRACE (("_udp_cancel"));
 
   src_port = intel16 (udp->srcPort);
   dst_port = intel16 (udp->dstPort);
@@ -1758,8 +1721,6 @@ void _tcp_cancel (const in_Header *ip, int icmp_type, int icmp_code,
   WORD   src_port = intel16 (tcp->srcPort);
   WORD   dst_port = intel16 (tcp->dstPort);
 
-  SIO_TRACE (("_tcp_cancel"));
-
   /* demux to active sockets (passive cannot get ICMP)
    */
   for (s = _tcp_allsocs; s; s = s->next)
@@ -1845,8 +1806,6 @@ static int tcp_read (_tcp_Socket *s, BYTE *buf, int maxlen)
 {
   int len;
 
-  SIO_TRACE (("tcp_read"));
-
   if (maxlen < 0)
       maxlen = INT_MAX;
 
@@ -1892,8 +1851,6 @@ static int tcp_read (_tcp_Socket *s, BYTE *buf, int maxlen)
 static int tcp_write (_tcp_Socket *s, const BYTE *data, UINT len)
 {
   UINT room;
-
-  SIO_TRACE (("tcp_write"));
 
   if (s->state != tcp_StateESTAB)
      return (0);
@@ -1953,8 +1910,6 @@ static _tcp_Socket *tcp_findseq (const in_Header *ip, const tcp_Header *tcp)
   DWORD        ack_num  = intel (tcp->acknum);
   WORD         dst_port = intel16 (tcp->dstPort);
 
-  SIO_TRACE (("tcp_findseq"));
-
   for (s = _tcp_allsocs; s; s = s->next)
   {
     if (s->hisport != 0       &&
@@ -1973,8 +1928,6 @@ static void tcp_sockreset (_tcp_Socket *s, BOOL proxy)
 {
   const char *str = proxy ? "Proxy reset connection"
                           : "Remote reset connection";
-
-  SIO_TRACE (("tcp_sockreset"));
 
   if (debug_on)
      outsnl (_LANG(str));
@@ -2027,8 +1980,6 @@ static void tcp_sockreset (_tcp_Socket *s, BOOL proxy)
  */
 static void tcp_no_arp (_tcp_Socket *s)
 {
-  SIO_TRACE (("tcp_no_arp"));
-
   s->err_msg = _LANG ("No ARP reply");
   STAT (ip4stats.ips_noroute++);
 
@@ -2054,8 +2005,6 @@ static BOOL tcp_checksum (const in_Header *ip, const tcp_Header *tcp, int len)
 {
   tcp_PseudoHeader ph = { 0,0,0,0,0,0 };
 
-  SIO_TRACE (("tcp_checksum"));
-
   ph.src      = ip->source;
   ph.dst      = ip->destination;
   ph.protocol = TCP_PROTO;
@@ -2079,8 +2028,6 @@ static BOOL tcp_checksum (const in_Header *ip, const tcp_Header *tcp, int len)
 static void tcp_rtt_win (_tcp_Socket *s)
 {
   DWORD timeout;
-
-  SIO_TRACE (("tcp_rtt_win"));
 
   /* update our retransmission stuff (Karn algorithm)
    */
@@ -2174,8 +2121,6 @@ static void tcp_rtt_win (_tcp_Socket *s)
 static void tcp_upd_win (_tcp_Socket *s, unsigned line)
 {
   UINT winfree = s->max_rx_data - (UINT)s->rx_datalen;
-
-  SIO_TRACE (("tcp_upd_win"));
 
   if (winfree < s->max_seg/2)
   {
@@ -2374,8 +2319,6 @@ int _tcp_send (_tcp_Socket *s, const char *file, unsigned line)
   int          opt_len;          /* total length of TCP options */
   int          pkt_num;          /* 0 .. s->cwindow-1 */
   int          rtt;
-
-  SIO_TRACE (("_tcp_send"));
 
   s->recent = 0;
   dst = (_pktserial ? NULL : &s->his_ethaddr);
@@ -2721,8 +2664,6 @@ int _tcp_keepalive (_tcp_Socket *tcp)
   BYTE  kc;
   int   rc;
 
-  SIO_TRACE (("_tcp_keepalive"));
-
   if (tcp->ip_type != TCP_PROTO || tcp->state < tcp_StateSYNSENT ||
       tcp->tx_datalen > 0)
      return (0);
@@ -2842,8 +2783,6 @@ VoidProc W32_CALL sock_yield (_tcp_Socket *s, VoidProc func)
  */
 int W32_CALL sock_abort (sock_type *s)
 {
-  SIO_TRACE (("sock_abort"));
-
   switch (s->tcp.ip_type)
   {
 #if !defined(USE_UDP_ONLY)
@@ -2870,8 +2809,6 @@ static int raw_read (_raw_Socket *raw, BYTE *buf, int maxlen)
 {
   int len = 0;
 
-  SIO_TRACE (("raw_read"));
-
   if (raw->used)
   {
     int   hlen = in_GetHdrLen (&raw->ip);
@@ -2895,8 +2832,6 @@ static int raw_read (_raw_Socket *raw, BYTE *buf, int maxlen)
 int W32_CALL sock_read (sock_type *s, BYTE *buf, size_t maxlen)
 {
   int count = 0;
-
-  SIO_TRACE (("sock_read"));
 
   do
   {
@@ -2950,8 +2885,6 @@ int W32_CALL sock_read (sock_type *s, BYTE *buf, size_t maxlen)
  */
 int W32_CALL sock_fastread (sock_type *s, BYTE *buf, int len)
 {
-  SIO_TRACE (("sock_fastread"));
-
   if (s->udp.ip_type == UDP_PROTO)
      return udp_read (&s->udp, buf, len);
 
@@ -2982,8 +2915,6 @@ int W32_CALL sock_write (sock_type *s, const BYTE *data, int len)
   size_t chunk;
   size_t remain  = len;
   int    written = 0;
-
-  SIO_TRACE (("sock_write"));
 
   while (remain > 0)
   {
@@ -3037,8 +2968,6 @@ int W32_CALL sock_write (sock_type *s, const BYTE *data, int len)
  */
 int W32_CALL sock_fastwrite (sock_type *s, const BYTE *data, int len)
 {
-  SIO_TRACE (("sock_fastwrite"));
-
   switch (s->udp.ip_type)
   {
     case UDP_PROTO:
@@ -3063,8 +2992,6 @@ int W32_CALL sock_fastwrite (sock_type *s, const BYTE *data, int len)
  */
 int W32_CALL sock_enqueue (sock_type *s, const BYTE *data, int len)
 {
-  SIO_TRACE (("sock_enqueue"));
-
   if (len <= 0)
      return (0);
 
@@ -3107,8 +3034,6 @@ int W32_CALL sock_enqueue (sock_type *s, const BYTE *data, int len)
  */
 void W32_CALL sock_noflush (sock_type *s)
 {
-  SIO_TRACE (("sock_noflush"));
-
   if (s->tcp.ip_type == TCP_PROTO)
   {
     s->tcp.flags &= ~tcp_FlagPUSH;
@@ -3122,8 +3047,6 @@ void W32_CALL sock_noflush (sock_type *s)
  */
 void W32_CALL sock_flush (sock_type *s)
 {
-  SIO_TRACE (("sock_flush"));
-
   if (s->tcp.ip_type == TCP_PROTO)
   {
     _tcp_Socket *tcp = &s->tcp;
@@ -3143,8 +3066,6 @@ void W32_CALL sock_flush (sock_type *s)
  */
 void W32_CALL sock_flushnext (sock_type *s)
 {
-  SIO_TRACE (("sock_flushnext"));
-
   if (s->tcp.ip_type == TCP_PROTO)
   {
     s->tcp.flags |= tcp_FlagPUSH;
@@ -3158,8 +3079,6 @@ void W32_CALL sock_flushnext (sock_type *s)
  */
 int W32_CALL sock_close (sock_type *s)
 {
-  SIO_TRACE (("sock_close"));
-
   switch (s->tcp.ip_type)
   {
     case UDP_PROTO:
@@ -3197,8 +3116,6 @@ void tcp_rtt_add (const _tcp_Socket *s, UINT rto, UINT MTU)
   struct tcp_rtt *rtt;
   DWORD  addr = s->hisaddr;
 
-  SIO_TRACE (("tcp_rtt_add"));
-
   if (~addr & ~sin_mask)  /* 0.0.0.0 or broadcast addresses? */
      return;
 
@@ -3219,8 +3136,6 @@ void tcp_rtt_add (const _tcp_Socket *s, UINT rto, UINT MTU)
 BOOL tcp_rtt_get (const _tcp_Socket *s, UINT *rto, UINT *MTU)
 {
   struct tcp_rtt *rtt = &rtt_cache [(s->hisaddr & 0xFFFF) % RTTCACHE];
-
-  SIO_TRACE (("tcp_rtt_get"));
 
   STAT (tcpstats.tcps_segstimed++);
 

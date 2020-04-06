@@ -165,7 +165,8 @@
   #endif
 #endif   /* __WATCOMC__ */
 
-#define GCC_INLINE extern __inline__ __attribute__ ((__gnu_inline__))
+#define GCC_INLINE    extern __inline__ __attribute__ ((__gnu_inline__))
+#define GCC_FASTCALL  __attribute__((__fastcall__))
 
 #if defined(__GNUC__) && defined(__i386__) && !defined(__NO_INLINE__)  /* -O0 */
   GCC_INLINE uint64 _get_rdtsc (void)
@@ -319,7 +320,7 @@
   static int     do_invd = -1;
   static jmp_buf sig_jmp;
 
-  static void __watcall sigill_handler (int sig)
+  static void sigill_handler (int sig)
   {
  /* printf ("SIGILL caught"); */
     do_invd = 0;
@@ -329,7 +330,7 @@
 
   static void check_invd (void)
   {
-    void (__watcall *old)(int);
+    void (*old)(int);
 
     if (do_invd == 0)
        return;

@@ -29,7 +29,6 @@
 #include "run.h"
 #include "timer.h"
 #include "profile.h"
-#include "rs232.h"
 #include "split.h"
 #include "ip4_in.h"
 #include "ip6_in.h"
@@ -135,8 +134,6 @@ static void W32_CALL __eth_release (void);
  */
 void * W32_CALL _eth_formatpacket (const void *mac_dest, WORD eth_type)
 {
-  SIO_TRACE (("_eth_formatpacket, type %04X", eth_type));
-
   nw_pkt = (*mac_tx_format) (TX_BUF(), mac_dest, eth_type);
   return (nw_pkt);
 }
@@ -157,8 +154,6 @@ static int send_loopback (link_Packet pkt, BOOL is_ip6, unsigned *err_line)
   struct pkt_ringbuf *q;
   const  in_Header   *ip;
   int    ip_len;
-
-  SIO_TRACE (("send_loopback"));
 
   if (!_pkt_inf)
   {
@@ -311,8 +306,6 @@ int W32_CALL _eth_send (WORD len, const void *sock, const char *file, unsigned l
 #endif
   BOOL send_loopback_to_driver = FALSE;
 
-  SIO_TRACE (("_eth_send, len %d", len));
-
   if (!_eth_is_init)  /* GvB 2002-09, Lets us run without a working eth */
   {
     SOCK_ERRNO (ENETDOWN);
@@ -457,8 +450,6 @@ static void *eth_mac_format (void *mac_buf, const void *mac_dest, WORD type)
 {
   union link_Packet *buf = (union link_Packet*) mac_buf;
 
-  SIO_TRACE (("eth_mac_format"));
-
   proto = type;      /* remember protocol for _eth_send() */
 
   /* Clear any remains of an old small packet.
@@ -487,8 +478,6 @@ static void *eth_mac_format (void *mac_buf, const void *mac_dest, WORD type)
 static void *tok_mac_format (void *mac_buf, const void *mac_dest, WORD type)
 {
   union link_Packet *buf = (union link_Packet*) mac_buf;
-
-  SIO_TRACE (("tok_mac_format"));
 
   /* No need to clear data behind header.
    */
@@ -522,8 +511,6 @@ static void *tok_mac_format (void *mac_buf, const void *mac_dest, WORD type)
 static void *fddi_mac_format (void *mac_buf, const void *mac_dest, WORD type)
 {
   union link_Packet *buf = (union link_Packet*) mac_buf;
-
-  SIO_TRACE (("fddi_mac_format"));
 
   memset (&buf->fddi.data[0], 0, FDDI_MIN-sizeof(fddi_Header));
   if (mac_dest)
@@ -586,8 +573,6 @@ static void *null_mac_format (void *mac_buf, const void *mac_dest, WORD type)
 {
   union link_Packet *buf = (union link_Packet*) mac_buf;
 
-  SIO_TRACE (("null_mac_format"));
-
   memset (&buf->ip.head, 0, sizeof(buf->ip.head));
   ARGSUSED (mac_dest);
   ARGSUSED (type);
@@ -601,8 +586,6 @@ static void *null_mac_format (void *mac_buf, const void *mac_dest, WORD type)
  */
 static int eth_mac_xmit (const void *buf, WORD len)
 {
-  SIO_TRACE (("eth_mac_xmit, len %d", len));
-
   if (len < ETH_MIN)
        len = ETH_MIN;  /* zero padding already done in eth_mac_format() */
   else if (len > ETH_MAX)
@@ -613,8 +596,6 @@ static int eth_mac_xmit (const void *buf, WORD len)
 
 static int fddi_mac_xmit (const void *buf, WORD len)
 {
-  SIO_TRACE (("fddi_mac_xmit, len %d", len));
-
   if (len < FDDI_MIN)
        len = FDDI_MIN;
   else if (len > FDDI_MAX)
@@ -625,8 +606,6 @@ static int fddi_mac_xmit (const void *buf, WORD len)
 
 static int arcnet_mac_xmit (const void *buf, WORD len)
 {
-  SIO_TRACE (("arcnet_mac_xmit, len %d", len));
-
   if (len < ARCNET_MIN)
        len = ARCNET_MIN;
   else if (len > ARCNET_MAX)
@@ -637,8 +616,6 @@ static int arcnet_mac_xmit (const void *buf, WORD len)
 
 static int tok_mac_xmit (const void *buf, WORD len)
 {
-  SIO_TRACE (("tok_mac_xmit, len %d", len));
-
   if (len > TOK_MAX)  /* Token-Ring has no min. length */
       len = TOK_MAX;
   return pkt_send (buf, len);
@@ -646,8 +623,6 @@ static int tok_mac_xmit (const void *buf, WORD len)
 
 static int null_mac_xmit (const void *buf, WORD len)
 {
-  SIO_TRACE (("null_mac_xmit, len %d", len));
-
   return pkt_send (buf, len);
 }
 
@@ -660,8 +635,6 @@ static int null_mac_xmit (const void *buf, WORD len)
 int W32_CALL _eth_init (void)
 {
   int rc;
-
-  SIO_TRACE (("_eth_init"));
 
   if (_eth_is_init)
      return (0);
@@ -739,8 +712,6 @@ int W32_CALL _eth_init (void)
  */
 int W32_CALL _eth_set_addr (const void *addr)
 {
-  SIO_TRACE (("_eth_set_addr"));
-
   if (_pktserial || _pktdevclass == PDCLASS_ARCNET)
      return (1);
 
@@ -759,8 +730,6 @@ int W32_CALL _eth_set_addr (const void *addr)
  */
 BYTE W32_CALL _eth_get_hwtype (BYTE *hwtype, BYTE *hwlen)
 {
-  SIO_TRACE (("_eth_get_hwtype"));
-
   if (_pktdevclass == PDCLASS_ETHER)
   {
     if (hwlen)  *hwlen  = sizeof (eth_address);
@@ -800,8 +769,6 @@ BYTE W32_CALL _eth_get_hwtype (BYTE *hwtype, BYTE *hwlen)
  */
 void W32_CALL _eth_free (const void *pkt)
 {
-  SIO_TRACE (("_eth_free"));
-
   if (_eth_recv_hook) /* hook-function should free it's own packet */
      return;
 
@@ -837,8 +804,6 @@ static void fix_tok_head (tok_Header **trp)
       dbug_printf ("%02X ", raw[i]);
   dbug_write ("\n");
 #endif
-
-  SIO_TRACE (("fix_tok_head"));
 
   if (TR_IS_SROUTED(tr))     /* Source routed */
   {
@@ -909,8 +874,6 @@ static union link_Packet *poll_recv_queue (WORD *type)
   struct pkt_ringbuf *q = &_pkt_inf->pkt_queue;
   union  link_Packet *pkt;
   struct in_Header   *ip;
-
-  SIO_TRACE (("poll_recv_queue"));
 
   ASSERT_PKT_INF (NULL);
 
@@ -1008,7 +971,6 @@ static union link_Packet *poll_recv_queue (WORD *type)
  */
 static void fix_llc_head (void **mac)
 {
-  SIO_TRACE (("fix_llc_head"));
 #if 1
   DEBUG_RX (NULL, *mac);
   _eth_free (*mac);
@@ -1039,8 +1001,6 @@ void * W32_CALL _eth_arrived (WORD *type_ptr, BOOL *broadcast)
   void              *ret = NULL;
   BOOL               is_bcast = FALSE;
   WORD               type = 0;
-
-  SIO_TRACE (("_eth_arrived"));
 
   if (!_eth_is_init)  /* GvB 2002-09, Lets us run without a working driver */
      return (NULL);
@@ -1139,8 +1099,6 @@ void * W32_CALL _eth_arrived (WORD *type_ptr, BOOL *broadcast)
  */
 void *_eth_mac_hdr (const in_Header *ip)
 {
-  SIO_TRACE (("_eth_mac_hdr"));
-
   if (!_pktserial)
      return (void*) ((BYTE*)ip - _pkt_ip_ofs);
 
@@ -1156,8 +1114,6 @@ void *_eth_mac_hdr (const in_Header *ip)
 void *_eth_mac_dst (const in_Header *ip)
 {
   const union link_Packet *pkt;
-
-  SIO_TRACE (("_eth_mac_dst"));
 
   pkt = (const union link_Packet*) ((BYTE*)ip - _pkt_ip_ofs);
 
@@ -1186,8 +1142,6 @@ void *_eth_mac_src (const in_Header *ip)
 {
   const union link_Packet *pkt;
 
-  SIO_TRACE (("_eth_mac_src"));
-
   pkt = (const union link_Packet*) ((BYTE*)ip - _pkt_ip_ofs);
 
   if (_pktdevclass == PDCLASS_ETHER)
@@ -1214,8 +1168,6 @@ void *_eth_mac_src (const in_Header *ip)
 WORD _eth_mac_typ (const in_Header *ip)
 {
   const union link_Packet *pkt;
-
-  SIO_TRACE (("_eth_mac_typ"));
 
   pkt = (const union link_Packet*) ((BYTE*)ip - _pkt_ip_ofs);
 
@@ -1255,8 +1207,6 @@ BOOL _eth_join_mcast_group (const struct MultiCast *mc)
   eth_address list [IPMULTI_SIZE];
   int         i, len, nextentry;
   BOOL        is_mcast1, is_mcast2, is_promis;
-
-  SIO_TRACE (("_eth_join_mcast_group"));
 
   /* Return if we're already receiving all multicasts or is in
    * promiscous mode.
@@ -1330,8 +1280,6 @@ BOOL _eth_leave_mcast_group (const struct MultiCast *mc)
 {
   eth_address list[IPMULTI_SIZE];
   int i, len, idx;
-
-  SIO_TRACE (("_eth_leave_mcast_group"));
 
   /* \note This should be expanded to include switching back to
    *       RXMODE_MULTCAST1 if the list of multicast addresses has

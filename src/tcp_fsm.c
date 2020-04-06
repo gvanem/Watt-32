@@ -17,7 +17,6 @@
 #include "timer.h"
 #include "sock_ini.h"
 #include "language.h"
-#include "rs232.h"
 #include "pcconfig.h"
 #include "pcqueue.h"
 #include "pcsed.h"
@@ -135,7 +134,6 @@ int _tcp_fsm (_tcp_Socket **sp, const in_Header *ip)
     const char *st_in  = tcpStateName (in_state);
     const char *st_out = tcpStateName (s->state);
 
-    SIO_TRACE (("tcp-state: %s -> %s ", st_in, st_out));
     TCP_CONSOLE_MSG (3, ("tcp-state: %s -> %s\n", st_in, st_out));
   }
 #endif

@@ -34,10 +34,10 @@ PYTHON           ?= py -3
 #
 # Only for the pure Winsock versions '*_w.exe' (clang/MSVC only)
 #
-@ifdef WATCOM
-  USE_WSOCK_TRACE ?= 0
-@else
+@ifdef VISUALC CLANG
   USE_WSOCK_TRACE ?= 1
+@else
+  USE_WSOCK_TRACE ?= 0
 @endif
 
 @ifdef IS_GCC
@@ -190,7 +190,7 @@ NO_W32_CFLAGS = -D_Windows
                   -D_CRT_NONSTDC_NO_WARNINGS \
                   -D_CRT_OBSOLETE_NO_WARNINGS
 
-  LDFLAGS = -nologo -map -debug -incremental:no
+  LDFLAGS = -nologo -map -debug -incremental:no -nodefaultlib:uuid.lib -verbose
 
   #
   # Ignore this:
@@ -199,7 +199,7 @@ NO_W32_CFLAGS = -D_Windows
   LDFLAGS += -ignore:4098
 @endif
 
-@ifdef MINGW64 VISUALC CLANG CYGWIN64
+@ifdef VISUALC CLANG MINGW64 CYGWIN64
   @ifdef WIN32
     #
     # WIN32 -> 32-bit programs.
@@ -207,9 +207,7 @@ NO_W32_CFLAGS = -D_Windows
     LIB_DIR = ../../lib/x86
     BITS    = 32
 
-    @ifdef MINGW64
-      COMMON_CFLAGS += -m32
-    @elifdef VISUALC CLANG
+    @ifdef VISUALC CLANG
       LDFLAGS += -machine:x86
     @endif
 
@@ -220,19 +218,22 @@ NO_W32_CFLAGS = -D_Windows
     LIB_DIR = ../../lib/x64
     BITS    = 64
 
-    @ifdef MINGW64 CYGWIN64
-      COMMON_CFLAGS += -m64
-    @elifdef VISUALC CLANG
+    @ifdef VISUALC CLANG
       LDFLAGS += -machine:x64
     @endif
   @endif
+
+  @ifdef MINGW64 CYGWIN64
+    COMMON_CFLAGS += -m$(BITS)
+  @endif
+
 @else
   LIB_DIR = ../../lib
 @endif
 
 @ifdef MINGW32
   COMMON_CFLAGS += -m32
-  WATT_LIB = $(LIB_DIR)/libwatt32.a
+  WATT_LIB       = $(LIB_DIR)/libwatt32.a
 
 @elifdef MINGW64
   WATT_LIB = $(LIB_DIR)/libwatt32.a
@@ -248,18 +249,18 @@ NO_W32_CFLAGS = -D_Windows
   WATT_LIB = $(LIB_DIR)/wattcphf.lib
 
 @elifdef VISUALC
-  CC = cl
+  CC       = cl
   WATT_LIB = $(LIB_DIR)/wattcpvc.lib
 
 @elifdef CLANG
   #
-  # In case '%CL%' is set, it may confuse 'clang-cl'. Unset it.
+  # In case '%CL%' is set, it could confuse 'clang-cl'. Unset it.
   #
   export CL=
 
-  CC = clang-cl
+  CC             = clang-cl
   COMMON_CFLAGS += -Wno-unused-function -Wno-unused-variable -Wno-unused-value
-  WATT_LIB = $(LIB_DIR)/wattcp_clang.lib
+  WATT_LIB       = $(LIB_DIR)/wattcp_clang.lib
 
 @elifdef WATCOM
   @ifdef SMALL
@@ -271,11 +272,7 @@ NO_W32_CFLAGS = -D_Windows
   @elifdef FLAT
     WATT_LIB = $(LIB_DIR)/wattcpwf.lib
   @elifdef WIN32
-    @ifdef DLL
-      WATT_LIB = $(LIB_DIR)/wattcpww_imp.lib
-    @else
-      WATT_LIB = $(LIB_DIR)/wattcpww.lib
-    @endif
+    WATT_LIB = $(LIB_DIR)/wattcpww.lib
   @endif
 
 @elifdef BORLAND
@@ -290,19 +287,21 @@ NO_W32_CFLAGS = -D_Windows
 @ifdef CYGWIN32 CYGWIN64
   CC             = gcc
   COMMON_CFLAGS += -static-libgcc -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable
-  NO_W32_CFLAGS += -D__USE_W32_SOCKETS
+  NO_W32_CFLAGS += -D__USE_W32_SOCKETS  # Use Winsock2
 
 @elifdef VISUALC CLANG
   define compile_and_link
     $(CC) -c $(COMMON_CFLAGS) $(W32_CFLAGS) $(2) -Fo.\\
-    link -out:$(strip $(1)) $(LDFLAGS) $(notdir $(2:.c=.obj)) $(WATT_LIB) user32.lib advapi32.lib
-    rm -f $(1:.exe=.lib) $(1:.exe=.exp)
+    link -out:$(strip $(1)) $(LDFLAGS) $(notdir $(2:.c=.obj)) $(WATT_LIB) user32.lib advapi32.lib > link.tmp
+    cat link.tmp >> $(1:.exe=.map)
+    rm -f $(1:.exe=.lib) $(1:.exe=.exp) link.tmp
   endef
 
   define compile_and_link_ws2
     $(CC) -c $(COMMON_CFLAGS) $(NO_W32_CFLAGS) $(2) -Fo.\\
-    link -out:$(strip $(1)) $(LDFLAGS) $(notdir $(2:.c=.obj)) user32.lib advapi32.lib $(WS2_32_LIB)
-    rm -f $(1:.exe=.lib) $(1:.exe=.exp)
+    link -out:$(strip $(1)) $(LDFLAGS) $(notdir $(2:.c=.obj)) user32.lib advapi32.lib $(WS2_32_LIB) > link.tmp
+    cat link.tmp >> $(1:.exe=.map)
+    rm -f $(1:.exe=.lib) $(1:.exe=.exp) link.tmp
   endef
 
 @elifdef HIGHC
@@ -443,7 +442,7 @@ NO_W32_CFLAGS = -D_Windows
   endef
 
   define compile_and_link_ws2
-    $(CC) $(COMMON_CFLAGS) $(NO_W32_CFLAGS) -o $(1) $(2) $(LDFLAGS) -l ws2_32.lib
+    $(CC) $(COMMON_CFLAGS) $(NO_W32_CFLAGS) -o $(1) $(2) $(LDFLAGS) -l $(WS2_32_LIB)
     rm -f $(1:.exe=.tds)
   endef
 @endif
@@ -486,7 +485,7 @@ udp_test_w.o: udp_test.c
 
 clean realclean vclean:
 	rm -f $(PROGRAMS) $(PROGRAMS:.exe=.obj) $(PROGRAMS:.exe=.map) echo.obj listen.obj cyg_kbhit.o
-	rm -f $(PROGRAMS:.exe=.pdb) vc1*.pdb highc.arg 386link.arg fsext.exe fsext.map cpp_filter.py
+	rm -f $(PROGRAMS:.exe=.pdb) vc1*.pdb highc.arg 386link.arg fsext.exe fsext.map link.tmp cpp_filter.py
 	@echo 'Cleaning done.'
 
 #
@@ -522,7 +521,7 @@ sysdep.h: ../wattcp.h ../timer.h  \
                sock_ini.h language.h pcconfig.h pcqueue.h pcdbug.h pcsed.h \
                pcpkt.h pcstat.h pcigmp.h pctcp.h pcbuf.h pcicmp.h pcarp.h \
                pcrecv.h printk.h netaddr.h ip4_in.h ip4_out.h ip6_in.h \
-               ip6_out.h rs232.h bsddbug.h bsdname.h gettod.h) \
+               ip6_out.h bsddbug.h bsdname.h gettod.h) \
              $(addprefix ../../inc/, \
                sys/socket.h          \
                sys/ioctl.h           \
@@ -650,7 +649,7 @@ pc_cbrk.exe: $(addprefix ../, \
 
 pcarp.exe: $(addprefix ../, \
              pcarp.c wattcp.h misc_str.h language.h netaddr.h \
-             misc.h run.h timer.h rs232.h ip4_in.h ip4_out.h sock_ini.h \
+             misc.h run.h timer.h ip4_in.h ip4_out.h sock_ini.h \
              chksum.h pcdbug.h pctcp.h pcsed.h pcconfig.h pcqueue.h \
              pcstat.h pcicmp.h pcdhcp.h pcpkt.h pcarp.h pcdns.h pcbuf.h)
 

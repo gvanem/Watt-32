@@ -42,7 +42,6 @@
 #undef USE_TCP_SACK    /* Include TCP Selective ACK feature (not yet) */
 #undef USE_ECHO_DISC   /* Include echo/discard servers */
 #undef USE_PPPOE       /* PPP-over-Ethernet encapsulation */
-#undef USE_RS232_DBG   /* Include RS232 serial port writing of trace-info */
 #undef USE_FAST_PKT    /* Use faster all real-mode PKTDRVR receiver (DOSX only) */
 #undef USE_DEAD_GWD    /* Dead Gateway detection in ARP module */
 #undef USE_GZIP        /* Use gzip compression for PPP and/or pcap debug file. Also for SCTP. */
@@ -114,7 +113,6 @@
 
 #if defined(__DJGPP__)
   #define USE_FSEXT
-/*#define USE_RS232_DBG */
 /*#define USE_FORTIFY */
 #endif
 
@@ -293,7 +291,6 @@
   #define USE_UDP_ONLY
   #define USE_TCP_SACK
   #define USE_ECHO_DISC
-  #define USE_RS232_DBG
   #define USE_FAST_PKT
   #define USE_TCP_MD5
 #endif

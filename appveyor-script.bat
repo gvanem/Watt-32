@@ -354,9 +354,9 @@ exit /b 0
   if %BUILDER%. == mingw64.  make -f MinGW64_%BITS%.mak
   if %BUILDER%. == visualc.  make -f visualc_%BITS%.mak
   if %BUILDER%. == watcom. (
-    if %MODEL%. == large. make -f watcom_l.mak
-    if %MODEL%. == flat.  make -f watcom_f.mak
-    if %MODEL%. == win32. make -f watcom_w.mak
+     if %MODEL%. == large. make -f watcom_l.mak
+     if %MODEL%. == flat.  make -f watcom_f.mak
+     if %MODEL%. == win32. make -f watcom_w.mak
   )
 
   %_ECHO% "\e[1;33mRunning test 'cpu.exe' ----------------------------------------------------\e[0m"

@@ -686,9 +686,6 @@ static const char *capabilities[] = {
 #if defined(USE_IPV6)
            "IPv6",
 #endif
-#if defined(USE_RS232_DBG)
-           "RS232",
-#endif
 #if defined(USE_DEAD_GWD)
            "dead-gw",
 #endif

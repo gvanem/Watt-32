@@ -20,7 +20,6 @@
 #include "misc_str.h"
 #include "run.h"
 #include "timer.h"
-#include "rs232.h"
 #include "ip4_in.h"
 #include "ip4_out.h"
 #include "sock_ini.h"
@@ -2329,6 +2328,7 @@ int main (int argc, char **argv)
     while ((len = sock_read(&sock,(BYTE*)buf,sizeof(buf))) > 0)
          fwrite (buf, len, 1, stdout);
   }
+
 sock_err:
   if (status == -1)
     printf ("Cannot connect to %s: %s\n", host, sockerr(&sock));

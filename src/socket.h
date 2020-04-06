@@ -90,7 +90,6 @@
 #include "ip4_out.h"
 #include "ip6_in.h"
 #include "ip6_out.h"
-#include "rs232.h"
 #include "bsddbug.h"
 #include "bsdname.h"
 #include "gettod.h"

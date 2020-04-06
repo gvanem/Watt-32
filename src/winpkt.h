@@ -112,6 +112,10 @@ extern UINT        winpkt_trace_line;
 extern UINT        winpkt_trace_level;
 
 #if defined(USE_DEBUG)
+  /*
+   * Trace to file specified by 'winpkt.dumpfile'.
+   * I.e. above 'winpkt_trace_file'.
+   */
   #define WINPKT_TRACE(args, ...)                \
           do {                                   \
             winpkt_trace_file = __FILE__;        \
