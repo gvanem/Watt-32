@@ -51,7 +51,7 @@ const char *cpu_get_model (int type, int model);
 
 /* Since these are already in libwatt.a
  */
-#if !defined(WATT32_STATIC)
+#if defined(COMPILING_PCDBUG_C) || !defined(WATT32_STATIC)
 const char *i486model (unsigned int nr)
 {
   static char *model[] = {
@@ -240,7 +240,7 @@ const char *cpu_get_model (int type, int model)
   sprintf (nbuf, "%d", model);
   return (nbuf);
 }
-#endif  /* !WATT32_STATIC */
+#endif  /* COMPILING_PCDBUG_C || !WATT32_STATIC */
 
 /* Do not compile this if this file is included from pcdbug.c.
  */

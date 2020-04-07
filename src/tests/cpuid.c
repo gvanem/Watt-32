@@ -24,7 +24,7 @@ CPUID_DATA cpuid (int);
             __modify [__eax __ebx __ecx __edx] __parm [__eax];
 
 
-extern unsigned long cdecl Get_CR4 (void);
+extern unsigned long cdecl _w32_Get_CR4 (void);
 #pragma aux (__cdecl) _w32_Get_CR4   "*"
 #define Get_CR4       _w32_Get_CR4
 

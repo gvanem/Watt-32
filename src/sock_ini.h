@@ -32,8 +32,9 @@ extern int  _dhcp_on;
 extern int  _dhcp6_on;
 extern int  _rarp_on;
 extern BOOL _do_mask_req;
-extern BOOL _watt_do_exit;
 extern BOOL _watt_is_init;
+
+W32_DATA BOOL _watt_do_exit;
 
 extern BOOL survive_eth,  survive_bootp;
 extern BOOL survive_dhcp, survive_rarp;

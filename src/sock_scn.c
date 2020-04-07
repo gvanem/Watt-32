@@ -11,11 +11,7 @@
 #include "misc.h"
 #include "pctcp.h"
 
-#if defined(__WATCOMC__) && (__WATCOMC__ >= 1250)  /* OW 1.5+ */
-  #define OPENWATCOM_15
-#endif
-
-#if defined(__MINGW32__) || defined(__MINGW64__) || defined(__CYGWIN__) || defined(OPENWATCOM_15)
+#if defined(__MINGW32__) || defined(__MINGW64__) || defined(__CYGWIN__) || defined(__WATCOMC__)
   #define HAVE_VSSCANF
 #endif
 

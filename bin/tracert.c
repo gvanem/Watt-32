@@ -580,6 +580,8 @@ static void show_version_info (const char *argv0)
 #ifdef USE_GEOIP
   verbose++;
   init_geoip (argv0);
+#else
+  (void)argv0;
 #endif
   exit (0);
 }

@@ -3,15 +3,15 @@
 #
 #  Watcom Win32 executables.
 #
-#  Usage: 'wmake -h -f wc_win.mak'
+#  Usage: 'wmake -h -f wcwindll.mak'
 #
 
 MODEL   = win32
 CC      = *wcc386 -3r
-CFLAGS  = -bt=nt -mf -oaxt -DWIN32 -DWATT32_STATIC
+CFLAGS  = -bt=nt -mf -oaxt -DWIN32
 LFLAGS  = system nt
-LIBRARY = library ../lib/wattcpww.lib
+LIBRARY = library ../lib/wattcpww_imp.lib
 
-BUILD_MESSAGE = Watcom/Win32 binaries done
+BUILD_MESSAGE = Watcom/Win32 binaries (DLL) done
 
 !include wccommon.mak

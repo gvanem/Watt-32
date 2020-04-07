@@ -3878,7 +3878,7 @@ const char *cpu_get_model (int type, int model)
 }
 #endif   /* 0 */
 
-void print_cpu_info (void)
+static void print_cpu_info (void)
 {
   uint64 Hz;
   char   speed [20];

@@ -345,50 +345,43 @@ NO_W32_CFLAGS = -D_Windows
   endef
 
 @elifdef WATCOM
-  LDFLAGS = option quiet, map, eliminate
+  #
+  # Turn off these:
+  #   Warning! W1027: file clib3r.lib(strerror.c): redefinition of strerror_ ignored
+  #
+
+  LDFLAGS = option quiet, map, eliminate disable 1027
 
   @ifdef SMALL
     CC            = wcc
-    COMMON_CFLAGS = -ms -0 -wx -os -zc -s -bt=dos -zq
-    LDFLAGS      += system dos option quiet, stack=10k
+    COMMON_CFLAGS = -bt=dos -ms -0 -os -s -zc
+    LDFLAGS      += system dos option stack=10k
 
   @elifdef LARGE
     CC            = wcc
-    COMMON_CFLAGS = -ml -0 -wx -os -zc -s -bt=dos -zq
-    LDFLAGS      += system dos option quiet, stack=10k
+    COMMON_CFLAGS = -bt=dos -ml -0 -os -s -zc
+    LDFLAGS      += system dos option stack=10k
 
   @elifdef SMALL32
     CC            = wcc386
-    COMMON_CFLAGS = -ms -3r -wx -d2 -zm -s -bt=dos -oaxt -zq
-    LDFLAGS      += system dos4g option quiet, stack=100k
+    COMMON_CFLAGS = -bt=dos -ms -3r -oaxt -s
+    LDFLAGS      += system dos4g option stack=100k
 
   @elifdef FLAT
-    #
-    # The '-3r/-3s' MUST match what 'wattcpwf.lib' was built with.
-    #
     CC            = wcc386
-    COMMON_CFLAGS = -mf -3r -wx -d2 -zff -zgf -zm -s -bt=dos -oilrtfm -zq
-    LDFLAGS      += system dos4g option quiet, stack=100k
+    COMMON_CFLAGS = -bt=dos -mf -3r -zff -zgf -oilrtfm -s
+    LDFLAGS      += system dos4g option stack=100k
 
   @elifdef WIN32
-    #
-    # The '-3r/-3s' MUST match what '$(WATT_LIB)' was built with.
-    #
     CC             = wcc386
-    COMMON_CFLAGS  = -bt=nt -mf -3r -wx -d2 -zc -zm -bm -DWIN32 -of -zq
-    LDFLAGS       += system nt option quiet, stack=200k
+    COMMON_CFLAGS  = -bt=nt -mf -3r -bm -oaxt -s -zc -DWIN32
+    LDFLAGS       += system nt option stack=200k
 
   @else
     $(error Unknown WATCOM model. Only 'SMALL', 'LARGE', 'FLAT' and 'WIN32'.)
   @endif
 
-  #
-  # Turn off these:
-  #   Warning! W1027: file clib3r.lib(strerror.c): redefinition of strerror_ ignored
-  #
-  LDFLAGS += disable 1027
-
-  COMMON_CFLAGS += -I$(WATCOM)\h -I$(WATCOM)\h\nt
+  COMMON_CFLAGS += -zq -wx -zm -d1 -I$(WATCOM)\h -I$(WATCOM)\h\nt
 
   #
   # Watcom does not like '/' in it's arguments.

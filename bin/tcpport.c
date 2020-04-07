@@ -383,8 +383,8 @@ int ttinc (int fast)
           "mov  sp, si"  \
           "push ax"      \
           "push bx"      \
-          parm [dx si]   \
-          modify [ax bx];
+          __parm [__dx __si] \
+          __modify [__ax __bx];
 
   extern void stackrestore (void);
   #pragma aux stackrestore = \
@@ -392,18 +392,14 @@ int ttinc (int fast)
           "pop ax"     \
           "mov ss, ax" \
           "mov sp, bx" \
-          modify [ax bx];
+          __modify [__ax __bx];
 
-  void interrupt ourhandler (bp,di,si,ds,es,dx,cx,bx,ax,ip,cs,flgs)
+  void interrupt ourhandler (union INTPACK r)
   {
     static WORD stack [STACK_SIZE];
-    static struct {
-           WORD bp,di,si,ds,es,dx,cx,bx,ax,ip,cs,flgs;
-         } far *stkptr;
 
-    (int*)stkptr = &bp;
     stackset (&stack[STACK_SIZE-1]);
-    stkptr->ax = sytek_int (stkptr->ax);
+    r.w.ax = sytek_int (r.w.ax);
     stackrestore();
   }
 #endif /* __WATCOMC__ */

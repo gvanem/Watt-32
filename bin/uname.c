@@ -48,7 +48,7 @@ void usage (void)
   exit (-1);
 }
 
-int nul_print (char c)
+int W32_CALL nul_print (char c)
 {
   (void)c;
   return (0);
@@ -56,7 +56,7 @@ int nul_print (char c)
 
 void my_sock_init (void)
 {
-  extern int _watt_do_exit;
+  W32_DATA int _watt_do_exit;
   int rc;
 
   _watt_do_exit = 0;   /* don't exit in sock_init() */

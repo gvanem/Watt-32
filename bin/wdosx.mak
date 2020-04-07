@@ -5,30 +5,18 @@
 #
 #  Note: stubit.exe is part of WDOSX
 #
-.EXTENSIONS:
-.EXTENSIONS: .exe .obj .c
 
-COMPILE = *wcc386 -mf -3r -w5 -d2 -zq -zm -of -I..\inc -fr=nul -bt=dos
-LINK    = *wlink option quiet, map, verbose, eliminate, caseexact, stack=50k &
-            debug all library ..\lib\wattcpwf.lib
+MODEL   = flat
+CC      = *wcc386 -3r
+CFLAGS  = -bt=dos -mf -oaxt -DWATT32_STATIC
+LFLAGS  = system wdosx option stack=50k
+LIBRARY = library ../lib/wattcpwf.lib
+EXTRA_EXE = @%make bind_exe
 
-PROGS = ping.exe    popdump.exe rexec.exe  tcpinfo.exe cookie.exe &
-        daytime.exe dayserv.exe finger.exe host.exe    lpq.exe    &
-        lpr.exe     ntime.exe   ph.exe     stat.exe    htget.exe  &
-        revip.exe   tracert.exe uname.exe  vlsm.exe    whois.exe  &
-        blather.exe lister.exe
+BUILD_MESSAGE = Watcom386/WDOSX binaries done
 
+!include wccommon.mak
 
-all:  $(PROGS)
-      @echo Watcom386/WDOSX binaries done
-
-.c.exe: .PRECIOUS
-      $(COMPILE) $*.c
-      $(LINK) name $*.exe file $*.obj
-      stubit $*.exe
-      del $*.bak
-
-clean:
-      @del *.obj
-      @del *.map
-
+bind_exe: .procedure
+      stubit $^@
+      del $^&.bak

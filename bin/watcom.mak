@@ -6,39 +6,16 @@
 #  Usage: 'wmake -h -f watcom.mak'
 #
 
-.EXTENSIONS:
-.EXTENSIONS: .exe .obj .c
+sufix_small = s
+sufix_large = l
 
-MODEL = l  # (s)mall or (l)arge model
+MODEL   = large		# small or large
 
-CC     = *wcc
-CFLAGS = -m$(MODEL) -w6 -d2 -zq -zc -zm -I..\inc -fr=nul &
-         -bt=dos #-dMAKE_TSR
+CC      = *wcc -0
+CFLAGS  = -bt=dos -m$(sufix_$(MODEL)) -os -zc -DWATT32_STATIC  #-dMAKE_TSR
+LFLAGS  = system dos option stack=15k
+LIBRARY = library ../lib/wattcpw$(sufix_$(MODEL)).lib
 
-LINK   = *wlink
-LFLAGS = option quiet, map, stack=15k, eliminate, caseexact &
-         system dos debug all sort global library ..\lib\wattcpw$(MODEL).lib
+BUILD_MESSAGE = Watcom/real-mode (model = $(MODEL)) binaries done
 
-#
-# Turn off these:
-#   Warning! W1027: file clibl.lib(strerror.c): redefinition of strerror_ ignored
-#
-LFLAGS += disable 1027
-
-PROGS = ping.exe    popdump.exe rexec.exe   tcpinfo.exe &
-        cookie.exe  daytime.exe dayserv.exe finger.exe  &
-        host.exe    lpq.exe     lpr.exe     ntime.exe   &
-        ph.exe      stat.exe    htget.exe   tcpport.exe &
-        uname.exe   tracert.exe whois.exe   blather.exe &
-        lister.exe  vlsm.exe    revip.exe
-
-all:  $(PROGS)
-      @echo Watcom/real-mode (model = $(MODEL)) binaries done
-
-.c.exe: .PRECIOUS
-      $(CC) $(CFLAGS) $*.c
-      $(LINK) $(LFLAGS) name $*.exe file $*.obj
-
-clean: .SYMBOLIC
-      - rm -f *.obj *.map
-
+!include wccommon.mak

@@ -131,8 +131,9 @@ BOOL _dhcp_on        = FALSE; /**< Try booting using DHCP ? */
 BOOL _dhcp6_on       = FALSE; /**< Try booting using DHCP6 ? */
 BOOL _rarp_on        = FALSE; /**< Try booting using RARP ? */
 BOOL _do_mask_req    = FALSE; /**< do an "ICMP Mask Request" when configured */
-BOOL _watt_do_exit   = TRUE;  /**< exit program when all boot attempts failed */
 BOOL _watt_no_config = FALSE; /**< run with no config file (embedded/diskless) */
+
+W32_DATA BOOL _watt_do_exit = TRUE;  /**< exit program when all boot attempts failed */
 
 WattUserConfigFunc _watt_user_config_fn = NULL;
 

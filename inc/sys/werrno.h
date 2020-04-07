@@ -176,15 +176,11 @@ W32_DATA char *_w32_sys_errlist[];
 W32_FUNC void  W32_CALL perror_s    (const char *str);
 W32_FUNC char *W32_CALL strerror_s_ (int errnum);
 
-#if defined(__WATCOMC__) && (__WATCOMC__ >= 1250)  /* OW 1.5+ */
-  #define W32_OPENWATCOM_15
-#endif
-
 #if defined(__cplusplus)
   #include <stdlib.h>
   #include <string.h>
 
-#elif !defined(_MSC_VER) && !defined(WIN32) && !defined(W32_OPENWATCOM_15)
+#elif !defined(_MSC_VER) && !defined(WIN32) && !defined(__WATCOMC__)
   #if !defined(_INC_STDLIB) && !defined(_STDLIB_H_) && !defined(_STDIO_H)
   W32_FUNC void W32_CALL perror (const char *str);
   #endif

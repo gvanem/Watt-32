@@ -6,9 +6,9 @@
  *   Lister is a primarly useless program that I hacked together to
  * prove that my multicast code was receiving correctly. It will list
  * the contents of all of the vat control messages on the address/port
- * pair specified. The default is for MBone Audio, but using the 
+ * pair specified. The default is for MBone Audio, but using the
  * command line arguments, you can specify any session. FYI: The port that
- * is specified on the vat command line or in the options panel is the 
+ * is specified on the vat command line or in the options panel is the
  * data port. The control port, the port lister takes, is the one immediately
  * above that. Any keypress will cause lister to exit.
  *
@@ -60,7 +60,7 @@ int main (int argc, char **argv)
        host = resolve (argv[1]);
   else host = resolve ("224.2.0.1");
 
-  if (!_ip4_is_multicast(host))
+  if (!IN_MULTICAST(host))
   {
     printf ("%s is not a class-D address\n", _inet_ntoa(buffer,host));
     return (-1);
