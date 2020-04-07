@@ -1,3 +1,7 @@
+#
+# Common definitions and rules for all Watcom *.mak files in
+# this directory; they contains a '!include wccommon.mak'.
+#
 #       exe             win32   flat    small32 large   small
 !inject ping.exe        win32   flat    small32 large
 !inject popdump.exe     win32   flat    small32 large
@@ -21,7 +25,7 @@
 !inject whois.exe       win32   flat    small32 large
 !inject blather.exe     win32   flat    small32
 !inject lister.exe      win32   flat    small32
-!inject ident.exe       win32     
+!inject ident.exe       win32
 !inject vlsm.exe        win32   flat    small32
 !inject con-test.exe    win32
 !inject gui-test.exe    win32

@@ -61,7 +61,7 @@ build_script:
     - cmd: appveyor-script.bat build_bin
 
 test_script:
-    - cmd: appveyor-script.bat build_tests
+    - cmd: set PATH=c:\Python34;%PATH% & python.exe appveyor-script.py build_tests
 
 #
 # Try to preserve previously downloaded CI packages, the 'src/build'

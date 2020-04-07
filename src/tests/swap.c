@@ -196,7 +196,7 @@ int intrin_byteswap (const void *buf, size_t max)
 #else
   (void)buf;
   (void)max;
-  printf ("%s() not available for %s.", __FUNCTION__, wattcpBuildCC());
+  printf ("%s() not available for %s.\n", __FUNCTION__, wattcpBuildCC());
   return (0);
 #endif
 }

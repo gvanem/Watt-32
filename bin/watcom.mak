@@ -6,15 +6,15 @@
 #  Usage: 'wmake -h -f watcom.mak'
 #
 
-sufix_small = s
-sufix_large = l
+suffix_small = s
+suffix_large = l
 
-MODEL   = large		# small or large
+MODEL   = large   # small or large
 
 CC      = *wcc -0
-CFLAGS  = -bt=dos -m$(sufix_$(MODEL)) -os -zc -DWATT32_STATIC  #-dMAKE_TSR
+CFLAGS  = -bt=dos -m$(suffix_$(MODEL)) -os -zc -DWATT32_STATIC  #-dMAKE_TSR
 LFLAGS  = system dos option stack=15k
-LIBRARY = library ../lib/wattcpw$(sufix_$(MODEL)).lib
+LIBRARY = library ../lib/wattcpw$(suffix_$(MODEL)).lib
 
 BUILD_MESSAGE = Watcom/real-mode (model = $(MODEL)) binaries done
 

@@ -162,7 +162,7 @@ cd src
 ::
 if %LOCAL_TEST% == 1 (
   echo on
-  if not exist "%APPVEYOR_BUILD_FOLDER_UNIX%" (echo No '%APPVEYOR_BUILD_FOLDER_UNIX%'. Edit this .bat-file & exit /b 1)
+  if not exist "%APPVEYOR_BUILD_FOLDER%" (echo No '%APPVEYOR_BUILD_FOLDER%'. Edit this .bat-file & exit /b 1)
 )
 
 ::

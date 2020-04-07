@@ -447,30 +447,30 @@ PROGRAMS := $(sort $(PROGRAMS))
 all: $(PROGRAMS)
 	@echo 'All done'
 
-fingerd.exe: ../listen.c $(WATT_LIB) $(MAKEFILE_LIST)
+fingerd.exe: ../listen.c $(WATT_LIB) | $(MAKEFILE_LIST)
 	$(call compile_and_link, $@, $<)
 	@echo
 
-wecho.exe: ../echo.c $(WATT_LIB) $(MAKEFILE_LIST)
+wecho.exe: ../echo.c $(WATT_LIB) | $(MAKEFILE_LIST)
 	$(call compile_and_link, $@, $<)
 	@echo
 
-udp_srv_w.exe: udp_srv.c $(CYG_KBHIT_O) $(MAKEFILE_LIST)
+udp_srv_w.exe: udp_srv.c $(CYG_KBHIT_O) | $(MAKEFILE_LIST)
 	$(call compile_and_link_ws2, $@, udp_srv.c $(CYG_KBHIT_O))
 	@echo
 
-udp_test_w.exe: udp_test.c $(CYG_KBHIT_O) $(MAKEFILE_LIST)
+udp_test_w.exe: udp_test.c $(CYG_KBHIT_O) | $(MAKEFILE_LIST)
 	$(call compile_and_link_ws2, $@, udp_test.c $(CYG_KBHIT_O))
 	@echo
 
-%.exe: %.c $(WATT_LIB) $(MAKEFILE_LIST)
+%.exe: %.c $(WATT_LIB) | $(MAKEFILE_LIST)
 	$(call compile_and_link, $@, $<)
 	@echo
 
 #
 # This MUST be compiled w/o any '-I../../inc' shadowing the real headers.
 #
-cyg_kbhit.o: cyg_kbhit.c $(MAKEFILE_LIST)
+cyg_kbhit.o: cyg_kbhit.c | $(MAKEFILE_LIST)
 	$(CC) -c $(COMMON_CFLAGS) $(NO_W32_CFLAGS) $<
 	@echo
 
