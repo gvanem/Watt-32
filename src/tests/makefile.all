@@ -155,7 +155,11 @@ VPATH  = ..
 #
 # Used for all Watt-32 test programs:
 #
-W32_CFLAGS = -DWATT32 -DTEST_PROG -DWATT32_STATIC -I.. -I../../inc
+@ifdef WATCOM
+  W32_CFLAGS = -DWATT32 -DTEST_PROG -DWATT32_STATIC -I.. -I"../../inc"
+@else
+  W32_CFLAGS = -DWATT32 -DTEST_PROG -DWATT32_STATIC -I.. -I../../inc
+@endif
 
 #
 # Used for all non-Watt-32 test programs (uses Winsock):
@@ -381,24 +385,33 @@ NO_W32_CFLAGS = -D_Windows
     $(error Unknown WATCOM model. Only 'SMALL', 'LARGE', 'FLAT' and 'WIN32'.)
   @endif
 
-  COMMON_CFLAGS += -zq -wx -zm -d1 -I$(WATCOM)\h -I$(WATCOM)\h\nt
+  COMMON_CFLAGS += -zq -wx -zm -fo=.obj -d1 -I"$(WATCOM)/h" -I"$(WATCOM)/h/nt"
 
   #
-  # Watcom does not like '/' in it's arguments.
-  # 'wlink' generates this:
-  #   Error! E2030: file clib3s.lib(dstrt386): multiple starting addresses found, already defined in clib3s.lib(cstrtwnt)
+  # Watcom tools use '/' character as option prefix that items using '/'
+  # must be quoted.
   #
-  # But the .exe-file seems to run fine.
-  #
-  define compile_and_link
-    $(CC) $(subst /,\, $(COMMON_CFLAGS) $(W32_CFLAGS)) $(subst /,\,$(2))
-    wlink $(LDFLAGS) library $(WATT_LIB) name $(1) file $(notdir $(2:.c=.obj))
-  endef
+  ifeq ($(OS),Windows_NT)
+    define compile_and_link
+      $(CC) $(subst /,\, $(COMMON_CFLAGS) $(W32_CFLAGS)) $(subst /,\,$(2))
+      wlink $(LDFLAGS) library $(WATT_LIB) name $(1) file $(notdir $(2:.c=.obj))
+    endef
 
-  define compile_and_link_ws2
-    $(CC) $(subst /,\, $(COMMON_CFLAGS) $(NO_W32_CFLAGS)) $(subst /,\,$(2))
-    wlink $(LDFLAGS) library $(WS2_32_LIB) name $(1) file $(notdir $(2:.c=.obj))
-  endef
+    define compile_and_link_ws2
+      $(CC) $(subst /,\, $(COMMON_CFLAGS) $(NO_W32_CFLAGS)) $(subst /,\,$(2))
+      wlink $(LDFLAGS) library $(WS2_32_LIB) name $(1) file $(notdir $(2:.c=.obj))
+    endef
+  else
+    define compile_and_link
+      $(CC) $(COMMON_CFLAGS) $(W32_CFLAGS) $(2)
+      wlink $(LDFLAGS) library $(WATT_LIB) name $(1) file $(notdir $(2:.c=.obj))
+    endef
+
+    define compile_and_link_ws2
+      $(CC) $(COMMON_CFLAGS) $(NO_W32_CFLAGS) $(2)
+      wlink $(LDFLAGS) library $(WS2_32_LIB) name $(1) file $(notdir $(2:.c=.obj))
+    endef
+  endif
 
 @elifdef BORLAND
   ifeq ($(CBUILDER_IS_LLVM_BASED),1)
