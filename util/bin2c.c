@@ -22,7 +22,7 @@ int main (int argc, char **argv)
 
   if (argc == 1 ||
       (argc == 2 && (!strcmp(argv[1],"-h") || !strcmp(argv[1],"-?")) ) )
-     Abort ("Usage: %s <- | bin-file> [> result]\n", argv[0]);
+     Abort ("Usage: %s <- | bin-file [> result]\n", argv[0]);
 
   if (argc == 2 && !strcmp(argv[1],"-"))
      inFile = stdin;

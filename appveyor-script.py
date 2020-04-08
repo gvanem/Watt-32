@@ -23,34 +23,37 @@ have_colorama = 0
 #
 if os.getenv ("APPVEYOR_PROJECT_NAME"):
   local_test = 0
-  echo = 'c:\\msys64\\usr\\bin\\echo.exe -en'
+  echo       = 'c:\\msys64\\usr\\bin\\echo.exe -en'
 else:
   local_test = 1
-  echo = os.getenv('MSYS2_ROOT') + r'\usr\bin\echo.exe -en'
+  echo       = os.getenv('MSYS2_ROOT') + '\\usr\\bin\\echo.exe -en'
 
 try:
-  from colorama import init, Fore, Style  # Fails on AppVeyour
+  from colorama2 import init, Fore, Style  # Fails on AppVeyour
   init()
-  colour_off    = Style.RESET_ALL
-  colour_red    = Fore.RED + Style.BRIGHT
+  colour_red    = Fore.RED    + Style.BRIGHT
   colour_yellow = Fore.YELLOW + Style.BRIGHT
+  colour_off    = Style.RESET_ALL
   have_colorama = 1
 
 except ImportError:
-  colour_off    = r'\e[0m'
-  colour_yellow = r'\e[1;33m'
   colour_red    = r'\e[1;31m'
+  colour_yellow = r'\e[1;33m'
+  colour_off    = r'\e[0m'
 
 #
 # Why so hard to get colours on AppVeyor?
 #
 def cprint (s):
-  s = '%s%s%s' % (colour_yellow, s, colour_off)
   global have_colorama
   if have_colorama:
+    s = '%s%s%s' % (colour_yellow, s, colour_off)
     print (s, end="")
   else:
-    os.system ('%s "%s"' % (echo, s))
+    s = '%s%s%s' % (colour_yellow, s.replace('\\','/'), colour_off)
+    cmd = '%s "%s"' % (echo, s)
+    print ('cmd: %s' % cmd)
+    os.system (cmd)
 
 def Fatal (s):
   cprint ("%s%s" % (colour_red, s))
@@ -111,8 +114,8 @@ def get_env_vars_common():
   env_var['CI_ROOT'] = env_var['APPVEYOR_BUILD_FOLDER'] + r'\CI-temp'
 
   if builder == 'mingw32' or builder == 'mingw64':
-    env_var['MINGW32'] = watt_root.replace ("\\","/")
-    env_var['MINGW64'] = watt_root.replace ("\\","/")
+    env_var['MINGW32'] = watt_root.replace ('\\','/')
+    env_var['MINGW64'] = watt_root.replace ('\\','/')
 
   #
   # Set the dir for djgpp cross-environment.
@@ -120,7 +123,7 @@ def get_env_vars_common():
   # 7z can create only 1 level of missing directories. So a '%CI_ROOT%\djgpp' will not work
   #
   if builder == 'djgpp':
-    env_var['DJGPP']     = env_var['CI_ROOT'].replace ("\\","/")
+    env_var['DJGPP']     = env_var['CI_ROOT'].replace ('\\','/')
     env_var['DJ_PREFIX'] = env_var['DJGPP'] + '/bin/i586-pc-msdosdjgpp-'
 
   if builder == 'watcom':
@@ -177,7 +180,7 @@ def url_progress (blocks, block_size, total_size):
 #
 def download_and_install (fname, url, is_clang_x86=False):
   if os.path.exists(fname):
-    cprint ("A local %s already exist.\n" % fname.replace('\\','/'))
+    cprint ("A local %s already exist.\n" % fname)
     return 0
 
   try:
@@ -208,7 +211,7 @@ def download_and_install (fname, url, is_clang_x86=False):
 
 
 def generate_oui():
-  cprint ("Generating 'src/oui-generated.c'.")
+  cprint ("Generating 'oui-generated.c'.")
   r = os.system ('python.exe make-oui.py > oui-generated.c')
   cprint ('--------------------------------------------------------------------------------------------------\n')
   return r
@@ -217,7 +220,7 @@ def generate_oui():
 # Print some usage.
 #
 def show_help():
-  print ("%sUsage: %s [build_src | build_bin | build_tests | fake_test]" % (__doc__, __file__))
+  print ("%sUsage: %s [build_src | build_bin | build_tests]" % (__doc__, __file__))
   sys.exit (0)
 
 def get_env_string (envs):
@@ -335,14 +338,14 @@ def merge_dicts (a, b):
 def run_test (prog, args=[]):
   cmd = prog + ' ' + ' '.join(args)
   if not os.path.exists(prog):
-    cprint ("Test program '%s' failed to link! -----------------------------------------------\n" % cmd)
+    cprint ("Test program '%s' failed to link! -----------------------------------------------\n" % prog)
     return 1
   cprint ("Running test '%s' ---------------------------------------------------------------\n" % cmd)
   return os.system (cmd)
 
 def main():
   if len(sys.argv) != 2 or \
-     sys.argv[1] not in ["build_src", "build_bin", "build_tests", "fake_test"]:
+     sys.argv[1] not in ["build_src", "build_bin", "build_tests"]:
     show_help()
 
   env_vars = get_env_vars_common()
@@ -360,7 +363,7 @@ def main():
   model   = env_vars['MODEL']
   cmd     = sys.argv[1]
 
-  cprint ("Doing '%s' for 'BUILDER=%s'" % (cmd, builder))
+  cprint ("Doing '%s' for 'BUILDER=%s'\n" % (cmd, builder))
   if builder == 'watcom':
     cprint (", 'MODEL=%s'\n" % model)  # Only 'watcom' has a '%MODEL%' set in 'appveoyr.yml'
   else:
@@ -373,22 +376,9 @@ def main():
     else:
       download_and_install (installer, URLs[builder])
   except KeyError:
-    # No need to install anything for this '%BUILDER%'
     pass
 
-  if cmd == 'fake_test':
-    r = write_and_run_bat ("fake_test.bat",
-                           [ '@echo off',
-                             'setlocal',
-                             get_env_string(env_vars),
-                             'echo BUILDER: %BUILDER%',
-                             'echo CPU:     %CPU%',
-                             'echo MODEL:   %MODEL%',
-                             'echo arg1:    "%1"'
-                           ],
-                           sys.argv[1])
-
-  elif cmd == 'build_src':
+  if cmd == 'build_src':
     os.chdir ('src')
     if generate_oui() == 0:
       env_vars['CL'] = '-DHAVE_OUI_GENERATATED_C'
@@ -411,14 +401,12 @@ def main():
 
   elif cmd == 'build_bin':
     os.chdir ('bin')
-
     bin_vars = get_env_vars_bin()
     bin_make, bin_progs = get_bin_make_command (merge_dicts(env_vars, bin_vars))
     if bin_progs == '':
       return 0
 
     os.system ('rm -f %s' % bin_progs)
-
     r = write_and_run_bat ("build_bin.bat",
                            [ '@echo off',
                              'setlocal',

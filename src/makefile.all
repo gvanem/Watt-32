@@ -1579,23 +1579,23 @@ $(RESOURCE): watt-32.rc
 
 @ifdef BORLAND
 $(OBJPATH)cflagsbf.h: $(C_ARGS)
-	$(W32_BIN2C) $(C_ARGS)                     > $(OBJPATH)cflagsbf.h
+	$(W32_BIN2C) $(C_ARGS)             > $(OBJPATH)cflagsbf.h
 
 @elifdef LADSOFT LCC PELLESC
 $(OBJPATH)cflagsbf.h:
-	echo $(CFLAGS) | $(W32_BIN2C)            - > $(OBJPATH)cflagsbf.h
+	echo $(CFLAGS) | $(W32_BIN2C)    - > $(OBJPATH)cflagsbf.h
 
 @elifdef VISUALC
-$(OBJPATH)cflagsbf.h:
-	- echo $(CFLAGS) | $(W32_BIN2C)          - > $(OBJPATH)cflagsbf.h
+$(OBJPATH)cflagsbf.h: $(C_ARGS)
+	$(W32_BIN2C) $(C_ARGS)             > $(OBJPATH)cflagsbf.h
 
 @elifdef CYGWIN32 CYGWIN64 MINGW32 MINGW64
 $(OBJPATH)cflagsbf.h:
-	echo $(CFLAGS) | $(W32_BIN2C_)           - > $(OBJPATH)cflagsbf.h
+	echo $(CFLAGS) | $(W32_BIN2C_)   - > $(OBJPATH)cflagsbf.h
 
 @elifdef HIGHC
 $(OBJPATH)cflagsbf.h:
-	echo "$(CFLAGS)" | $(W32_BIN2C_)         - > $(OBJPATH)cflagsbf.h
+	echo "$(CFLAGS)" | $(W32_BIN2C_) - > $(OBJPATH)cflagsbf.h
 
 @elifdef WATCOM
 $(OBJPATH)cflagsbf.h: $(C_ARGS)
