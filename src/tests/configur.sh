@@ -76,7 +76,7 @@ usage ()
 gen_djgpp ()
 {
   echo "Generating DJGPP makefile"
-  ../util/linux/mkmake -o djgpp.mak makefile.all DJGPP FLAT IS_GCC
+  ../../util/linux/mkmake -o djgpp.mak makefile.all DJGPP FLAT IS_GCC
 
   echo "Run GNU make to make target:"
   echo "  'make -f djgpp.mak'"
@@ -85,7 +85,7 @@ gen_djgpp ()
 gen_mingw32 ()
 {
   echo "Generating MinGW32 makefile"
-  ../util/linux/mkmake -o MinGW32.mak makefile.all MINGW32 WIN32 IS_GCC
+  ../../util/linux/mkmake -o MinGW32.mak makefile.all MINGW32 WIN32 IS_GCC
 
   echo "Run GNU make to make target:"
   echo "  'make -f MinGW32.mak'"
@@ -94,8 +94,8 @@ gen_mingw32 ()
 gen_mingw64 ()
 {
   echo "Generating MinGW64-w64 makefiles"
-  ../util/linux/mkmake -o MinGW64_32.mak makefile.all MINGW64 WIN32 IS_GCC
-  ../util/linux/mkmake -o MinGW64_64.mak makefile.all MINGW64 WIN64 IS_GCC
+  ../../util/linux/mkmake -o MinGW64_32.mak makefile.all MINGW64 WIN32 IS_GCC
+  ../../util/linux/mkmake -o MinGW64_64.mak makefile.all MINGW64 WIN64 IS_GCC
 
   echo "Run GNU make to make target(s):"
   echo "  'make -f MinGW64_32.mak'"
@@ -105,7 +105,7 @@ gen_mingw64 ()
 gen_cygwin32 ()
 {
   echo "Generating CygWin32 makefile"
-  ../util/linux/mkmake -o CygWin.mak makefile.all CYGWIN WIN32 IS_GCC
+  ../../util/linux/mkmake -o CygWin.mak makefile.all CYGWIN WIN32 IS_GCC
 
   echo "Run GNU make to make target:"
   echo "  'make -f CygWin.mak'"
@@ -114,7 +114,7 @@ gen_cygwin32 ()
 gen_cygwin64 ()
 {
   echo "Generating CygWin64 makefile"
-  ../util/linux/mkmake -o CygWin_64.mak  makefile.all CYGWIN64 WIN64 IS_GCC
+  ../../util/linux/mkmake -o CygWin_64.mak  makefile.all CYGWIN64 WIN64 IS_GCC
 
   echo "Run GNU make to make target:"
   echo "  'make -f CygWin_64.mak'"
@@ -127,8 +127,8 @@ gen_cygwin64 ()
 gen_clang ()
 {
   echo "Generating clang-cl (Win32/Win64, release/debug) makefiles, directories, errnos and dependencies"
-  ../util/linux/mkmake -o clang_32.mak makefile.all CLANG WIN32
-  ../util/linux/mkmake -o clang_64.mak makefile.all CLANG WIN64
+  ../../util/linux/mkmake -o clang_32.mak makefile.all CLANG WIN32
+  ../../util/linux/mkmake -o clang_64.mak makefile.all CLANG WIN64
 
   echo "Run GNU make to make target(s):"
   echo "  'make -f clang_32.mak'"
