@@ -393,12 +393,12 @@ NO_W32_CFLAGS = -D_Windows
   #
   ifeq ($(OS),Windows_NT)
     define compile_and_link
-      $(CC) $(subst /,\, $(COMMON_CFLAGS) $(W32_CFLAGS)) $(subst /,\,$(2))
+      $(CC) $(subst /,\, $(COMMON_CFLAGS) $(W32_CFLAGS)) $(subst /,\\,$(2))
       wlink $(LDFLAGS) library $(WATT_LIB) name $(1) file $(notdir $(2:.c=.obj))
     endef
 
     define compile_and_link_ws2
-      $(CC) $(subst /,\, $(COMMON_CFLAGS) $(NO_W32_CFLAGS)) $(subst /,\,$(2))
+      $(CC) $(subst /,\, $(COMMON_CFLAGS) $(NO_W32_CFLAGS)) $(subst /,\\,$(2))
       wlink $(LDFLAGS) library $(WS2_32_LIB) name $(1) file $(notdir $(2:.c=.obj))
     endef
   else
