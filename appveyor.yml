@@ -40,6 +40,7 @@ matrix:
   fast_finish: true
   allow_failures:
      - BUILDER: mingw64
+     - BUILDER: clang
 
 install:
   #
@@ -61,7 +62,8 @@ build_script:
     - cmd: appveyor-script.bat build_bin
 
 test_script:
-    - cmd: set PATH=c:\Python34;%PATH% & python.exe appveyor-script.py build_tests
+#    - cmd: set PATH=c:\Python34;%PATH% & python.exe appveyor-script.py build_tests
+     - cmd: appveyor-script.bat build_tests
 
 #
 # Try to preserve previously downloaded CI packages, the 'src/build'
