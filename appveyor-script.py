@@ -336,10 +336,10 @@ def merge_dicts (a, b):
   return r
 
 def run_test (prog, args=[]):
-  cmd = prog + ' ' + ' '.join(args)
   if not os.path.exists(prog):
     cprint ("Test program '%s' failed to link! -----------------------------------------------\n" % prog)
     return 1
+  cmd = prog + ' ' + ' '.join(args)
   cprint ("Running test '%s' ---------------------------------------------------------------\n" % cmd)
   return os.system (cmd)
 
