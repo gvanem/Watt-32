@@ -39,10 +39,6 @@
 
 #if defined(USE_BSD_API)
 
-#define SHUT_RD   0    /* Further receives are disallowed */
-#define SHUT_WR   1    /* Further sends are disallowed */
-#define SHUT_RDWR 2    /* Further sends and receives are disallowed */
-
 int W32_CALL shutdown (int s, int how)
 {
   Socket *socket = _socklist_find (s);
