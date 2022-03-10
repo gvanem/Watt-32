@@ -31,26 +31,23 @@ INC_DIR = ../inc
 WATTLIB = ../lib/libwatt.a
 
 #
-# If building on Windows, the '$(BIN_PREFIX)gcc' should become something
-# like 'f:/gv/djgpp/bin/i586-pc-msdosdjgpp-gcc'.
+# If building on Windows or Linux, '$(DJGPP_PREFIX)-gcc' should become
+# something like 'i586-pc-msdosdjgpp-gcc' or a full path like
+# 'f:/gv/djgpp/bin/i586-pc-msdosdjgpp-gcc'.
 #
 # If building on plain old DOS, it is simply 'gcc' which 'make' should
 # find on %PATH.
 #
-ifeq ($(OS),Windows_NT)
-  ifeq ($(DJ_PREFIX),)
-    $(error Define a $(DJ_PREFIX) to point to the ROOT of the djgpp cross compiler).
-  endif
-
-  BIN_PREFIX ?= $(DJ_PREFIX)
-
-  #
-  # In case %DJDIR is not set under Windows. Why would it exist?
-  #
-  DJDIR ?= e:/djgpp
-else
-  BIN_PREFIX =
+ifneq ($(DJGPP_PREFIX),)
+  BIN_PREFIX = $(DJGPP_PREFIX)-
+else ifeq ($(OS),Windows_NT)
+  $(error Define a DJGPP_PREFIX to invoke the djgpp cross compiler).
 endif
+
+#
+# In case %DJDIR is not set under Windows. Why would it exist?
+#
+DJDIR ?= e:/djgpp
 
 CC      =  $(BIN_PREFIX)gcc
 CFLAGS  = -Wall -W -Wno-sign-compare -g -O2 -I$(INC_DIR)
