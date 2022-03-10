@@ -93,7 +93,9 @@ usage ()
 gen_djgpp ()
 {
   echo "Generating DJGPP makefile, directory and dependencies"
-  echo "BIN_PREFIX = $DJGPP_PREFIX-" > djgpp.mak
+  echo "BIN_PREFIX = $DJGPP_PREFIX-"                 >  djgpp.mak
+  echo "W32_BIN2C_ = $util_dir/bin2c"                >> djgpp.mak
+  echo "W32_NASM_ ?= nasm"                           >> djgpp.mak
   $util_dir/mkmake -d build/djgpp makefile.all DJGPP >> djgpp.mak
   $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
   echo "neterr.c: build/djgpp/syserr.c"          >> build/djgpp/watt32.dep
