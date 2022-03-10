@@ -157,7 +157,9 @@ goto next
 :djgpp
 ::
 echo Generating DJGPP makefile, directory, errnos and dependencies
-%MKMAKE% -o djgpp.mak -d build\djgpp makefile.all DJGPP FLAT
+echo #                                                      > djgpp.mak
+if not %DJGPP_PREFIX%.==. echo BIN_PREFIX = %DJGPP_PREFIX%->> djgpp.mak
+%MKMAKE% -d build\djgpp makefile.all DJGPP FLAT            >> djgpp.mak
 %MKDEP%  -s.o -p$(OBJDIR)/ *.c *.h   > build\djgpp\watt32.dep
 echo neterr.c: build/djgpp/syserr.c >> build\djgpp\watt32.dep
 

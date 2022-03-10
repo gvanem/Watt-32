@@ -195,7 +195,7 @@ def get_env_vars_common():
   #
   if builder == 'djgpp':
     env_var['DJGPP']     = env_var['CI_ROOT'].replace ('\\','/')
-    env_var['DJ_PREFIX'] = env_var['DJGPP'] + '/bin/i586-pc-msdosdjgpp-'
+    env_var['DJGPP_PREFIX'] = env_var['DJGPP'] + '/bin/i586-pc-msdosdjgpp'
 
   if builder == 'watcom':
     env_var['WATCOM']      = env_var['CI_ROOT']

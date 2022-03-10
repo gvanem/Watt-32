@@ -87,7 +87,7 @@ set MINGW64=%APPVEYOR_BUILD_FOLDER_UNIX%
 :: 7z can create only 1 level of missing directories. So a '%CI_ROOT%\djgpp' will not work
 ::
 set DJGPP=%APPVEYOR_BUILD_FOLDER_UNIX%/CI-temp
-set DJ_PREFIX=%DJGPP%/bin/i586-pc-msdosdjgpp-
+set DJGPP_PREFIX=%DJGPP%/bin/i586-pc-msdosdjgpp
 
 ::
 :: Set env-var for building with Watcom 2.0
