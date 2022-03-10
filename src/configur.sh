@@ -21,7 +21,14 @@
 #
 # target triplet for cross-djgpp toolchain:
 #
-DJGPP_PREFIX="i586-pc-msdosdjgpp"
+if [ -z "$DJGPP_PREFIX" ]; then
+  for i in i{3..7}86-pc-msdosdjgpp; do
+    if which $i-gcc 2>&1 > /dev/null; then
+      DJGPP_PREFIX=$i
+      break
+    fi
+  done
+fi
 
 #
 # target triplet for cross-win64 toolchain, MinGW-w64:
@@ -76,8 +83,9 @@ usage ()
 #
 gen_djgpp ()
 {
-  echo "Generating DJGPP makefile, directory, errnos and dependencies"
-  ../util/linux/mkmake -o djgpp.mak -d              build/djgpp makefile.all DJGPP
+  echo "Generating DJGPP makefile, directory and dependencies"
+  echo "BIN_PREFIX = $DJGPP_PREFIX-" > djgpp.mak
+  ../util/linux/mkmake -d build/djgpp makefile.all DJGPP >> djgpp.mak
   ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
   echo "neterr.c: build/djgpp/syserr.c"          >> build/djgpp/watt32.dep
 
