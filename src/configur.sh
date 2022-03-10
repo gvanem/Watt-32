@@ -19,6 +19,15 @@
 #
 
 #
+# detect which utility programs to use
+#
+case $(uname) in
+MINGW*|MSYS*) util_dir=../util/win32 ;;
+*)            util_dir=../util/linux ;;
+# non-linux users will need to recompile util/linux/* for their platform.
+esac
+
+#
 # target triplet for cross-djgpp toolchain:
 #
 if [ -z "$DJGPP_PREFIX" ]; then
@@ -85,8 +94,8 @@ gen_djgpp ()
 {
   echo "Generating DJGPP makefile, directory and dependencies"
   echo "BIN_PREFIX = $DJGPP_PREFIX-" > djgpp.mak
-  ../util/linux/mkmake -d build/djgpp makefile.all DJGPP >> djgpp.mak
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
+  $util_dir/mkmake -d build/djgpp makefile.all DJGPP >> djgpp.mak
+  $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
   echo "neterr.c: build/djgpp/syserr.c"          >> build/djgpp/watt32.dep
 
   #
@@ -104,8 +113,8 @@ gen_djgpp ()
 gen_mingw32 ()
 {
   echo "Generating MinGW32 makefile, directory, errnos and dependencies"
-  ../util/linux/mkmake -o MinGW32.mak -d             build/MinGW32 makefile.all MINGW32 WIN32
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW32/watt32.dep
+  $util_dir/mkmake -o MinGW32.mak -d             build/MinGW32 makefile.all MINGW32 WIN32
+  $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW32/watt32.dep
   echo "neterr.c: build/MinGW32/syserr.c"         >> build/MinGW32/watt32.dep
 
   #
@@ -125,9 +134,9 @@ gen_mingw32 ()
 gen_mingw64 ()
 {
   echo "Generating MinGW64-w64 makefiles, directory, errnos and dependencies"
-  ../util/linux/mkmake -o MinGW64_32.mak -d          build/MinGW64/32bit makefile.all MINGW64 WIN32
-  ../util/linux/mkmake -o MinGW64_64.mak -d          build/MinGW64/64bit makefile.all MINGW64 WIN64
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW64/watt32.dep
+  $util_dir/mkmake -o MinGW64_32.mak -d          build/MinGW64/32bit makefile.all MINGW64 WIN32
+  $util_dir/mkmake -o MinGW64_64.mak -d          build/MinGW64/64bit makefile.all MINGW64 WIN64
+  $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW64/watt32.dep
   echo "neterr.c: build/MinGW64/syserr.c"         >> build/MinGW64/watt32.dep
 
   #
@@ -150,9 +159,9 @@ gen_mingw64 ()
 gen_cygwin ()
 {
   echo "Generating Cygwin makefiles, directories and dependencies"
-  ../util/linux/mkmake -o Cygwin_32.mak -d           build/CygWin/32bit makefile.all CYGWIN WIN32
-  ../util/linux/mkmake -o Cygwin_64.mak -d           build/CygWin/64bit makefile.all CYGWIN WIN64
-  ../util/linux/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/CygWin/watt32.dep
+  $util_dir/mkmake -o Cygwin_32.mak -d           build/CygWin/32bit makefile.all CYGWIN WIN32
+  $util_dir/mkmake -o Cygwin_64.mak -d           build/CygWin/64bit makefile.all CYGWIN WIN64
+  $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/CygWin/watt32.dep
 
   echo "Run GNU make to make target(s):"
   echo "    'make -f Cygwin_32.mak'"
@@ -168,12 +177,12 @@ gen_cygwin ()
 gen_clang ()
 {
   echo "Generating clang-cl (Win32/Win64, release/debug) makefiles, directories, errnos and dependencies"
-  ../util/linux/mkmake -o clang-release_32.mak -d build/clang/32bit/release makefile.all CLANG WIN32 RELEASE
-  ../util/linux/mkmake -o clang-release_64.mak -d build/clang/64bit/release makefile.all CLANG WIN64 RELEASE
-  ../util/linux/mkmake -o clang-debug_32.mak   -d build/clang/32bit/debug   makefile.all CLANG WIN32 DEBUG
-  ../util/linux/mkmake -o clang-debug_64.mak   -d build/clang/64bit/debug   makefile.all CLANG WIN64 DEBUG
+  $util_dir/mkmake -o clang-release_32.mak -d build/clang/32bit/release makefile.all CLANG WIN32 RELEASE
+  $util_dir/mkmake -o clang-release_64.mak -d build/clang/64bit/release makefile.all CLANG WIN64 RELEASE
+  $util_dir/mkmake -o clang-debug_32.mak   -d build/clang/32bit/debug   makefile.all CLANG WIN32 DEBUG
+  $util_dir/mkmake -o clang-debug_64.mak   -d build/clang/64bit/debug   makefile.all CLANG WIN64 DEBUG
 
-  ../util/linux/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/clang/watt32.dep
+  $util_dir/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/clang/watt32.dep
   echo "neterr.c: build/clang/syserr.c"            >> build/clang/watt32.dep
 
   #
@@ -192,12 +201,12 @@ gen_clang ()
 gen_watcom ()
 {
   echo "Generating Watcom makefiles, directories, errnos and dependencies"
-  ../util/linux/mkmake -w -o watcom_s.mak -d build/watcom/small   makefile.all WATCOM SMALL
-  ../util/linux/mkmake -w -o watcom_l.mak -d build/watcom/large   makefile.all WATCOM LARGE
-  ../util/linux/mkmake -w -o watcom_3.mak -d build/watcom/small32 makefile.all WATCOM SMALL32
-  ../util/linux/mkmake -w -o watcom_f.mak -d build/watcom/flat    makefile.all WATCOM FLAT
-  ../util/linux/mkmake -w -o watcom_x.mak -d build/watcom/x32vm   makefile.all WATCOM FLAT X32VM
-  ../util/linux/mkmake -w -o watcom_w.mak -d build/watcom/win32   makefile.all WATCOM WIN32
+  $util_dir/mkmake -w -o watcom_s.mak -d build/watcom/small   makefile.all WATCOM SMALL
+  $util_dir/mkmake -w -o watcom_l.mak -d build/watcom/large   makefile.all WATCOM LARGE
+  $util_dir/mkmake -w -o watcom_3.mak -d build/watcom/small32 makefile.all WATCOM SMALL32
+  $util_dir/mkmake -w -o watcom_f.mak -d build/watcom/flat    makefile.all WATCOM FLAT
+  $util_dir/mkmake -w -o watcom_x.mak -d build/watcom/x32vm   makefile.all WATCOM FLAT X32VM
+  $util_dir/mkmake -w -o watcom_w.mak -d build/watcom/win32   makefile.all WATCOM WIN32
 
   #
   # This require dosemu be installed
