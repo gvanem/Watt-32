@@ -254,15 +254,6 @@ prefix = /dev/env/DJDIR/net/watt
 CFLAGS = -O3 -g -I. -I../inc -DWATT32_BUILD -W -Wall -Wno-strict-aliasing \
          -march=i386 -mtune=i586
 
-ifeq ($(filter 2 3 4,$(word 3, $(shell true | $(CC) -E -dD -x c - | grep 'define\ *__GNUC__'))),)
-  #
-  # We have gcc >= 5.x and we must ensure that always traditional
-  # GNU extern inline semantics are used (aka -fgnu89-inline) even
-  # if ISO C99 semantics have been specified.
-  #
-  CFLAGS += -fgnu89-inline
-endif
-
 STAT_LIB = ../lib/libwatt.a
 OBJDIR   = build/djgpp
 OBJPATH  = $(OBJDIR)/
@@ -271,6 +262,15 @@ CC     = $(BIN_PREFIX)gcc
 AR     = $(BIN_PREFIX)ar rs
 AS     = $(BIN_PREFIX)as
 AFLAGS = # --gdwarf2
+
+ifeq ($(filter 2 3 4,$(word 3, $(shell true | $(CC) -E -dD -x c - | grep 'define\ *__GNUC__'))),)
+  #
+  # We have gcc >= 5.x and we must ensure that always traditional
+  # GNU extern inline semantics are used (aka -fgnu89-inline) even
+  # if ISO C99 semantics have been specified.
+  #
+  CFLAGS += -fgnu89-inline
+endif
 
 OBJS := $(subst .obj,.o,$(OBJS))
 
