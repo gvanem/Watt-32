@@ -15,11 +15,6 @@ default all:
 	@echo 'Usage: "make -f dj-errno.mak dj_err.exe"'
 	@echo '    or "make -f dj-errno.mak win32/dj_err.exe" (requires a MinGW gcc)'
 
-#
-# Assume plain DOS for now.
-#
-BIN_PREFIX =
-
 ifeq ($(OS),Windows_NT)
   ifneq ($(DJ_PREFIX),)
     #
