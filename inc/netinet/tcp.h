@@ -38,6 +38,9 @@
 #ifndef __NETINET_TCP_H
 #define __NETINET_TCP_H
 
+#include <sys/cdefs.h>
+#include <sys/wtypes.h>
+
 typedef u_long  tcp_seq;
 typedef u_long  tcp_cc;                 /* connection count per rfc1644 */
 
