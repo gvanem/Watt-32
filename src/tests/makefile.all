@@ -149,6 +149,30 @@ VPATH = ..
 #
 W32_CFLAGS = -DWATT32 -DTEST_PROG -DWATT32_STATIC -I.. -I../../inc
 
+@ifdef BORLAND
+  W32_CFLAGS += -I../build/borland
+@elifdef WATCOM
+  W32_CFLAGS += -I"../build/watcom"
+@elifdef DJGPP
+  W32_CFLAGS += -I../build/djgpp
+@elifdef VISUALC
+  W32_CFLAGS += -I../build/visualc
+@elifdef MINGW32
+  W32_CFLAGS += -I../build/MinGW32
+@elifdef MINGW64
+  W32_CFLAGS += -I../build/MinGW64
+@elifdef ORANGEC
+  W32_CFLAGS += -I../build/orangec
+@elifdef CYGWIN
+  W32_CFLAGS += -I../build/CygWin
+@elifdef CLANG
+  W32_CFLAGS += -I../build/clang
+@elifdef PELLESC
+  W32_CFLAGS += -I..\build\pellesc
+@elifdef HIGHC
+  W32_CFLAGS += -I../build/highc
+@endif
+
 #
 # Used for all non-Watt-32 test programs (uses Winsock2):
 #

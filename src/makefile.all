@@ -256,8 +256,8 @@ PKT_STUB = pkt_stub.h
 #
 prefix = /dev/env/DJDIR/net/watt
 
-CFLAGS = -O3 -g -I. -I../inc -DWATT32_BUILD -W -Wall -Wno-strict-aliasing \
-         -march=i386 -mtune=i586
+CFLAGS = -O3 -g -I. -I../inc -Ibuild/djgpp -DWATT32_BUILD -W -Wall \
+         -Wno-strict-aliasing -march=i386 -mtune=i586
 
 #
 # Add this for all gcc compilers since it could create havoc to the
@@ -433,7 +433,8 @@ OBJPATH = $(OBJDIR)\ #
   CFLAGS = $(CFLAGS) -w-aus- -w-pia- -w-csu-
 !endif
 
-CFLAGS  = $(CFLAGS) -q -c -O -v -vi- -d -Tt -w  -I. -I..\inc -n$(OBJDIR) -DWATT32_BUILD
+CFLAGS  = $(CFLAGS) -q -c -O -v -vi- -d -Tt -w  -I. -I..\inc -Ibuild\borland \
+          -n$(OBJDIR) -DWATT32_BUILD
 LDFLAGS = -tWD -lM -lm -q -lq -laa -lc
 
 AS = tasm32
@@ -475,7 +476,7 @@ $(OBJPATH)objects.arg: $(MAKE_FILE)
 
 $(C_ARGS): $(MAKE_FILE)
 	@copy &&|
-	  $(CFLAGS)
+	  $(CFLAGS) $(USER_CFLAGS)
 | $<
 
 $(OBJPATH)asmpkt.obj:   asmpkt.asm
@@ -582,7 +583,7 @@ LINK_ARGS = $(OBJPATH)wlink.arg
 C_ARGS    = $(OBJPATH)wcc.arg
 
 AFLAGS += -zq -w3 -d1 -I"../inc"
-CFLAGS += -zq -wx -DWATT32_BUILD -I. -I"../inc"
+CFLAGS += -zq -wx -DWATT32_BUILD -I. -I"../inc" -I"build/watcom"
 @ifdef DEBUG
 CFLAGS += -d2
 @else
@@ -656,7 +657,7 @@ $(OBJPATH)cpumodel.obj: cpumodel.asm
 
 $(C_ARGS): $(__MAKEFILES__)
 	%create $^@
-	@%append $^@ $(CFLAGS) $(I_CFLAGS)
+	@%append $^@ $(CFLAGS) $(I_CFLAGS) $(USER_CFLAGS)
 
 $(LIB_ARGS): $(__MAKEFILES__)
 	%create $^@
@@ -718,7 +719,8 @@ clean: .SYMBOLIC
 # or the "Build Tools for Visual Studio":
 #   https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
 #
-CFLAGS = -nologo -Zi -W3 -DWATT32_BUILD -D_WIN32_WINNT=0x0601 -I. -I../inc
+CFLAGS = -nologo -Zi -W3 -DWATT32_BUILD -D_WIN32_WINNT=0x0601 -I. -I../inc \
+         -Ibuild/visualc
 
 LDFLAGS = -machine:$(CPU)
 
@@ -804,7 +806,7 @@ all: $(C_ARGS) $(OBJPATH)cflags.h $(OBJPATH)cflagsbf.h $(TARGETS)
 	@echo All done
 
 $(C_ARGS): $(MAKE_FILE)
-	@echo -c $(CFLAGS) > $@
+	@echo -c $(CFLAGS) $(USER_CFLAGS) > $@
 
 $(LINK_ARGS): $(MAKE_FILE)
 	@echo $(LDFLAGS) $(OBJS) $(RESOURCE) $(EX_LIBS) > $@
@@ -877,6 +879,7 @@ endif
 
 CC     = "$(CLANG_ROOT)/bin/clang-cl.exe"
 CFLAGS = -nologo -Zi -Zo -GS- -I. -I../inc \
+         -Ibuild/clang                     \
          -DWATT32_BUILD                    \
          -D_CRT_SECURE_NO_WARNINGS         \
          -D_CRT_NONSTDC_NO_WARNINGS        \
@@ -1060,7 +1063,8 @@ OBJPATH   = $(OBJDIR)/
 CC     = hc386
 C_ARGS = $(OBJPATH)highc.arg
 
-CFLAGS = -I. -I../inc -I$(PHARLAP)/include -w3 -g -O2 -DWATT32_BUILD \
+CFLAGS = -I. -I../inc -Ibuild/highc -I$(PHARLAP)/include -w3 -g -O2  \
+         -DWATT32_BUILD                                              \
          -Hpentium_only -DBUGGY_FARPTR=1 -Hnocopyr -Hnoswap          \
          -Hon=relax_func_ptr_rules -Hon=Preload_args_from_memory     \
          -Hon=char_is_rep -Hon=quiet -Hoff=check_stack               \
@@ -1109,7 +1113,7 @@ IMP_LIB   = ../lib/x86/wattcp_occ_imp.lib
 WATT_DLL  = ../bin/watt-32.dll
 EX_LIBS   = user32.lib advapi32.lib
 
-CFLAGS    = -I. -I../inc -9 +v -O+a -O+i -w+ -wd148 -DWATT32_BUILD
+CFLAGS    = -I. -I../inc -Ibuild/orangec -9 +v -O+a -O+i -w+ -wd148 -DWATT32_BUILD
 LDFLAGS   = --shared -mx -l # --nologo -T:WIN32
 AS        = $(W32_NASM_)
 AFLAGS    = -DBITS_32 -f win32
@@ -1161,7 +1165,7 @@ clean:
 # Will soon history since it's not been updated for years.
 #
 CC      = gcc
-CFLAGS  = -O2 -g -Wall -Wno-strict-aliasing -mthreads -pipe -I. -I../inc \
+CFLAGS  = -O2 -g -Wall -Wno-strict-aliasing -mthreads -pipe -I. -I../inc -Ibuild/MinGW32 \
           -fdiagnostics-color=never -DWATT32_BUILD -D_WIN32_WINNT=0x0601 -DWINVER=0x0601
 
 LDFLAGS = -shared -Wl,--enable-stdcall-fixup,--print-map,--sort-common,--cref
@@ -1253,7 +1257,7 @@ else
   CFLAGS = -O0 -g2 -fgnu89-inline
 endif
 
-CFLAGS += -Wall -Wundef -Wno-strict-aliasing -I. -I../inc \
+CFLAGS += -Wall -Wundef -Wno-strict-aliasing -I. -I../inc -Ibuild/MinGW64 \
           -fdiagnostics-color=never -DWATT32_BUILD -D_WIN32_WINNT=0x0601 -DWINVER=0x0601
 LDFLAGS = -shared -Wl,--enable-stdcall-fixup,--print-map,--sort-common,--cref
 
@@ -1328,8 +1332,8 @@ clean:
 @elifdef CYGWIN
 
 CC       = gcc
-CFLAGS   = -m$(BITS) -O2 -g -Wall -Wno-unused-function -mthreads \
-           -fno-strict-aliasing -static-libgcc -I. -I../inc      \
+CFLAGS   = -m$(BITS) -O2 -g -Wall -Wno-unused-function -mthreads              \
+           -fno-strict-aliasing -static-libgcc -I. -I../inc -Ibuild/Cygwin    \
            -fdiagnostics-color=never -DWATT32_BUILD -D_WIN32_WINNT=0x0601
 LDFLAGS  = -m$(BITS) -shared -static-libgcc -Wl,--print-map
 AS       = as
@@ -1404,7 +1408,8 @@ OBJPATH   = $(OBJDIR)\ #
 
 CC     = pocc
 CFLAGS = $(CFLAGS) -DWATT32_BUILD -MT -X -Ox -Ob1 -Ze -Zi -W1 -Go \
-         -I$(PELLESC)\include -I$(PELLESC)\include\win -I. -I..\inc # -std:C99
+         -I$(PELLESC)\include -I$(PELLESC)\include\win -I. -I..\inc \
+         -Ibuild\pellesc # -std:C99
 
 AFLAGS = -c -nologo -Zi $(AFLAGS)
 
@@ -1485,7 +1490,7 @@ lang.c: lang.l
   endif
 
 $(C_ARGS): $(MAKEFILE_LIST)
-	$(call create_response_file, $@, -c $(CFLAGS))
+	$(call create_response_file, $@, -c $(CFLAGS) $(USER_CFLAGS))
 
 $(LIB_ARGS): $(OBJS) $(MAKEFILE_LIST)
 	$(call create_response_file, $@, $(OBJS))
@@ -1504,19 +1509,19 @@ $(LINK_ARGS): $(OBJS) $(RESOURCE) $(MAKEFILE_LIST)
   # GNU-Make rules uses shell 'sh' commands:
   #
 $(OBJPATH)cflags.h: $(MAKEFILE_LIST)
-	echo 'const char *w32_cflags = "$(CFLAGS)";' > $(OBJPATH)cflags.h
-	echo 'const char *w32_cc     = "$(CC)";'    >> $(OBJPATH)cflags.h
+	echo 'const char *w32_cflags = "$(CFLAGS) $(USER_CFLAGS)";' > $(OBJPATH)cflags.h
+	echo 'const char *w32_cc     = "$(CC)";'                   >> $(OBJPATH)cflags.h
 
 @elifdef WATCOM
 $(OBJPATH)cflags.h: $(__MAKEFILES__)
 	%create $^@
-	@%append $^@ const char *w32_cflags = "$(CFLAGS)";
+	@%append $^@ const char *w32_cflags = "$(CFLAGS) $(USER_CFLAGS)";
 	@%append $^@ const char *w32_cc     = "$(CC)";
 
 @elifdef BORLAND
 $(OBJPATH)cflags.h: $(MAKE_FILE)
-	echo const char *w32_cflags = '"$(CFLAGS)";' > $(OBJPATH)cflags.h
-	echo const char *w32_cc     = '"$(CC)";'    >> $(OBJPATH)cflags.h
+	echo const char *w32_cflags = '"$(CFLAGS) $(USER_CFLAGS)";' > $(OBJPATH)cflags.h
+	echo const char *w32_cc     = '"$(CC)";'                   >> $(OBJPATH)cflags.h
 
 @else
 #
@@ -1527,6 +1532,7 @@ $(OBJPATH)cflags.h: $(MAKE_FILE)
 $(OBJPATH)cflags.h: $(MAKE_FILE)
 	echo const char *w32_cflags =       > $(OBJPATH)cflags.h
 	echo            "$(CFLAGS)"        >> $(OBJPATH)cflags.h
+	echo            "$(USER_CFLAGS)"   >> $(OBJPATH)cflags.h
 	echo            "$(EXTRA_CFLAGS);" >> $(OBJPATH)cflags.h
 	echo const char *w32_cc = "$(CC)"; >> $(OBJPATH)cflags.h
 @endif

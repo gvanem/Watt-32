@@ -80,6 +80,10 @@ void process_makefile (const char *in_fname, const char *out_fname)
     }
   }
 
+  p = getenv ("CFLAGS");
+  if (!p) p = "";
+  fprintf (out, "USER_CFLAGS = %s\n", p);
+
   while (fgets(buf, sizeof(buf)-1, in))
   {
     p = buf;

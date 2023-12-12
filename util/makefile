@@ -1,6 +1,6 @@
 #
-#  GNU make makefile for the MkMake/MkDep/MkLang/MkImp/bin32c
-#  utilities used during Watt-32 developement
+#  GNU make makefile for the MkMake/MkDep/MkLang/MkConf/MkImp/bin2c
+#  utilities used during Watt-32 development
 #
 #  DOS versions:   Requires djgpp2 + SLang 1.3+ library installed.
 #  Win32 versions: Requires MinGW + Slang 1.3+ installed.
@@ -27,33 +27,27 @@ SLANG_CFLAGS = $(shell pkg-config --cflags slang)
 SLANG_LIBS   = $(shell pkg-config --libs slang)
 
 CC     = gcc
-CFLAGS = -Wall -g -save-temps # -s
+CFLAGS = -Os -Wall -g0 -save-temps # -s
 
-all: mkmake.exe mkdep.exe mklang.exe mkimp.exe dxegen.exe bin2c.exe
+UTILS := mkmake mkdep mklang mkconf bin2c
 
-win32: $(addprefix win32/, mkmake.exe mkdep.exe mklang.exe bin2c.exe)
+DJGPP_UTILS := $(addsuffix .exe,$(UTILS)) mkimp.exe dxegen.exe
+WIN32_UTILS := $(addprefix win32/,$(addsuffix .exe,$(UTILS)))
+LINUX_UTILS := $(addprefix linux/,$(UTILS))
 
-linux: $(addprefix linux/, mkmake mkdep mklang bin2c)
+all:   $(DJGPP_UTILS)
+
+win32: $(WIN32_UTILS)
+
+linux: $(LINUX_UTILS)
 
 #
 # DOS/djgpp binaries:
 #
-mkdep.exe: mkdep.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-mklang.exe: mklang.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-mkimp.exe: mkimp.c
-	$(CC) $(CFLAGS) -o $@ $^
-
 mkmake.exe: mkmake.c
 	$(CC) $(CFLAGS) -I$(SLANG_ROOT_DOS)/src -o $@ $^ $(SLANG_LIB_DOS)
 
-bin2c.exe: bin2c.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-dxegen.exe: dxegen.c
+%.exe: %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 #
@@ -66,26 +60,14 @@ ifeq ($(USE_MSVC),1)
   win32/mkmake.exe: mkmake.c
 	cl $(CL_CFLAGS) -Fe./$@ -I$(SLANG_ROOT_WIN)/src $(SLANG_LIB_WIN_CL) $< $(CL_LDFLAGS)
 
-  win32/mkdep.exe: mkdep.c
-	cl $(CL_CFLAGS) -Fe./$@ $< $(CL_LDFLAGS)
-
-  win32/mklang.exe: mklang.c
-	cl $(CL_CFLAGS) -Fe./$@ $< $(CL_LDFLAGS)
-
-  win32/bin2c.exe: bin2c.c
+  win32/%.exe: %.c
 	cl $(CL_CFLAGS) -Fe./$@ $< $(CL_LDFLAGS)
 
 else
   win32/mkmake.exe: mkmake.c
 	$(CC) -m32 $(CFLAGS) $(SLANG_CFLAGS) -o $@ $< $(SLANG_LIBS)
 
-  win32/mkdep.exe: mkdep.c
-	$(CC) -m32 $(CFLAGS) -o $@ $<
-
-  win32/mklang.exe: mklang.c
-	$(CC) -m32 $(CFLAGS) -o $@ $<
-
-  win32/bin2c.exe: bin2c.c
+  win32/%.exe: %.c
 	$(CC) -m32 $(CFLAGS) -o $@ $<
 endif
 
@@ -95,21 +77,19 @@ endif
 linux/mkmake: mkmake.c
 	$(CC) $(CFLAGS) $(SLANG_CFLAGS) -o $@ $< $(SLANG_LIBS)
 
-linux/mkdep: mkdep.c
+linux/%: %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-linux/mklang: mklang.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-linux/bin2c: bin2c.c
-	$(CC) $(CFLAGS) -o $@ $^
 
 mkimp.c: mkimp.l
 	flex -o$@ $^
 
 clean:
-	@rm -f *.o mk*.exe dxegen.exe bin2c.exe \
-               win32/mk*.exe win32/bin2c.exe \
-               linux/mk* linux/bin2c \
+	@rm -f $(DJGPP_UTILS)          \
+               $(WIN32_UTILS)          \
+               $(LINUX_UTILS)          \
+               *.o win32/*.o linux/*.o \
+               *.s win32/*.s linux/*.s \
+               *.i win32/*.i linux/*.i \
                mkimp.c mkimp_gr.c
 

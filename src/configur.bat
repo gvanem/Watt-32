@@ -25,6 +25,7 @@ if not exist %WATT_ROOT%\src\makefile.all goto not_set
 ::
 set     MKMAKE=..\util\mkmake.exe
 set      MKDEP=..\util\mkdep.exe
+set     MKCONF=..\util\mkconf.exe
 set     HC_ERR=..\util\hc_err.exe
 set     WC_ERR=..\util\wc_err.exe
 set    BCC_ERR=..\util\bcc_err.exe
@@ -32,19 +33,21 @@ set  W32_BIN2C=..\util\bin2c.exe
 set W32_BIN2C_=../util/bin2c.exe
 set   W32_NASM=..\util\nasm.exe
 set  W32_NASM_=../util/nasm.exe
-set    DJ_ERR=..\util\dj_err.exe
+set     DJ_ERR=..\util\dj_err.exe
+set    OPTIONS=
 
 ::
 :: Check for env-var %OS%.
 :: Ass-u-me, if set to anything (normally 'OS=Windows_NT'), we are on Windows.
 ::
-if %OS%. == . goto is_dos
+if %OS%. == . goto parse_options
 
 ::
 :: Use these programs under all versions of Windows.
 ::
 set     MKMAKE=..\util\win32\mkmake.exe
 set      MKDEP=..\util\win32\mkdep.exe
+set     MKCONF=..\util\win32\mkconf.exe
 set     HC_ERR=..\util\win32\hc_err.exe
 set     WC_ERR=..\util\win32\wc_err.exe
 set    BCC_ERR=..\util\win32\bcc_err.exe
@@ -52,9 +55,20 @@ set  W32_BIN2C=..\util\win32\bin2c.exe
 set W32_BIN2C_=../util/win32/bin2c.exe
 set   W32_NASM=..\util\win32\nasm.exe
 set  W32_NASM_=../util/win32/nasm.exe
-set    DJ_ERR=..\util\win32\dj_err.exe
+set     DJ_ERR=..\util\win32\dj_err.exe
 
-:is_dos
+:parse_options
+if %1.==.         goto usage
+if %1.==--help.   goto full_usage
+if %1.==-h.       goto usage
+if %1.==-?.       goto usage
+
+%MKCONF% --check %1
+if errorlevel 1   goto start
+
+set OPTIONS=%OPTIONS% %1
+shift
+goto parse_options
 
 :start
 if %1.==clang.    goto clang
@@ -70,11 +84,9 @@ if %1.==visualc.  goto visualc
 if %1.==watcom.   goto watcom
 if %1.==all.      goto all
 if %1.==clean.    goto clean
-if %1.==-h.       goto usage
-if %1.==-?.       goto usage
-if %1.==.         goto usage
-if not %1.==.     goto bad_usage
-goto quit
+if %1.==.         goto quit
+
+goto bad_usage
 
 ::--------------------------------------------------------------------------
 :borland
@@ -86,6 +98,7 @@ echo Generating Borland-C makefiles, directories, errnos and dependencies
 %MKMAKE% -o bcc_w.mak -d build\borland\win32 makefile.all BORLAND WIN32
 %MKDEP%  -s.obj -p$(OBJDIR)\ *.c *.h     > build\borland\watt32.dep
 echo neterr.c:  build\borland\syserr.c  >> build\borland\watt32.dep
+%MKCONF% %OPTIONS% > build\borland\userconf.h
 
 %BCC_ERR% -s > build\borland\syserr.c
 %BCC_ERR% -e > ..\inc\sys\borlandc.err
@@ -107,6 +120,7 @@ echo Generating Watcom makefiles, directories, errnos and dependencies
 %MKMAKE% -w -o watcom_x.mak -d build\watcom\x32vm   makefile.all WATCOM FLAT X32VM
 %MKMAKE% -w -o watcom_w.mak -d build\watcom\win32   makefile.all WATCOM WIN32
 %MKMAKE% -w -o watcom_3.mak -d build\watcom\small32 makefile.all WATCOM SMALL32
+%MKCONF% %OPTIONS% > build\watcom\userconf.h
 
 %WC_ERR% -s > build\watcom\syserr.c
 %WC_ERR% -e > ..\inc\sys\watcom.err
@@ -129,6 +143,7 @@ echo Generating Metaware High-C makefile, directory, errnos and dependencies
 %MKMAKE% -o highc.mak -d build\highc makefile.all HIGHC FLAT
 %MKDEP%  -s.obj -p$(OBJDIR)/ *.c *.h > build\highc\watt32.dep
 echo neterr.c: build/highc/syserr.c >> build\highc\watt32.dep
+%MKCONF% %OPTIONS% > build\highc\userconf.h
 
 %HC_ERR% -s > build\highc\syserr.c
 %HC_ERR% -e > ..\inc\sys\highc.err
@@ -144,6 +159,7 @@ echo Generating Orange-C makefile, directory, errnos and dependencies
 %MKMAKE% -o orangec.mak -d build\orangec makefile.all ORANGEC WIN32
 %MKDEP%  -s.obj -p$(OBJDIR)\ *.c *.h   > build\orangec\watt32.dep
 echo neterr.c: build\orangec\syserr.c >> build\orangec\watt32.dep
+%MKCONF% %OPTIONS% > build\orangec\userconf.h
 
 ..\util\win32\oc_err -s > build\orangec\syserr.c
 ..\util\win32\oc_err -e > ..\inc\sys\orangec.err
@@ -161,6 +177,7 @@ if not %DJGPP_PREFIX%.==. echo BIN_PREFIX = %DJGPP_PREFIX%->> djgpp.mak
 %MKMAKE% -d build\djgpp makefile.all DJGPP FLAT            >> djgpp.mak
 %MKDEP%  -s.o -p$(OBJDIR)/ *.c *.h   > build\djgpp\watt32.dep
 echo neterr.c: build/djgpp/syserr.c >> build\djgpp\watt32.dep
+%MKCONF% %OPTIONS% > build\djgpp\userconf.h
 
 %DJ_ERR% -s > build\djgpp\syserr.c
 %DJ_ERR% -e > ..\inc\sys\djgpp.err
@@ -177,10 +194,10 @@ echo Generating Microsoft Visual-C (x86/x64) makefiles, directories, errnos and 
 %MKMAKE% -o visualc-release_64.mak -d build\visualc\64bit\release makefile.all VISUALC WIN64 RELEASE
 %MKMAKE% -o visualc-debug_32.mak   -d build\visualc\32bit\debug   makefile.all VISUALC WIN32 DEBUG
 %MKMAKE% -o visualc-debug_64.mak   -d build\visualc\64bit\debug   makefile.all VISUALC WIN64 DEBUG
-
 %MKDEP%  -s.obj -p$(OBJDIR)\ *.c *.h                               > build\visualc\watt32.dep
 echo $(OBJDIR)\stkwalk.obj: stkwalk.cpp wattcp.h misc.h stkwalk.h >> build\visualc\watt32.dep
 echo neterr.c:  build\visualc\syserr.c                            >> build\visualc\watt32.dep
+%MKCONF% %OPTIONS% > build\visualc\userconf.h
 
 ..\util\win32\vc_err -s > build\visualc\syserr.c
 ..\util\win32\vc_err -e > ..\inc\sys\visualc.err
@@ -200,6 +217,7 @@ echo Generating MinGW32 makefile, directory, errnos and dependencies
 %MKMAKE% -o MinGW32.mak -d build\MinGW32 makefile.all MINGW32 WIN32
 %MKDEP%  -s.o -p$(OBJDIR)/ *.c *.h     > build\MinGW32\watt32.dep
 echo neterr.c: build/MinGW32/syserr.c >> build\MinGW32\watt32.dep
+%MKCONF% %OPTIONS% > build\MinGW32\userconf.h
 
 ..\util\mw_err -s > build\MinGW32\syserr.c
 ..\util\mw_err -e > ..\inc\sys\mingw32.err
@@ -217,6 +235,7 @@ echo Generating MinGW64-w64 makefiles, directories, errnos and dependencies
 %MKMAKE% -o MinGW64_64.mak             -d build\MinGW64\64bit makefile.all MINGW64 WIN64
 %MKDEP%  -s.o -p$(OBJDIR)/ *.c *.h      > build\MinGW64\watt32.dep
 echo neterr.c: build/MinGW64/syserr.c  >> build\MinGW64\watt32.dep
+%MKCONF% %OPTIONS% > build\MinGW64\userconf.h
 
 ..\util\mw64_err -s > build\MinGW64\syserr.c
 ..\util\mw64_err -e > ..\inc\sys\mingw64.err
@@ -235,6 +254,7 @@ echo Generating Cygwin (x86/x64) makefiles, directories and dependencies
 %MKMAKE% -o Cygwin_32.mak          -d build\Cygwin\32bit makefile.all CYGWIN WIN32
 %MKMAKE% -o Cygwin_64.mak          -d build\Cygwin\64bit makefile.all CYGWIN WIN64
 %MKDEP%  -s.o -p$(OBJDIR)/ *.c *.h >  build\Cygwin\watt32.dep
+%MKCONF% %OPTIONS% > build\Cygwin\userconf.h
 
 make.exe -s -f ../util/pkg-conf.mak cygwin_pkg
 make.exe -s -f ../util/pkg-conf.mak cygwin64_pkg
@@ -254,6 +274,7 @@ echo Generating PellesC makefiles, directories, errnos and dependencies
 %MKMAKE% -o pellesc_64.mak -d build\pellesc\64bit makefile.all PELLESC WIN64
 %MKDEP%  -s.obj -p$(OBJDIR)\ *.c *.h   > build\pellesc\watt32.dep
 echo neterr.c: build\pellesc\syserr.c >> build\pellesc\watt32.dep
+%MKCONF% %OPTIONS% > build\pellesc\userconf.h
 
 ..\util\po_err -s > build\pellesc\syserr.c
 ..\util\po_err -e > ..\inc\sys\pellesc.err
@@ -273,6 +294,7 @@ echo Generating 'clang-cl' makefiles, directories, errnos and dependencies
 %MKMAKE% -o clang-debug_64.mak   -d build\clang\64bit\debug   makefile.all CLANG WIN64 DEBUG
 %MKDEP% -s.obj -p$(OBJDIR)/ *.c *.h  > build\clang\watt32.dep
 echo neterr.c: build/clang/syserr.c >> build\clang\watt32.dep
+%MKCONF% %OPTIONS% > build\clang\userconf.h
 
 ..\util\win32\clang_err -s > build\clang\syserr.c
 ..\util\win32\clang_err -e > ..\inc\sys\clang.err
@@ -294,8 +316,22 @@ echo Unknown option '%1'.
 :usage
 ::
 echo Configuring Watt-32 tcp/ip targets.
-echo Usage: %0 {borland, clang, cygwin, djgpp, highc, mingw32, mingw64,
-echo            orangec, pellesc, visualc, watcom, all, clean}
+echo Usage: %0 [options...] targets...
+echo Available targets:
+echo   borland, clang, cygwin, djgpp, highc, mingw32, mingw64, orangec,
+echo   pellesc, visualc, watcom, all, clean
+echo Use --help to see a full list of options.
+goto quit
+
+::--------------------------------------------------------------------------
+:full_usage
+::
+echo Configuring Watt-32 tcp/ip targets.
+echo Usage: %0 [options...] targets...
+echo Available targets:
+echo   borland, clang, cygwin, djgpp, highc, mingw32, mingw64, orangec,
+echo   pellesc, visualc, watcom, all, clean
+%MKCONF% --help
 goto quit
 
 ::--------------------------------------------------------------------------
@@ -359,11 +395,25 @@ del ..\inc\sys\orangec.err
 del ..\inc\sys\pellesc.err
 del ..\inc\sys\highc.err
 del ..\inc\sys\watcom.err
+
+del build\djgpp\userconf.h
+del build\borland\userconf.h
+del build\highc\userconf.h
+del build\visualc\userconf.h
+del build\watcom\userconf.h
+del build\MinGW32\userconf.h
+del build\MinGW64\userconf.h
+del build\orange\userconf.h
+del build\pellesc\userconf.h
+del build\highc\userconf.h
+del build\watcom\userconf.h
 goto next
 
 ::------------------------------------------------------------
 :all
 ::
+if not %OPTIONS%.==. echo WARNING: Options ignored for "all": %OPTIONS%
+
 call %0 borland   %2
 call %0 watcom    %2
 call %0 djgpp     %2

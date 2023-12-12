@@ -74,18 +74,12 @@ missing_stuff ()
   exit 4;
 }
 
-bad_usage ()
-{
-  echo "Unknown option '$1'."
-  echo "Usage: $0 [djgpp mingw32 mingw64 cygwin clang watcom all clean]"
-  exit 2;
-}
-
 usage ()
 {
-  echo "Configuring Watt-32 tcp/ip targets."
-  echo "Usage: $0 [djgpp mingw32 mingw64 cygwin clang watcom all clean]"
-  exit 1;
+  echo "Usage: $0 [options...] <targets...>"
+  echo "Available targets:"
+  echo "  djgpp mingw32 mingw64 cygwin clang watcom all clean"
+  $util_dir/mkconf --help
 }
 
 #
@@ -99,7 +93,8 @@ gen_djgpp ()
   echo "W32_NASM_ ?= nasm"                                >> djgpp.mak
   $util_dir/mkmake -d build/djgpp makefile.all DJGPP FLAT >> djgpp.mak
   $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.[ch] > build/djgpp/watt32.dep
-  echo "neterr.c: build/djgpp/syserr.c"          >> build/djgpp/watt32.dep
+  echo "neterr.c: build/djgpp/syserr.c"      >> build/djgpp/watt32.dep
+  $util_dir/mkconf $OPTIONS                   > build/djgpp/userconf.h
 
   #
   # these hacks won't work because errnos.c relies on being compiled as a target-exe.
@@ -118,7 +113,8 @@ gen_mingw32 ()
   echo "Generating MinGW32 makefile, directory, errnos and dependencies"
   $util_dir/mkmake -o MinGW32.mak -d             build/MinGW32 makefile.all MINGW32 WIN32
   $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW32/watt32.dep
-  echo "neterr.c: build/MinGW32/syserr.c"         >> build/MinGW32/watt32.dep
+  echo "neterr.c: build/MinGW32/syserr.c"     >> build/MinGW32/watt32.dep
+  $util_dir/mkconf $OPTIONS                    > build/MinGW32/userconf.h
 
   #
   # these hacks won't work because errnos.c relies on being compiled as a target-exe.
@@ -140,7 +136,8 @@ gen_mingw64 ()
   $util_dir/mkmake -o MinGW64_32.mak -d          build/MinGW64/32bit makefile.all MINGW64 WIN32
   $util_dir/mkmake -o MinGW64_64.mak -d          build/MinGW64/64bit makefile.all MINGW64 WIN64
   $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/MinGW64/watt32.dep
-  echo "neterr.c: build/MinGW64/syserr.c"         >> build/MinGW64/watt32.dep
+  echo "neterr.c: build/MinGW64/syserr.c"     >> build/MinGW64/watt32.dep
+  $util_dir/mkconf $OPTIONS                    > build/MinGW64/userconf.h
 
   #
   # these hacks won't work because errnos.c relies on being compiled as a target-exe.
@@ -165,6 +162,7 @@ gen_cygwin ()
   $util_dir/mkmake -o Cygwin_32.mak -d           build/CygWin/32bit makefile.all CYGWIN WIN32
   $util_dir/mkmake -o Cygwin_64.mak -d           build/CygWin/64bit makefile.all CYGWIN WIN64
   $util_dir/mkdep -s.o -p\$\(OBJDIR\)/ *.c *.h > build/CygWin/watt32.dep
+  $util_dir/mkconf $OPTIONS                    > build/CygWin/userconf.h
 
   echo "Run GNU make to make target(s):"
   echo "    'make -f Cygwin_32.mak'"
@@ -184,9 +182,9 @@ gen_clang ()
   $util_dir/mkmake -o clang-release_64.mak -d build/clang/64bit/release makefile.all CLANG WIN64 RELEASE
   $util_dir/mkmake -o clang-debug_32.mak   -d build/clang/32bit/debug   makefile.all CLANG WIN32 DEBUG
   $util_dir/mkmake -o clang-debug_64.mak   -d build/clang/64bit/debug   makefile.all CLANG WIN64 DEBUG
-
   $util_dir/mkdep -s.obj -p\$\(OBJDIR\)/ *.[ch] > build/clang/watt32.dep
-  echo "neterr.c: build/clang/syserr.c"            >> build/clang/watt32.dep
+  echo "neterr.c: build/clang/syserr.c"        >> build/clang/watt32.dep
+  $util_dir/mkconf $OPTIONS                     > build/clang/userconf.h
 
   #
   # Not sure these will work (under Linux/Wine)?
@@ -210,6 +208,7 @@ gen_watcom ()
   $util_dir/mkmake -w -o watcom_f.mak -d build/watcom/flat    makefile.all WATCOM FLAT
   $util_dir/mkmake -w -o watcom_x.mak -d build/watcom/x32vm   makefile.all WATCOM FLAT X32VM
   $util_dir/mkmake -w -o watcom_w.mak -d build/watcom/win32   makefile.all WATCOM WIN32
+  $util_dir/mkconf $OPTIONS > build/watcom/userconf.h
 
   #
   # This require dosemu be installed
@@ -236,9 +235,11 @@ gen_all ()
 
 do_clean ()
 {
-  rm -f djgpp.mak watcom_{f,l,s,w,x,3}.mak MinGW32.mak MinGW64_{32,64}.mak CygWin_{32,64}.mak clang-release_{32,64}.mak clang-debug_{32,64}.mak
-  rm -f build/djgpp/watt32.dep  build/MinGW32/watt32.dep build/MinGW64/watt32.dep
-  rm -f build/CygWin/watt32.dep build/watcom/watt32.dep  build/clang/watt32.dep
+  rm -f djgpp.mak watcom_{f,l,s,w,x,3}.mak MinGW32.mak MinGW64_{32,64}.mak CygWin_{32,64}.mak clang-{release,debug}_{32,64}.mak
+  for i in djgpp MinGW32 MinGW64 CygWin watcom clang; do
+    rm -f build/$i/watt32.dep
+    rm -f build/$i/userconf.h
+  done
   rm -f build/djgpp/syserr.c build/watcom/syserr.c build/MinGW32/syserr.c build/MinGW64/syserr.c build/clang/syserr.c
   rm -f ../inc/sys/djgpp.err ../inc/sys/watcom.err ../inc/sys/mingw32.err ../inc/sys/mingw64.err ../inc/sys/clang.err
 }
@@ -257,18 +258,38 @@ test -d ../util      || { missing_stuff ; }
 #
 if test $# -lt 1; then
   usage
+  exit 1
 fi
-case $1 in
-  djgpp|mingw32|mingw64|cygwin|clang|watcom|all|clean)
+
+unset TARGETS OPTIONS
+
+for i in "$@"; do
+  case $i in
+    djgpp|mingw32|mingw64|cygwin|clang|watcom|all|clean)
+      TARGETS="$TARGETS $i"
       ;;
-  "-h"|"-?") usage ;;
-  *)  bad_usage $1 ;;
-esac
+
+    "-h"|"-?"|"--help")
+      usage
+      exit 1
+      ;;
+
+    *) # See if mkconf recognizes it
+      if $util_dir/mkconf --check $i; then
+        OPTIONS="$OPTIONS $i"
+      else
+        echo "Unknown option '$1'."
+        usage
+        exit 2
+      fi
+      ;;
+  esac
+done
 
 #
 # Process the cmdline args
 #
-for i in "$@"
+for i in $TARGETS
 do
  case $i in
   all)     gen_all      ;;
@@ -279,6 +300,5 @@ do
   cygwin)  gen_cygwin   ;;
   clang)   gen_clang    ;;
   watcom)  gen_watcom   ;;
-  *)       bad_usage $i;;
  esac
 done

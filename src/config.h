@@ -188,6 +188,11 @@
 #endif
 
 /*
+ * Include user options set from configure script.
+ */
+#include "userconf.h" /* @NO_DEP */
+
+/*
  * Test some illegal combinations.
  */
 #if defined(USE_BSD_API)
