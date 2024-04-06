@@ -1,0 +1,90 @@
+function UniqueName()
+	local filename = tostring(os.time()):sub(-8)
+	local file = io.open(filename, "r")
+
+	while file do
+		io.close(file)
+		filename = tostring(tonumber(filename) + 1):sub(-8)
+		file = io.open(filename, "r")
+	end
+
+	return filename
+end
+
+function CreateCTestFile(name)
+	local file = io.open(name, "w")
+	if file then
+		file:write("int main(void) {\n\treturn 0;\n}\n")
+		file:close()
+		return true
+	end
+
+	return false
+end
+
+function FileExists(name)
+	local file = io.open(name)
+	if file then
+		file:close()
+		return true
+	end
+
+	return false
+end
+
+function SanitizePath(family, path)
+	local sanitize
+	if family == "Unix" then
+		sanitize = path:gsub([[\]], [[/]])
+	else
+		sanitize = path:gsub([[/]], [[\]])
+	end
+
+	return sanitize
+end
+
+function SearchForExecutable(exec, delimiter)
+	local path = os.getenv("PATH")
+
+	for filePath in path:gmatch("[^" .. delimiter .. "]+") do
+		local path = filePath .. "/" .. exec
+
+		local file = io.open(path)
+
+		if file then
+			io.close(file)
+			return true
+		end
+	end
+
+	return false
+end
+
+function RunCommand(exec)
+	local handle = {os.execute(exec)}
+
+	if handle[1] == true and handle[2] == "exit" then
+		return handle[3]
+	end
+
+	return nil
+end
+
+function Check(msg)
+	io.write(msg .. "... ")
+	io.flush()
+end
+
+function Pass(msg)
+	print(msg)
+end
+
+function Fail(msg)
+	print(msg)
+	os.exit(1)
+end
+
+function Error()
+	print("Error!")
+	os.exit(2)
+end
