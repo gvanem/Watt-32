@@ -68,17 +68,14 @@ function CheckCompiler(family, makefile)
 				cc = "clang"
 			else
 				cc = "gcc"
-				CheckGccCompiler(cc, tmpName)
 			end
+			CheckGccCompiler(cc, tmpName)
 		end
 	else
 		return CheckCustomCompiler(cc, tmpName)
 	end
 
 	os.remove(tmpName .. ".c")
-
-	CheckCompilerIntSize()
-	CheckCompilerLongSize()
 end
 
 function CheckRemoveFileCmd(family, filename)

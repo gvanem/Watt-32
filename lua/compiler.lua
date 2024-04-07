@@ -1,17 +1,20 @@
 require("lua.util")
 
-function CheckAndReturnCommonExecutable(baseName)
-	local names = {
-		baseName,
-		"a", -- Typical of GCC when no output name is given
-	}
+function GetExecutableNames(name)
+	return {name, "a"}
+end
 
-	local extensions = {
-	".com",
-	".exe",
-	".out",
-	"", -- No extension, typical of GCC on Linux
-	}
+function GetExecutableExtensions()
+	return {".com", ".exe", ".out"}
+end
+
+function GetCompilerOutputExtensions()
+	return {".a", ".com", ".dll", ".exe", ".lib", ".o", ".obj", ".out"}
+end
+
+function CheckAndReturnCommonExecutable(baseName)
+	local names = GetExecutableNames(baseName)
+	local extensions = GetExecutableExtensions()
 
 	for _, name in ipairs(names) do
 		for _, extension in ipairs(extensions) do
@@ -27,23 +30,8 @@ function CheckAndReturnCommonExecutable(baseName)
 end
 
 function CheckAndRemoveCommonArtifacts(baseName)
-	local names = {
-		baseName,
-		"a", -- Typical of GCC when no output name is given
-	}
-
-	local extensions = {
-	".a",
-	".com",
-	".dll",
-	".exe",
-	".lib",
-	".o",
-	".obj",
-	".out",
-	"", -- No extension, typical of GCC on Linux
-	}
-
+	local names = GetExecutableNames(baseName)
+	local extensions = GetCompilerOutputExtensions()
 	local r = 0
 
 	for _, name in ipairs(names) do
@@ -78,16 +66,17 @@ function CheckCustomCompiler(cc, tmpName)
 		".c"
 	)
 
-	if CheckAndRemoveCommonArtifacts(tmpName) then Pass("Yes") else
+	local exists = CheckAndRemoveCommonArtifacts(tmpName)
+	if exists > 0 then Pass("Yes") else
 		os.remove(tmpName .. ".c")
 		Fail("No")
 	end
 
 	Compiler.cc = cc
+	Compiler.cl = cc
 
 	local cflags = CheckEnvVar("CFLAGS")
 	if cflags then
-		os.remove(tmpName)
 		Check("Checking if C compiler works with CFLAGS")
 		local r = RunCommand (
 			cc ..
@@ -98,7 +87,9 @@ function CheckCustomCompiler(cc, tmpName)
 			".c"
 		)
 
-		if CheckAndRemoveCommonArtifacts(tmpName) then Pass("Yes") else
+		local exists = CheckAndRemoveCommonArtifacts(tmpName)
+		if exists > 0 then Pass("Yes")
+		else
 			os.remove(tmpName .. ".c")
 			Fail("No")
 		end

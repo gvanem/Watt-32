@@ -24,6 +24,8 @@ CheckDirContains(system.family, "src", {"accept.c", "pcpkt.c"})
 -- Create a basic C file to test the compiler
 CheckCompiler(system.family, Target.makefile)
 
+CheckCompilerIntSize()
+CheckCompilerLongSize()
 Check("Checking if Lua configuration script is finished and ready to use")
 Fail("No")
 
