@@ -60,6 +60,11 @@ function SearchForExecutable(exec, delimiter)
 	return false
 end
 
+function RunCommandLocal(exec)
+	if system.family == "Unix" then exec = "./" .. exec end
+	return RunCommand(exec)
+end
+
 function RunCommand(exec)
 	local handle = {os.execute(exec)}
 

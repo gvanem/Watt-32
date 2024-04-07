@@ -1,5 +1,31 @@
 require("lua.util")
 
+function CheckAndReturnCommonExecutable(baseName)
+	local names = {
+		baseName,
+		"a", -- Typical of GCC when no output name is given
+	}
+
+	local extensions = {
+	".com",
+	".exe",
+	".out",
+	"", -- No extension, typical of GCC on Linux
+	}
+
+	for _, name in ipairs(names) do
+		for _, extension in ipairs(extensions) do
+			local fileName = name .. extension
+			local file = io.open(fileName)
+
+			if file then
+				io.close(file)
+				return fileName
+			end
+		end
+	end
+end
+
 function CheckAndRemoveCommonArtifacts(baseName)
 	local names = {
 		baseName,
@@ -18,7 +44,7 @@ function CheckAndRemoveCommonArtifacts(baseName)
 	"", -- No extension, typical of GCC on Linux
 	}
 
-	r = 0
+	local r = 0
 
 	for _, name in ipairs(names) do
 		for _, extension in ipairs(extensions) do
@@ -107,7 +133,7 @@ function CheckGccCompiler(cc, tmpName)
 		tmpName .. ".c"
 	)
 
-	exist = CheckAndRemoveCommonArtifacts(tmpName)
+	local exist = CheckAndRemoveCommonArtifacts(tmpName)
 	if exist > 0 then Pass("Yes")
 	else
 		os.remove(tmpName .. ".c")
@@ -115,6 +141,7 @@ function CheckGccCompiler(cc, tmpName)
 	end
 
 	Compiler.cc = gcc
+	Compiler.cl = gcc
 
 	Check("Checking if '" .. gcc .. "' understands '-fdiagnostics-color=never'")
 	RunCommand (
@@ -130,50 +157,169 @@ function CheckGccCompiler(cc, tmpName)
 	else print("No") end
 end
 
-function CheckWatcomCompiler(tmpName)
+function CheckWccCompiler(tmpName)
 	Compiler.type = "watcom"
 	Compiler.output = "-fo="
 	Compiler.ld = "wlink"
 
+	Check("Checking wcc is available")
+
 	if Target.SkipCompilerCheck then
-		Check("Checking a Open Watcom C compiler is available")
-		Compiler.cc = {"wcc", "wcc386"}
+		Compiler.cc = "wcc"
+		Compiler.cl = "wcl"
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
 	end
 
-	Compiler.cc = {}
-
-	Check("Checking wcc is available")
-
 	RunCommand (
-		"wcc " ..
+		"wcc -q " ..
 		tmpName .. ".c"
 	)
 
-	local wcc = CheckAndRemoveCommonArtifacts(tmpName)
-	if wcc > 0 then
-		Pass("Yes")
-		table.insert(Compiler.cc, "wcc")
-	else print("No") end
-
-	Check("Checking wcc386 is available")
-	RunCommand (
-		"wcc386 " ..
-		tmpName .. ".c"
-	)
-
-	local wcc386 = CheckAndRemoveCommonArtifacts(tmpName)
-	if wcc386 > 0 then
-		Pass("Yes")
-		table.insert(Compiler.cc, "wcc386")
-	else print("No") end
-
-	Check("Checking a Open Watcom C compiler is available")
-	if wcc > 0 or wcc386 > 0 then Pass("Yes")
+	local exist = CheckAndRemoveCommonArtifacts(tmpName)
+	if exist > 0 then Pass("Yes")
 	else
 		os.remove(tmpName .. ".c")
 		Fail("No")
 	end
+
+	Compiler.cc = "wcc"
+	Compiler.cl = "wcl -q"
+end
+
+function CheckWcc386Compiler(tmpName)
+	Compiler.type = "watcom"
+	Compiler.output = "-fo="
+	Compiler.ld = "wlink"
+
+	Check("Checking wcc386 is available")
+
+	if Target.SkipCompilerCheck then
+		Compiler.cc = "wcc386"
+		Compiler.cl = "wcl386"
+		os.remove(tmpName .. ".c")
+		Pass("Skipped")
+		return
+	end
+
+	RunCommand (
+		"wcc386 -q " ..
+		tmpName .. ".c"
+	)
+
+	local exist = CheckAndRemoveCommonArtifacts(tmpName)
+	if exist > 0 then Pass("Yes")
+	else
+		os.remove(tmpName .. ".c")
+		Fail("No")
+	end
+
+	Compiler.cc = "wcc386"
+	Compiler.cl = "wcl386 -q"
+end
+
+function GetBitSizeResult(fileName)
+	file = io.open(fileName)
+	if not file then return 0 end
+
+	local result = file:read("*a")
+	io.close(file)
+
+	if result == "65535\n" then return 16
+	elseif result == "4294967295\n" then return 32
+	elseif result == "18446744073709551615\n" then return 64
+	else return 0 end
+end
+
+function CheckCompilerIntSize()
+	Check("Checking size of 'int' C type in bits")
+
+	if Target.SkipCompilerCheck then
+		Pass("Skipped")
+		return
+	end
+
+	local tmpName = UniqueName()
+	local file = io.open(tmpName .. ".c", "w")
+
+	file:write(
+[[
+#include <stdio.h>
+int main(void) {
+	unsigned int i = -1;
+	printf("%u\n", i);
+	return 0;
+}
+]]
+	)
+
+	io.close(file)
+
+	RunCommand (
+		Compiler.cl .. " " ..
+		tmpName .. ".c"
+	)
+	os.remove(tmpName .. ".c")
+
+	local bin = CheckAndReturnCommonExecutable(tmpName)
+	if not bin then Error() end
+
+	RunCommandLocal(bin .. " > " .. tmpName .. ".txt")
+	os.remove(bin)
+
+	local result = GetBitSizeResult(tmpName .. ".txt")
+	os.remove(tmpName .. ".txt")
+
+	CheckAndRemoveCommonArtifacts(tmpName)
+	if result == 0 then Error() end
+
+	Pass(result)
+	Compiler.int = result
+end
+
+function CheckCompilerLongSize()
+	Check("Checking size of 'long' C type in bits")
+
+	if Target.SkipCompilerCheck then
+		Pass("Skipped")
+		return
+	end
+
+	local tmpName = UniqueName()
+	local file = io.open(tmpName .. ".c", "w")
+
+	file:write(
+[[
+#include <stdio.h>
+int main(void) {
+	unsigned long i = -1;
+	printf("%lu\n", i);
+	return 0;
+}
+]]
+	)
+
+	io.close(file)
+
+	RunCommand (
+		Compiler.cl .. " " ..
+		tmpName .. ".c"
+	)
+	os.remove(tmpName .. ".c")
+
+	local bin = CheckAndReturnCommonExecutable(tmpName)
+	if not bin then Error() end
+
+	RunCommandLocal(bin .. " > " .. tmpName .. ".txt")
+	os.remove(bin)
+
+	local result = GetBitSizeResult(tmpName .. ".txt")
+	os.remove(tmpName .. ".txt")
+
+	CheckAndRemoveCommonArtifacts(tmpName)
+	if result == 0 then Error() end
+
+	Pass(result)
+	Compiler.long = result
 end

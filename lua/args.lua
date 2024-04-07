@@ -14,11 +14,12 @@ end
 
 function TargetHelpStr()
 return "\tcc\t- Handle everything yourself with CC,CFLAGS,LD enviroment variables\n" ..
-"\tclang\t- A GCC compatible alternative compiler\n" ..
+"\tclang\t- A GCC compatible alternative compiler based on LLVM\n" ..
 "\tdjggp\t- A port of GCC for 80386+ DOS systems\n" ..
 "\tgcc\t- GNU Compiler Collection intended for Posix systems\n" ..
 "\tmingw\t- A port of GCC for Win32 based systems\n" ..
-"\twatcom\t- A C/C++ toolchain that can build 16-bit DOS programs\n"
+"\twcc\t- Open Watcom C/C++ toolchain to build 8086-80286 targets\n" ..
+"\twcc386\t- Open Watcom C/C++ toolchain to build 80386+ targets\n"
 end
 
 function OptionHelpStr()
@@ -47,7 +48,8 @@ function CheckMakefileRequestValid()
 		"djgpp",
 		"gcc",
 		"mingw",
-		"watcom",
+		"wcc",
+		"wcc386",
 	}
 
 	for _, a in ipairs(arg) do

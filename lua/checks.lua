@@ -58,9 +58,10 @@ function CheckCompiler(family, makefile)
 		Check("Guessing compiler")
 
 		if makefile == "cc" then Fail("None") -- Nothing was specified
-		elseif makefile == "watcom" then
+		elseif makefile == "wcc" or makefile == "wcc386" then
 			Pass("Open Watcom")
-			CheckWatcomCompiler(tmpName)
+			if makefile == "wcc386" then CheckWcc386Compiler(tmpName)
+			else CheckWccCompiler(tmpName) end
 		else
 			Pass("GNU Compiler Collection or compatible")
 			if makefile == "clang" then
@@ -76,7 +77,8 @@ function CheckCompiler(family, makefile)
 
 	os.remove(tmpName .. ".c")
 
-	return cc, cflags
+	CheckCompilerIntSize()
+	CheckCompilerLongSize()
 end
 
 function CheckRemoveFileCmd(family, filename)
