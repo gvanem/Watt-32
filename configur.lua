@@ -1,9 +1,11 @@
+require("lua.args")
 require("lua.checks")
 require("lua.util")
 
 -- Get which makefile to generate
-target = {}
-target.makefile = CheckMakefileRequestValid(arg[1])
+Target = {}
+GetOpt()
+Target.makefile = CheckMakefileRequestValid()
 
 -- Can the system acheve basic things?
 system = {}
@@ -20,7 +22,7 @@ CheckDirContains(system.family, "inc", {"net/if.h", "tcp.h"})
 CheckDirContains(system.family, "src", {"accept.c", "pcpkt.c"})
 
 -- Create a basic C file to test the compiler
-CheckCompiler(system.family, target.makefile)
+CheckCompiler(system.family, Target.makefile)
 
 Check("Checking if Lua configuration script is finished and ready to use")
 Fail("No")

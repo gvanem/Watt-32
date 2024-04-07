@@ -160,33 +160,3 @@ function CheckDirContains(family, dir, files)
 	Pass("Yes")
 	return true
 end
-
-function CheckMakefileRequestValid(makefile)
-	-- TODO: Add Borland C and other antiques?
-	local options = {
-		"cc",
-		"clang",
-		"djgpp",
-		"gcc",
-		"mingw",
-		"watcom",
-	}
-
-	for _, option in ipairs(options) do
-		if makefile == option then return makefile end
-	end
-
-	if os.getenv('CC') then return "cc" end
-
-	print(
-		"Specify a makefile to generate, options are:\n" ..
-		"\tcc\t- Handle everything yourself with CC,CFLAGS,LD enviroment variables\n" ..
-		"\tclang\t- A GCC compatible alternative compiler\n" ..
-		"\tdjggp\t- A port of GCC for 80386+ DOS systems\n" ..
-		"\tgcc\t- GNU Compiler Collection intended for Posix systems\n" ..
-		"\tmingw\t- A port of GCC for Win32 based systems\n" ..
-		"\twatcom\t- A C/C++ toolchain that can build 16-bit DOS programs\n"
-	)
-
-	os.exit(1)
-end

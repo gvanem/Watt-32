@@ -39,6 +39,12 @@ end
 function CheckCustomCompiler(cc, tmpName)
 	Check("Checking CC compiler works")
 
+	if Target.SkipCompilerCheck then
+		os.remove(tmpName .. ".c")
+		Pass("Skipped")
+		return
+	end
+
 	RunCommand (
 		cc ..
 		" " ..
@@ -80,12 +86,21 @@ function CheckCustomCompiler(cc, tmpName)
 end
 
 function CheckGccCompiler(cc, tmpName)
+	local gcc = cc or "gcc"
+
 	Compiler.type = "gcc"
 	Compiler.output = "-o "
 	Compiler.ld = "ld"
 
-	gcc = cc or "gcc"
 	Check("Checking '" .. gcc .. "' is available")
+
+	if Target.SkipCompilerCheck then
+		os.remove(tmpName .. ".c")
+		Pass("Skipped")
+		Compiler.cc = gcc
+		return
+	end
+
 	RunCommand (
 		gcc ..
 		" " ..
@@ -109,7 +124,7 @@ function CheckGccCompiler(cc, tmpName)
 	)
 
 	exist = CheckAndRemoveCommonArtifacts(tmpName)
-	if exist > 0 then 
+	if exist > 0 then
 		Pass("Yes")
 		Compiler.colorOption = true
 	else print("No") end
@@ -120,16 +135,25 @@ function CheckWatcomCompiler(tmpName)
 	Compiler.output = "-fo="
 	Compiler.ld = "wlink"
 
+	if Target.SkipCompilerCheck then
+		Check("Checking a Open Watcom C compiler is available")
+		Compiler.cc = {"wcc", "wcc386"}
+		os.remove(tmpName .. ".c")
+		Pass("Skipped")
+		return
+	end
+
 	Compiler.cc = {}
 
 	Check("Checking wcc is available")
+
 	RunCommand (
 		"wcc " ..
 		tmpName .. ".c"
 	)
 
 	local wcc = CheckAndRemoveCommonArtifacts(tmpName)
-	if wcc > 0 then 
+	if wcc > 0 then
 		Pass("Yes")
 		table.insert(Compiler.cc, "wcc")
 	else print("No") end
@@ -141,8 +165,8 @@ function CheckWatcomCompiler(tmpName)
 	)
 
 	local wcc386 = CheckAndRemoveCommonArtifacts(tmpName)
-	if wcc386 > 0 then 
-		Pass("Yes") 
+	if wcc386 > 0 then
+		Pass("Yes")
 		table.insert(Compiler.cc, "wcc386")
 	else print("No") end
 
