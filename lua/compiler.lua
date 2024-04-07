@@ -22,7 +22,7 @@ function CheckAndReturnCommonExecutable(baseName)
 			local file = io.open(fileName)
 
 			if file then
-				io.close(file)
+				file:close()
 				return fileName
 			end
 		end
@@ -40,7 +40,7 @@ function CheckAndRemoveCommonArtifacts(baseName)
 			local file = io.open(fileName)
 
 			if file then
-				io.close(file)
+				file:close()
 				os.remove(fileName)
 				r = r + 1
 			end
@@ -53,7 +53,7 @@ end
 function CheckCustomCompiler(cc, tmpName)
 	Check("Checking CC compiler works")
 
-	if Target.SkipCompilerCheck then
+	if Target.skipChecks then
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
@@ -111,7 +111,7 @@ function CheckGccCompiler(cc, tmpName)
 
 	Check("Checking '" .. gcc .. "' is available")
 
-	if Target.SkipCompilerCheck then
+	if Target.skipChecks then
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		Compiler.cc = gcc
@@ -155,7 +155,7 @@ function CheckWccCompiler(tmpName)
 
 	Check("Checking wcc is available")
 
-	if Target.SkipCompilerCheck then
+	if Target.skipChecks then
 		Compiler.cc = "wcc"
 		Compiler.cl = "wcl"
 		os.remove(tmpName .. ".c")
@@ -186,7 +186,7 @@ function CheckWcc386Compiler(tmpName)
 
 	Check("Checking wcc386 is available")
 
-	if Target.SkipCompilerCheck then
+	if Target.skipChecks then
 		Compiler.cc = "wcc386"
 		Compiler.cl = "wcl386"
 		os.remove(tmpName .. ".c")
@@ -215,7 +215,7 @@ function GetBitSizeResult(fileName)
 	if not file then return 0 end
 
 	local result = file:read("*a")
-	io.close(file)
+	file:close()
 
 	if result == "65535\n" then return 16
 	elseif result == "4294967295\n" then return 32
@@ -226,8 +226,9 @@ end
 function CheckCompilerIntSize()
 	Check("Checking size of 'int' C type in bits")
 
-	if Target.SkipCompilerCheck then
-		Pass("Skipped")
+	if Target.skipChecks then
+		Compiler.int = Target.makefile == "wcc" and 16 or 32
+		Pass("Skipped (assuming " .. Compiler.int ..")")
 		return
 	end
 
@@ -244,8 +245,7 @@ int main(void) {
 }
 ]]
 	)
-
-	io.close(file)
+	file:close()
 
 	RunCommand (
 		Compiler.cl .. " " ..
@@ -272,8 +272,9 @@ end
 function CheckCompilerLongSize()
 	Check("Checking size of 'long' C type in bits")
 
-	if Target.SkipCompilerCheck then
-		Pass("Skipped")
+	if Target.skipChecks then
+		Compiler.long = 32
+		Pass("Skipped (assuming " .. Compiler.long ..")")
 		return
 	end
 
@@ -290,8 +291,7 @@ int main(void) {
 }
 ]]
 	)
-
-	io.close(file)
+	file:close()
 
 	RunCommand (
 		Compiler.cl .. " " ..

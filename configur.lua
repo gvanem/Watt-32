@@ -2,31 +2,41 @@ require("lua.args")
 require("lua.checks")
 require("lua.util")
 
--- Get which makefile to generate
+-- Check parameters
 Target = {}
 GetOpt()
+
+-- Get which makefile to generate
 Target.makefile = CheckMakefileRequestValid()
 
 -- Can the system acheve basic things?
-system = {}
-system.family = CheckSystemFamily()
+System = {}
+System.family = CheckSystemFamily()
 TmpFolder = UniqueName()
 
-system.divider = system.family == "unix" and "/" or "\\"
-system.md = CheckCreateDirCmd(system.family, TmpFolder)
-system.rm = CheckRemoveFileCmd(system.family, TmpFolder)
-system.rd = CheckRemoveDirCmd(system.family, TmpFolder)
+System.divider = System.family == "Unix" and "/" or "\\"
+System.md = CheckCreateDirCmd(System.family, TmpFolder)
+System.rm = CheckRemoveFileCmd(System.family, TmpFolder)
+System.rd = CheckRemoveDirCmd(System.family, TmpFolder)
 
 -- Does the project directory look correct?
-CheckDirContains(system.family, "inc", {"net/if.h", "tcp.h"})
-CheckDirContains(system.family, "src", {"accept.c", "pcpkt.c"})
+CheckDirContains(System.family, "inc", {"net/if.h", "tcp.h"})
+CheckDirContains(System.family, "src", {"accept.c", "pcpkt.c"})
 
 -- Create a basic C file to test the compiler
-CheckCompiler(system.family, Target.makefile)
+CheckCompiler(System.family, Target.makefile)
 
+-- Check size of standard types an actual 32-bit typedef can be defined
 CheckCompilerIntSize()
 CheckCompilerLongSize()
-Check("Checking if Lua configuration script is finished and ready to use")
-Fail("No")
+
+-- TODO: Check linker works
+
+-- TODO: Generate makefile and output enviroment
+
+-- TODO: Print valid makefile commands the same as 'configur(.bat/.sh)'
+
+Check("Checking script is still work-in-progress")
+Fail("Yes, thanks for testing. Please provide feedback.")
 
 os.exit()

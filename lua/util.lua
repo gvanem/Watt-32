@@ -3,7 +3,7 @@ function UniqueName()
 	local file = io.open(filename, "r")
 
 	while file do
-		io.close(file)
+		file:close()
 		filename = tostring(tonumber(filename) + 1):sub(-8)
 		file = io.open(filename, "r")
 	end
@@ -52,7 +52,7 @@ function SearchForExecutable(exec, delimiter)
 		local file = io.open(path)
 
 		if file then
-			io.close(file)
+			file:close()
 			return true
 		end
 	end
@@ -61,7 +61,7 @@ function SearchForExecutable(exec, delimiter)
 end
 
 function RunCommandLocal(exec)
-	if system.family == "Unix" then exec = "./" .. exec end
+	if System.family == "Unix" then exec = "./" .. exec end
 	return RunCommand(exec)
 end
 

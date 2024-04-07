@@ -36,7 +36,7 @@ function GetOpt()
 			end
 		end
 
-		if a == '-s' or a == '/s' then Target.SkipCompilerCheck = true end
+		if a == '-s' or a == '/s' then Target.skipChecks = true end
 	end
 end
 

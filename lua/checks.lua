@@ -88,14 +88,14 @@ function CheckRemoveFileCmd(family, filename)
 
 	if not file then Error() end
 
-	io.close(file)
+	file:close()
 
 	local e = exec .. " " .. path
 	RunCommand(e)
 
 	file = io.open(path)
 	if file then
-		io.close(file)
+		file:close()
 		Fail("No")
 	end
 
@@ -117,12 +117,12 @@ function CheckRemoveDirCmd(family, filename)
 	local e = exec .. " " .. filename
 	RunCommand(e)
 
-	io.close(file)
+	file:close()
 
 	-- The file shouldn't open since its folder has been deleted
 	local file = io.open(path)
 	if file then
-		io.close(file)
+		file:close()
 		Fail("No")
 	end
 
@@ -140,7 +140,7 @@ function CheckCreateDirCmd(family, filename)
 	file = io.open(filename .. "/1.txt", "a")
 
 	if file then
-		io.close(file)
+		file:close()
 		Pass("Yes")
 	else Fail("No") end
 
