@@ -96,10 +96,6 @@ function CheckCustomCompiler(cc, tmpName)
 
 		Compiler.cflags = cflags
 	end
-
-	local ld = CheckEnvVar("LD")
-
-	return Compiler
 end
 
 function CheckGccCompiler(cc, tmpName)

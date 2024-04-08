@@ -1,4 +1,5 @@
 require("lua.compiler")
+require("lua.linker")
 require("lua.util")
 
 function CheckSystemFamily()
@@ -76,6 +77,23 @@ function CheckCompiler(family, makefile)
 	end
 
 	os.remove(tmpName .. ".c")
+end
+
+function CheckLinker(makefile)
+	local ld = CheckEnvVar("LD")
+	if ld then Compiler.ld = ld
+	else
+		Check("Guessing linker")
+		if Compiler.type == "watcom" then
+			Compiler.ld = "wlink"
+			Pass(Compiler.ld)
+			CheckWlinkLinker()
+		elseif Compiler.type == "gcc" then
+			Compiler.ld = "ld"
+			Pass(Compiler.ld)
+			CheckLdLinker()
+		else Fail("Unknown") end
+	end
 end
 
 function CheckRemoveFileCmd(family, filename)

@@ -3,11 +3,10 @@ require("lua.checks")
 require("lua.util")
 
 -- Check parameters
-Target = {}
 GetOpt()
 
 -- Get which makefile to generate
-Target.makefile = CheckMakefileRequestValid()
+Target = CheckMakefileRequestValid()
 
 -- Can the system acheve basic things?
 System = {}
@@ -24,13 +23,14 @@ CheckDirContains(System.family, "inc", {"net/if.h", "tcp.h"})
 CheckDirContains(System.family, "src", {"accept.c", "pcpkt.c"})
 
 -- Create a basic C file to test the compiler
-CheckCompiler(System.family, Target.makefile)
+CheckCompiler(System.family, Target)
 
 -- Check size of standard types an actual 32-bit typedef can be defined
 CheckCompilerIntSize()
 CheckCompilerLongSize()
 
--- TODO: Check linker works
+-- Check linker works
+CheckLinker()
 
 -- TODO: Generate makefile and output enviroment
 
