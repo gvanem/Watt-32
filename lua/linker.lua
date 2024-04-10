@@ -41,7 +41,7 @@ function CheckLdLinker()
 	if not file then Error() end
 	file:close()
 
-	RunCommand(Compiler.ld .. " --entry main " .. tmpName .. ".o")
+	RunCommand(Compiler.ld .. " -e 0 " .. tmpName .. ".o")
 	os.remove(tmpName .. ".c")
 
 	local exists = CheckAndReturnCommonExecutable(tmpName)
