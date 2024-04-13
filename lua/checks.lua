@@ -86,10 +86,18 @@ function CheckLinker(makefile)
 		Check("Guessing linker")
 		if Compiler.type == "watcom" then
 			Compiler.ld = "wlink"
+			if Target.skipChecks == true then
+				Pass("Skipped (assuming '" .. Compiler.ld .. "')")
+				return
+			end
 			Pass(Compiler.ld)
 			CheckWlinkLinker()
 		elseif Compiler.type == "gcc" then
 			Compiler.ld = "ld"
+			if Target.skipChecks == true then
+				Pass("Skipped (assuming '" .. Compiler.ld .. "')")
+				return
+			end
 			Pass(Compiler.ld)
 			CheckLdLinker()
 		else Fail("Unknown") end

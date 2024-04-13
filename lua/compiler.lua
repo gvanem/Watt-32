@@ -181,6 +181,7 @@ function CheckWccCompiler(tmpName)
 	if Target.skipChecks then
 		Compiler.cc = "wcc"
 		Compiler.cl = "wcl"
+		Compiler.m16 = true
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
@@ -200,6 +201,7 @@ function CheckWccCompiler(tmpName)
 
 	Compiler.cc = "wcc"
 	Compiler.cl = "wcl -q"
+	Compiler.m16 = true
 end
 
 function CheckWcc386Compiler(tmpName)
@@ -212,6 +214,7 @@ function CheckWcc386Compiler(tmpName)
 	if Target.skipChecks then
 		Compiler.cc = "wcc386"
 		Compiler.cl = "wcl386"
+		Compiler.m32 = true
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
@@ -231,6 +234,7 @@ function CheckWcc386Compiler(tmpName)
 
 	Compiler.cc = "wcc386"
 	Compiler.cl = "wcl386 -q"
+	Compiler.m32 = true
 end
 
 function GetBitSizeResult(fileName)
