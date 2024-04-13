@@ -130,7 +130,7 @@ function CheckRemoveFileCmd(family, filename)
 end
 
 function CheckRemoveDirCmd(family, filename)
-	local exec = family == "Unix" and "rm -R" or "DELTREE /Y"
+	local exec = family == "Unix" and "rm -R" or "RD /S /Q"
 	Check("Checking '" .. exec .."' works")
 
 	-- Ensure there's a file in the directory
@@ -138,18 +138,34 @@ function CheckRemoveDirCmd(family, filename)
 	local file = io.open(path)
 
 	if not file then Error() end
+	file:write("Delete me!")
+	file:close()
 
 	-- Delete the folder
 	local e = exec .. " " .. filename
 	RunCommand(e)
 
-	file:close()
-
 	-- The file shouldn't open since its folder has been deleted
 	local file = io.open(path)
 	if file then
 		file:close()
-		Fail("No")
+		if family == "Unix" then
+			os.remove(path)
+			Fail("No")
+		end
+
+		-- Trying 'RD /S /Q' didn't work, try 'DELTREE /Y'
+		Pass("No")
+		exec = "DELTREE /Y"
+		Check("Checking '" .. exec .."' works")
+		e = exec .. " " .. filename
+		RunCommand(e)
+		local file = io.open(path)
+		if file then
+			file:close()
+			os.remove(path)
+			Fail("No")
+		end
 	end
 
 	Pass("Yes")
