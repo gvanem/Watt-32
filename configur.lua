@@ -1,5 +1,6 @@
 require("lua.args")
 require("lua.checks")
+require("lua.makefile")
 require("lua.util")
 
 -- Check parameters and which makefile to generate
@@ -18,8 +19,8 @@ System.rm = CheckRemoveFileCmd(System.family, TmpFolder)
 System.rd = CheckRemoveDirCmd(System.family, TmpFolder)
 
 -- Does the project directory look correct?
-CheckDirContains(System.family, "inc", {"net/if.h", "tcp.h"})
-CheckDirContains(System.family, "src", {"accept.c", "pcpkt.c"})
+CheckDirContains(System.family, "inc", {"net/if.h", "tcp.h"}) -- TODO: Add all the important headers in a table and call in place of this inline variable
+CheckDirContains(System.family, "src", MakefileCoreSource())
 
 -- Create a basic C file to test the compiler
 CheckCompiler(System.family, Target.makefile)
@@ -32,6 +33,7 @@ CheckCompilerLongSize()
 CheckLinker()
 
 -- TODO: Generate makefile and output enviroment
+GenerateMakefile("lua_test.mak")
 
 -- TODO: Print valid makefile commands the same as 'configur(.bat/.sh)'
 
