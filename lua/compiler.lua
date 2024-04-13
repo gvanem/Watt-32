@@ -130,6 +130,33 @@ function CheckGccCompiler(cc, tmpName)
 	Compiler.cc = gcc
 	Compiler.cl = gcc
 
+	Check("Checking if '" .. gcc .. "' can target i386")
+	RunCommand (
+		gcc ..
+		" -m32 -march=i386 " ..
+		tmpName .. ".c"
+	)
+
+	exist = CheckAndRemoveCommonArtifacts(tmpName)
+	if exist > 0 then
+		Pass("Yes")
+		Compiler.m32 = true
+	else Pass("No") end
+
+	Check("Checking if '" .. gcc .. "' can target x86-64")
+	RunCommand (
+		gcc ..
+		" -m64 -march=x86-64 " ..
+		tmpName .. ".c"
+	)
+
+	exist = CheckAndRemoveCommonArtifacts(tmpName)
+	if exist > 0 then
+		Pass("Yes")
+		Compiler.m64 = true
+	elseif not Compiler.m32 then Fail("No") -- Need at least one target
+	else Pass("No") end -- Continue (32-bit only)
+
 	Check("Checking if '" .. gcc .. "' understands '-fdiagnostics-color=never'")
 	RunCommand (
 		gcc ..
@@ -141,7 +168,7 @@ function CheckGccCompiler(cc, tmpName)
 	if exist > 0 then
 		Pass("Yes")
 		Compiler.colorOption = true
-	else print("No") end
+	else Pass("No") end
 end
 
 function CheckWccCompiler(tmpName)
