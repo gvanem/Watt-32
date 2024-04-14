@@ -11,10 +11,14 @@ function UniqueName()
 	return filename
 end
 
-function CreateCTestFile(name)
+function CreateCTestFile(name, src)
+	if not src then
+		src = "int main(void) {\n\treturn 0;\n}\n"
+	end
+
 	local file = io.open(name, "w")
 	if file then
-		file:write("int main(void) {\n\treturn 0;\n}\n")
+		file:write(src)
 		file:close()
 		return true
 	end

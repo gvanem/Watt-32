@@ -260,9 +260,7 @@ function CheckCompilerIntSize()
 	end
 
 	local tmpName = UniqueName()
-	local file = io.open(tmpName .. ".c", "w")
-
-	file:write(
+	if not CreateCTestFile(tmpName .. ".c",
 [[
 #include <stdio.h>
 int main(void) {
@@ -271,8 +269,7 @@ int main(void) {
 	return 0;
 }
 ]]
-	)
-	file:close()
+	) then Error() end
 
 	RunCommand (
 		Compiler.cl .. " " ..
@@ -306,9 +303,7 @@ function CheckCompilerLongSize()
 	end
 
 	local tmpName = UniqueName()
-	local file = io.open(tmpName .. ".c", "w")
-
-	file:write(
+	if not CreateCTestFile(tmpName .. ".c",
 [[
 #include <stdio.h>
 int main(void) {
@@ -317,8 +312,7 @@ int main(void) {
 	return 0;
 }
 ]]
-	)
-	file:close()
+	) then Error() end
 
 	RunCommand (
 		Compiler.cl .. " " ..
