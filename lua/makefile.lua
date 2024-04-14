@@ -1,15 +1,28 @@
 require("lua.util")
 
 function MakefileHeader()
-	return 
+	return
 [[
 #
 # NB! THIS MAKEFILE WAS AUTOMATICALLY GENERATED.
-#     Consider running "<lua> configur.lua <target>" instead of editing
+# If you make manual edits, be sure to save them as a different name
+# otherwise the script may overwrite your changes.
+#
+# Consider running "<lua> configur.lua <target>" instead of editing
 #
 # Makefile for the Watt-32 TCP/IP stack.
 #
 ]]
+end
+
+function TableStringFormat(t, p, a)
+	for i, v in pairs(t) do
+		t[i] = p .. v
+	end
+
+	for i, v in pairs(t) do
+		t[i] = v .. a
+	end
 end
 
 function MakefileAsmSource()
@@ -33,7 +46,7 @@ function MakefileBsdSource()
 	"getnet.c", "getprot.c", "getput.c", "getserv.c", "ioctl.c",
 	"linkaddr.c", "listen.c", "netaddr.c", "neterr.c", "nettime.c",
 	"nsapaddr.c", "presaddr.c", "printk.c", "receive.c", "select.c",
-	"shutdown.c", "signal.c", "socket.c", "sockopt.c", "stream.c", 
+	"shutdown.c", "signal.c", "socket.c", "sockopt.c", "stream.c",
 	"syslog.c", "syslog2.c", "transmit.c",
 	}
 end
@@ -66,8 +79,52 @@ function MakefileZlibSource()
 	}
 end
 
+function MakefileCommon(prepend, append)
+	local common = {
+	"cpumodel", "accept", "bind", "bsddbug", "bsdname", "btree",
+	"chksum", "close", "connect", "crc", "dynip", "echo", "fcntl",
+	"get_ai", "get_ip", "get_ni", "get_xbyr", "geteth", "gethost",
+	"gethost6", "getname", "getnet", "getopt", "getprot", "getput",
+	"getserv", "gettod", "idna", "ioctl", "ip4_frag", "ip4_in",
+	"ip4_out", "ip6_in", "ip6_out", "language", "linkaddr", "listen",
+	"lookup", "loopback", "misc", "netaddr", "netback", "neterr",
+	"nettime", "nsapaddr", "oldstuff", "packet32", "pc_cbrk", "pcarp",
+	"pcbootp", "pcbuf", "pcconfig", "pcdbug", "pcdhcp", "pcdns",
+	"pcicmp", "pcicmp6", "pcigmp", "pcping", "pcqueue", "pcrarp",
+	"pcrecv", "pcsed", "pcstat", "pctcp", "ports", "ppp", "pppoe",
+	"presaddr", "printk", "profile", "punycode", "receive", "res_comp",
+	"res_data", "res_debu", "res_init", "res_loc", "res_mkqu",
+	"res_quer", "res_send", "run", "select", "settod", "shutdown",
+	"signal", "sock_dbu", "sock_in", "sock_ini", "sock_io", "sock_prn",
+	"sock_scn", "sock_sel", "socket", "sockopt", "split", "stream",
+	"misc_str", "swsvpkt", "syslog", "syslog2", "tcp_fsm", "tcp_md5",
+	"tftp", "timer", "transmit", "udp_rev", "version", "zadler32",
+	"zcompres", "zcrc32", "zdeflate", "zgzio", "zinfback", "zinffast",
+	"zinflate", "zinftree", "ztrees", "zuncompr", "zutil",
+	}
+
+	TableStringFormat(common, prepend, append)
+	return common
+end
+
+function MakefileAllDosObjects(prepend, append)
+	local common = MakefileCommon(prepend, append)
+	local dos = {
+	"asmpkt", "fsext", "pcpkt32", "pcpkt", "pcintr", "powerpak", "qmsg",
+	"wdpmi", "x32vm"
+	}
+	TableStringFormat(dos, prepend, append)
+
+	table.move(dos, 1, #dos, #common + 1, common)
+	return common
+end
+
 function MakefileCreateVariable(name, value)
-	return name .. " = " .. table.concat(value, " ")
+	if type(value) == "table" then
+		return name .. " = " .. table.concat(value, " ")
+	else
+		return name .. " = " .. value
+	end
 end
 
 function GenerateAsmSources()
@@ -120,10 +177,56 @@ end
 
 function GenerateMakefileUnix(file)
 	-- TODO: write a unix style makefile depending on -m32 or -m64
-	file:write([[# A Unix makefile would go here in the complete version]])
+	file:write([[# A Unix makefile would go here in the completed version]])
+end
+
+function GenerateCleanRule(path)
+	return "clean:\n" ..
+	"\t" .. System.rd .. " " .. path .. "\n\n"
+end
+
+function GenerateMakefileWatcomLarge()
+	-- TODO: Temporary function, rewrite to handle all memory types
+	return [[
+$(STAT_LIB): $(OBJS) $(LIB_ARGS)
+	*wlib -q -b -c -pa -z=export.tmp $^@ @$(LIB_ARGS)
+
+$(OBJPATH)language.obj: language.c lang.c
+$(OBJPATH)asmpkt.obj:   asmpkt.asm
+$(OBJPATH)cpumodel.obj: cpumodel.asm
+
+.c{$(OBJDIR)}.obj: .AUTODEPEND
+	*]].. Compiler.cc .. " " .. Compiler.cflags .. [[ $[@ -fo=$^@
+
+.asm{$(OBJDIR)}.obj: .AUTODEPEND
+	*wasm ]] .. Compiler.aflags .. [[ $[@ -fo=$^@
+
+]]
 end
 
 function GenerateMakefileWatcom(file)
-	-- TODO: write a wmake style makefile depending on wcc or wcc386
-	file:write([[# A Watcom makefile would go here in the complete version]])
+	-- TODO: Setup parameters so it can be used to write all memory models not just large
+	local binPath = SanitizePath("../bin/")
+	local libPath = SanitizePath("../lib/")
+	local libName = "wattcpwl.lib"
+	local objPath = SanitizePath("build/watcom/large/")
+
+	if not Compiler.aflags then
+		Compiler.aflags = [[-bt=dos -zq -w3 -d1 -I"../inc"]]
+	end
+
+	if not Compiler.cflags then
+		Compiler.cflags = [[-bt=dos -ml -0 -os -s -zc -zm -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -I"$(%WATCOM)/h"]]
+	end
+
+	file:write(
+MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. "\n" ..
+MakefileCreateVariable("BINPATH", binPath) .. "\n" ..
+MakefileCreateVariable("LIBPATH", libPath) .. "\n" ..
+MakefileCreateVariable("OBJPATH", objPath) .. "\n" ..
+MakefileCreateVariable("STAT_LIB", [[$(LIBPATH)]] .. libName) .. "\n" ..
+"\n" ..
+GenerateMakefileWatcomLarge() ..
+GenerateCleanRule(objPath)
+)
 end
