@@ -14,16 +14,16 @@ System.family = CheckSystemFamily()
 TmpFolder = UniqueName()
 
 System.divider = System.family == "Unix" and "/" or "\\"
-System.md = CheckCreateDirCmd(System.family, TmpFolder)
-System.rm = CheckRemoveFileCmd(System.family, TmpFolder)
-System.rd = CheckRemoveDirCmd(System.family, TmpFolder)
+System.md = CheckCreateDirCmd(TmpFolder)
+System.rm = CheckRemoveFileCmd(TmpFolder)
+System.rd = CheckRemoveDirCmd(TmpFolder)
 
 -- Does the project directory look correct?
-CheckDirContains(System.family, "inc", {"net/if.h", "tcp.h"}) -- TODO: Add all the important headers in a table and call in place of this inline variable
-CheckDirContains(System.family, "src", MakefileCoreSource())
+CheckDirContains("inc", {"net/if.h", "tcp.h"}) -- TODO: Add all the important headers in a table and call in place of this inline variable
+CheckDirContains("src", MakefileCoreSource())
 
 -- Create a basic C file to test the compiler
-CheckCompiler(System.family, Target.makefile)
+CheckCompiler()
 
 -- Check size of standard types an actual 32-bit typedef can be defined
 CheckCompilerIntSize()

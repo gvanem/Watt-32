@@ -48,10 +48,11 @@ function CheckEnvVar(var)
 	return v
 end
 
-function CheckCompiler(family, makefile)
+function CheckCompiler(makefile)
 	Compiler = {}
 	local tmpName = UniqueName()
 
+	if not makefile then makefile = Target.makefile end
 	if not CreateCTestFile(tmpName .. ".c") then Error() end
 
 	local cc = CheckEnvVar("CC")
@@ -79,7 +80,7 @@ function CheckCompiler(family, makefile)
 	os.remove(tmpName .. ".c")
 end
 
-function CheckLinker(makefile)
+function CheckLinker()
 	local ld = CheckEnvVar("LD")
 	if ld then Compiler.ld = ld
 	else
@@ -104,8 +105,8 @@ function CheckLinker(makefile)
 	end
 end
 
-function CheckRemoveFileCmd(family, filename)
-	local exec = family == "Unix" and "rm" or "DEL"
+function CheckRemoveFileCmd(filename)
+	local exec = System.family == "Unix" and "rm" or "DEL"
 	Check("Checking '" .. exec .. "' works")
 
 	local path = SanitizePath(filename .. "/2.txt")
@@ -129,8 +130,8 @@ function CheckRemoveFileCmd(family, filename)
 	return exec
 end
 
-function CheckRemoveDirCmd(family, filename)
-	local exec = family == "Unix" and "rm -R" or "RD /S /Q"
+function CheckRemoveDirCmd(filename)
+	local exec = System.family == "Unix" and "rm -R" or "RD /S /Q"
 	Check("Checking '" .. exec .."' works")
 
 	-- Ensure there's a file in the directory
@@ -149,7 +150,7 @@ function CheckRemoveDirCmd(family, filename)
 	local file = io.open(path)
 	if file then
 		file:close()
-		if family == "Unix" then
+		if System.family == "Unix" then
 			os.remove(path)
 			Fail("No")
 		end
@@ -172,8 +173,8 @@ function CheckRemoveDirCmd(family, filename)
 	return exec
 end
 
-function CheckCreateDirCmd(family, filename)
-	local exec = family == "Unix" and "mkdir" or "MD"
+function CheckCreateDirCmd(filename)
+	local exec = System.family == "Unix" and "mkdir" or "MD"
 	Check("Checking '" .. exec .. "' works")
 
 	local e = exec .. " " .. filename
@@ -189,7 +190,7 @@ function CheckCreateDirCmd(family, filename)
 	return exec
 end
 
-function CheckDirContains(family, dir, files)
+function CheckDirContains(dir, files)
 	Check("Checking '" .. dir .. "' contains required files")
 
 	for _, file in ipairs(files) do
