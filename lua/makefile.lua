@@ -90,10 +90,17 @@ function GenerateZlibSources()
 	return MakefileCreateVariable("ZLIB_SOURCE", MakefileZlibSource())
 end
 
-function GenerateMakefile(fileName)
+function GetMakefileOutputName()
+	return "src" .. System.divider .. Target.makefile .. ".mak"
+end
+
+function GenerateMakefile()
+	local fileName = GetMakefileOutputName()
 	Check("Generating makefile '" .. fileName .. "'")
-	-- TODO: fileName should be determined by Target.makefile once production ready
+
 	local file = io.open(fileName, "w")
+	if not file then Error() end
+
 	file:write(MakefileHeader() .. "\n")
 	file:write(GenerateAsmSources() .. "\n")
 	file:write(GenerateBindSources() .. "\n")

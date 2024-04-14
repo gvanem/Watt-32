@@ -32,8 +32,8 @@ CheckCompilerLongSize()
 -- Check linker works
 CheckLinker()
 
--- TODO: Generate makefile and output enviroment
-GenerateMakefile("lua_test.mak")
+-- Generate makefile
+GenerateMakefile()
 
 -- TODO: Print valid makefile commands the same as 'configur(.bat/.sh)'
 
