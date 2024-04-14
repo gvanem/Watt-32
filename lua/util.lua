@@ -36,9 +36,9 @@ function FileExists(name)
 	return false
 end
 
-function SanitizePath(family, path)
+function SanitizePath(path)
 	local sanitize
-	if family == "Unix" then
+	if System.family == "Unix" then
 		sanitize = path:gsub([[\]], [[/]])
 	else
 		sanitize = path:gsub([[/]], [[\]])

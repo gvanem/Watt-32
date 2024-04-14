@@ -108,7 +108,7 @@ function CheckRemoveFileCmd(family, filename)
 	local exec = family == "Unix" and "rm" or "DEL"
 	Check("Checking '" .. exec .. "' works")
 
-	local path = SanitizePath(family, filename .. "/2.txt")
+	local path = SanitizePath(filename .. "/2.txt")
 
 	file = io.open(path, "a")
 
@@ -134,7 +134,7 @@ function CheckRemoveDirCmd(family, filename)
 	Check("Checking '" .. exec .."' works")
 
 	-- Ensure there's a file in the directory
-	local path = SanitizePath(family, filename .. "/1.txt")
+	local path = SanitizePath(filename .. "/1.txt")
 	local file = io.open(path)
 
 	if not file then Error() end
@@ -193,7 +193,7 @@ function CheckDirContains(family, dir, files)
 	Check("Checking '" .. dir .. "' contains required files")
 
 	for _, file in ipairs(files) do
-		local path = SanitizePath(family, dir .. "/" .. file)
+		local path = SanitizePath(dir .. "/" .. file)
 
 		if not FileExists(path) then Fail("Missing '" .. file .. "'") end
 	end
