@@ -174,7 +174,6 @@ end
 function CheckWccCompiler(tmpName)
 	Compiler.type = "watcom"
 	Compiler.output = "-fo="
-	Compiler.ld = "wlink"
 
 	Check("Checking wcc is available")
 

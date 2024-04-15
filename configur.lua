@@ -23,6 +23,8 @@ CheckDirContains("inc", {"net/if.h", "tcp.h"}) -- TODO: Add all the important he
 CheckDirContains("src", MakefileCoreSource())
 
 -- Create a basic C file to test the compiler
+Compiler = {}
+CheckAssembler()
 CheckCompiler()
 
 -- Check size of standard types an actual 32-bit typedef can be defined

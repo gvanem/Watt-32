@@ -1,3 +1,4 @@
+require("lua.asm")
 require("lua.compiler")
 require("lua.linker")
 require("lua.util")
@@ -48,8 +49,27 @@ function CheckEnvVar(var)
 	return v
 end
 
+function CheckAssembler(makefile)
+	local tmpName = UniqueName()
+	if not makefile then makefile = Target.makefile end
+
+	local as = CheckEnvVar("AS")
+	if not cc then
+		Check("Guessing assembler")
+		if makefile == "cc" then Fail("None") -- Nothing was specified
+		elseif makefile == "wcc" or makefile == "wcc386" then
+			Pass("Open Watcom")
+			CheckWasmAssembler(as, tmpName)
+		else
+			Pass("GNU Compiler Collection or compatible")
+			CheckGccAssembler(as, tmpName)
+		end
+	else
+		CheckCustomAssembler(as, tmpName)
+	end
+end
+
 function CheckCompiler(makefile)
-	Compiler = {}
 	local tmpName = UniqueName()
 
 	if not makefile then makefile = Target.makefile end

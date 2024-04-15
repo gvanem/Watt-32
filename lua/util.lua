@@ -11,10 +11,78 @@ function UniqueName()
 	return filename
 end
 
-function CreateCTestFile(name, src)
+function CreateMasmTestFile(name, src)
 	if not src then
-		src = "int main(void) {\n\treturn 0;\n}\n"
+		src =
+[[
+.model small
+.stack 100h
+
+.data
+    helloMsg db 'Hello, MASM!', '$'
+
+.code
+main:
+	mov ax, @data
+	mov ds, ax
+
+	mov ah, 09h         ; Function to print string
+	lea dx, helloMsg    ; Load address of the message
+	int 21h             ; Call DOS interrupt to print the string
+
+	mov ah, 4Ch         ; DOS function to terminate program
+	int 21h             ; Call DOS interrupt
+
+end main
+]]
 	end
+
+	local file = io.open(name, "w")
+	if file then
+		file:write(src)
+		file:close()
+		src = nil
+		return true
+	end
+
+	return false
+end
+
+function CreateGasTestFile(name, src)
+	if not src then
+		src =
+[[
+.section .data
+hello_msg:
+    .ascii "Hello, GAS!\0"
+.section .text
+.global _start
+_start:
+	mov $0x2, %ax
+	mov %ax, %ds
+
+	mov $0x09, %ah      # Function to print string
+	mov $hello_msg, %dx # Load address of the message
+	int $0x21           # Call DOS interrupt to print the string
+
+	mov $0x4c, %ah      # DOS function to terminate program
+	int $0x21           # Call DOS interrupt
+]]
+	end
+
+	local file = io.open(name, "w")
+	if file then
+		file:write(src)
+		file:close()
+		src = nil
+		return true
+	end
+
+	return false
+end
+
+function CreateCTestFile(name, src)
+	if not src then src = "int main(void) {\n\treturn 0;\n}\n" end
 
 	local file = io.open(name, "w")
 	if file then
