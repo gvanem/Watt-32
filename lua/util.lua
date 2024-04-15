@@ -134,17 +134,13 @@ end
 
 function RunCommandLocal(exec)
 	if System.family == "Unix" then exec = "./" .. exec end
-	return RunCommand(exec)
+	RunCommand(exec)
 end
 
 function RunCommand(exec)
-	local handle = {os.execute(exec)}
-
-	if handle[1] == true and handle[2] == "exit" then
-		return handle[3]
-	end
-
-	return nil
+	os.execute(exec)
+	-- Keep memory free on DOS systems
+	collectgarbage("step", 9001)
 end
 
 function Check(msg)
