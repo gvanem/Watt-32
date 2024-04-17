@@ -16,19 +16,23 @@ function MakefileHeader()
 end
 
 function TableStringFormat(t, p, a)
-	for i, v in pairs(t) do
-		t[i] = p .. v
+	if p then
+		for i, v in pairs(t) do
+			t[i] = p .. v
+		end
 	end
 
-	for i, v in pairs(t) do
-		t[i] = v .. a
+	if a then
+		for i, v in pairs(t) do
+			t[i] = v .. a
+		end
 	end
 end
 
-function MakefileAsmSource()
-	return {
-	"asmpkt.asm", "cpumodel.asm",
-	}
+function MakefileAssembly(prepend, append)
+	local assembly = {"asmpkt", "cpumodel"}
+	TableStringFormat(assembly, prepend, append)
+	return assembly
 end
 
 function MakefileBindSource()
@@ -128,7 +132,9 @@ function MakefileCreateVariable(name, value)
 end
 
 function GenerateAsmSources()
-	return MakefileCreateVariable("ASM_SOURCE", MakefileAsmSource())
+	return MakefileCreateVariable("ASM_SOURCE",
+		MakefileAssembly(nil, Compiler.aext)
+	)
 end
 
 function GenerateBindSources()

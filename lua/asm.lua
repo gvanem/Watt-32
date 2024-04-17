@@ -1,54 +1,73 @@
-require("lua.compiler")
 require("lua.util")
 
-function GetExecutableNames(name)
-	return {name, "a"}
-end
+function CreateMasmTestFile(name, src)
+	if not src then
+		src =
+[[
+.model small
+.stack 100h
 
-function GetExecutableExtensions()
-	return {".com", ".exe", ".out"}
-end
+.data
+	helloMsg db 'Hello, MASM!', '$'
 
-function GetCompilerOutputExtensions()
-	return {".a", ".com", ".dll", ".exe", ".lib", ".o", ".obj", ".out"}
-end
+.code
+main:
+	mov ax, @data
+	mov ds, ax
 
-function CheckAndReturnCommonExecutable(baseName)
-	local names = GetExecutableNames(baseName)
-	local extensions = GetExecutableExtensions()
+	mov ah, 09h         ; Function to print string
+	lea dx, helloMsg    ; Load address of the message
+	int 21h             ; Call DOS interrupt to print the string
 
-	for _, name in ipairs(names) do
-		for _, extension in ipairs(extensions) do
-			local fileName = name .. extension
-			local file = io.open(fileName)
+	mov ah, 4Ch         ; DOS function to terminate program
+	int 21h             ; Call DOS interrupt
 
-			if file then
-				file:close()
-				return fileName
-			end
-		end
-	end
-end
-
-function CheckAndRemoveCommonArtifacts(baseName)
-	local names = GetExecutableNames(baseName)
-	local extensions = GetCompilerOutputExtensions()
-	local r = 0
-
-	for _, name in ipairs(names) do
-		for _, extension in ipairs(extensions) do
-			local fileName = name .. extension
-			local file = io.open(fileName)
-
-			if file then
-				file:close()
-				os.remove(fileName)
-				r = r + 1
-			end
-		end
+end main
+]]
 	end
 
-	return r
+	local file = io.open(name, "w")
+	if file then
+		file:write(src)
+		file:close()
+		src = nil
+		return true
+	end
+
+	return false
+end
+
+function CreateGasTestFile(name, src)
+	if not src then
+		src =
+[[
+.section .data
+hello_msg:
+	.ascii "Hello, GAS!\0"
+.section .text
+.global _start
+_start:
+	mov $0x2, %ax
+	mov %ax, %ds
+
+	mov $0x09, %ah      # Function to print string
+	mov $hello_msg, %dx # Load address of the message
+	int $0x21           # Call DOS interrupt to print the string
+
+	mov $0x4c, %ah      # DOS function to terminate program
+	int $0x21           # Call DOS interrupt
+]]
+	end
+
+	local file = io.open(name, "w")
+	if file then
+		file:write(src)
+		file:close()
+		src = nil
+		return true
+	end
+
+	return false
 end
 
 function CheckCustomAssembler(as, tmpName)
@@ -64,11 +83,11 @@ function CheckCustomAssembler(as, tmpName)
 	os.remove(tmpName .. ".asm")
 
 	local exists = CheckAndRemoveCommonArtifacts(tmpName)
-	if exists > 0 then 
-		Pass("Yes") 
+	if exists > 0 then
+		Pass("Yes")
 		Compiler.as = as
-		Compiler.atype = "masm"
-	else 
+		Compiler.aext = ".asm"
+	else
 		Pass("No")
 		Check("Checking '" .. as .. "' compiler understands GAS format")
 
@@ -76,17 +95,17 @@ function CheckCustomAssembler(as, tmpName)
 		RunCommand(as .. " " .. tmpName .. ".s")
 		os.remove(tmpName .. ".s")
 		exists = CheckAndRemoveCommonArtifacts(tmpName)
-		if exists > 0 then 
-			Pass("Yes") 
+		if exists > 0 then
+			Pass("Yes")
 			Compiler.as = as
-			Compiler.atype = "gas"
+			Compiler.aext = ".s"
 			Pass("Yes")
 		end
 	end
 
 	local name
 
-	if Compiler.atype == "masm" then
+	if Compiler.aext == "masm" then
 		if not CreateMasmTestFile(tmpName .. ".asm") then Error() else
 			name = tmpName .. ".asm"
 		end
@@ -122,14 +141,13 @@ function CheckGccAssembler(as, tmpName)
 	if Target.skipChecks then
 		Pass("Skipped")
 		Compiler.as = gcc
+		Compiler.aext = ".s"
 		return
 	end
 
 	if not CreateGasTestFile(tmpName .. ".s") then Error() end
 
-	RunCommand (
-		gcc .. " " .. tmpName .. ".s "
-	)
+	RunCommand (gcc .. " " .. tmpName .. ".s ")
 
 	local exist = CheckAndRemoveCommonArtifacts(tmpName)
 	if exist > 0 then Pass("Yes")
@@ -140,6 +158,7 @@ function CheckGccAssembler(as, tmpName)
 
 	os.remove(tmpName .. ".s")
 	Compiler.as = gcc
+	Compiler.aext = ".s"
 end
 
 function CheckWasmAssembler(as, tmpName)
@@ -149,6 +168,7 @@ function CheckWasmAssembler(as, tmpName)
 
 	if Target.skipChecks then
 		Compiler.as = "wasm"
+		Compiler.aext = ".asm"
 		Pass("Skipped")
 		return
 	end
@@ -166,4 +186,5 @@ function CheckWasmAssembler(as, tmpName)
 	if exist > 0 then Pass("Yes") else Fail("No") end
 
 	Compiler.as = wasm
+	Compiler.aext = ".asm"
 end

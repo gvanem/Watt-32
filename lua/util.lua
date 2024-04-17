@@ -11,87 +11,54 @@ function UniqueName()
 	return filename
 end
 
-function CreateMasmTestFile(name, src)
-	if not src then
-		src =
-[[
-.model small
-.stack 100h
-
-.data
-    helloMsg db 'Hello, MASM!', '$'
-
-.code
-main:
-	mov ax, @data
-	mov ds, ax
-
-	mov ah, 09h         ; Function to print string
-	lea dx, helloMsg    ; Load address of the message
-	int 21h             ; Call DOS interrupt to print the string
-
-	mov ah, 4Ch         ; DOS function to terminate program
-	int 21h             ; Call DOS interrupt
-
-end main
-]]
-	end
-
-	local file = io.open(name, "w")
-	if file then
-		file:write(src)
-		file:close()
-		src = nil
-		return true
-	end
-
-	return false
+function GetExecutableNames(name)
+	return {name, "a"}
 end
 
-function CreateGasTestFile(name, src)
-	if not src then
-		src =
-[[
-.section .data
-hello_msg:
-    .ascii "Hello, GAS!\0"
-.section .text
-.global _start
-_start:
-	mov $0x2, %ax
-	mov %ax, %ds
-
-	mov $0x09, %ah      # Function to print string
-	mov $hello_msg, %dx # Load address of the message
-	int $0x21           # Call DOS interrupt to print the string
-
-	mov $0x4c, %ah      # DOS function to terminate program
-	int $0x21           # Call DOS interrupt
-]]
-	end
-
-	local file = io.open(name, "w")
-	if file then
-		file:write(src)
-		file:close()
-		src = nil
-		return true
-	end
-
-	return false
+function GetExecutableExtensions()
+	return {".com", ".exe", ".out"}
 end
 
-function CreateCTestFile(name, src)
-	if not src then src = "int main(void) {\n\treturn 0;\n}\n" end
+function GetCompilerOutputExtensions()
+	return {".a", ".com", ".dll", ".exe", ".lib", ".o", ".obj", ".out"}
+end
 
-	local file = io.open(name, "w")
-	if file then
-		file:write(src)
-		file:close()
-		return true
+function CheckAndReturnCommonExecutable(baseName)
+	local names = GetExecutableNames(baseName)
+	local extensions = GetExecutableExtensions()
+
+	for _, name in ipairs(names) do
+		for _, extension in ipairs(extensions) do
+			local fileName = name .. extension
+			local file = io.open(fileName)
+
+			if file then
+				file:close()
+				return fileName
+			end
+		end
+	end
+end
+
+function CheckAndRemoveCommonArtifacts(baseName)
+	local names = GetExecutableNames(baseName)
+	local extensions = GetCompilerOutputExtensions()
+	local r = 0
+
+	for _, name in ipairs(names) do
+		for _, extension in ipairs(extensions) do
+			local fileName = name .. extension
+			local file = io.open(fileName)
+
+			if file then
+				file:close()
+				os.remove(fileName)
+				r = r + 1
+			end
+		end
 	end
 
-	return false
+	return r
 end
 
 function FileExists(name)
