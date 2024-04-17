@@ -28,6 +28,7 @@ CheckAssembler()
 CheckCompiler()
 
 -- Check size of standard types an actual 32-bit typedef can be defined
+CheckCompilerNative() -- Can these tests even be done?
 CheckCompilerIntSize()
 CheckCompilerLongSize()
 

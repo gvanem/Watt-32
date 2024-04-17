@@ -74,6 +74,7 @@ function CheckGccCompiler(cc, tmpName)
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		Compiler.cc = gcc
+		Compiler.cl = gcc
 		return
 	end
 
@@ -210,6 +211,45 @@ function GetBitSizeResult(fileName)
 	elseif result == "4294967295\n" then return 32
 	elseif result == "18446744073709551615\n" then return 64
 	else return 0 end
+end
+
+function CheckCompilerNative()
+	Check("Checking if '" .. Compiler.cl .. "' builds native binaries")
+	if Target.skipChecks then
+		Pass("Skipped (assuming no)")
+		return
+	end
+
+	local tmpName = UniqueName()
+	if not CreateCTestFile(tmpName .. ".c",
+[[
+#include <stdio.h>
+int main(void) {
+	puts("Hello World");
+	return 0;
+}
+]]
+	) then Error() end
+
+	RunCommand (
+		Compiler.cl .. " " ..
+		tmpName .. ".c"
+	)
+	os.remove(tmpName .. ".c")
+
+	local bin = CheckAndReturnCommonExecutable(tmpName)
+	if not bin then Error() end
+
+	RunCommandLocal(bin .. " > " .. tmpName .. ".txt")
+	os.remove(bin)
+
+	if FileExists(tmpName .. ".txt") then
+		Pass("Yes")
+		os.remove(tmpName .. ".txt")
+	else
+		Pass("No")
+		Target.crossCompile = true
+	end
 end
 
 function CheckCompilerIntSize()
