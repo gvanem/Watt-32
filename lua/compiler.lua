@@ -75,6 +75,7 @@ function CheckGccCompiler(cc, tmpName)
 		Pass("Skipped")
 		Compiler.cc = gcc
 		Compiler.cl = gcc
+		Compiler.pp = Compiler.cc .. " -E -P"
 		return
 	end
 
@@ -93,6 +94,7 @@ function CheckGccCompiler(cc, tmpName)
 
 	Compiler.cc = gcc
 	Compiler.cl = gcc
+	Compiler.pp = Compiler.cc .. " -E -P"
 
 	Check("Checking if '" .. gcc .. "' can target i386")
 	RunCommand (
@@ -145,6 +147,7 @@ function CheckWccCompiler(tmpName)
 		Compiler.cc = "wcc"
 		Compiler.cl = "wcl"
 		Compiler.m16 = true
+		Compiler.pp = Compiler.cc .. " -P"
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
@@ -165,6 +168,7 @@ function CheckWccCompiler(tmpName)
 	Compiler.cc = "wcc"
 	Compiler.cl = "wcl -q"
 	Compiler.m16 = true
+	Compiler.pp = Compiler.cc .. " -P"
 end
 
 function CheckWcc386Compiler(tmpName)
@@ -178,6 +182,7 @@ function CheckWcc386Compiler(tmpName)
 		Compiler.cc = "wcc386"
 		Compiler.cl = "wcl386"
 		Compiler.m32 = true
+		Compiler.pp = Compiler.cc .. " -P"
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
@@ -198,6 +203,7 @@ function CheckWcc386Compiler(tmpName)
 	Compiler.cc = "wcc386"
 	Compiler.cl = "wcl386 -q"
 	Compiler.m32 = true
+	Compiler.pp = Compiler.cc .. " -P"
 end
 
 function GetBitSizeResult(fileName)
