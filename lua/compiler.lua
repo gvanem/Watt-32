@@ -213,9 +213,9 @@ function GetBitSizeResult(fileName)
 end
 
 function CheckCompilerIntSize()
-	Check("Checking size of 'int' C type in bits")
+	Check("Checking actual size of 'int' C type in bits")
 
-	if Target.skipChecks then
+	if Target.crossCompile or Target.skipChecks then
 		Compiler.int = Target.makefile == "wcc" and 16 or 32
 		Pass("Skipped (assuming " .. Compiler.int ..")")
 		return
@@ -256,9 +256,9 @@ int main(void) {
 end
 
 function CheckCompilerLongSize()
-	Check("Checking size of 'long' C type in bits")
+	Check("Checking actual size of 'long' C type in bits")
 
-	if Target.skipChecks then
+	if Target.crossCompile or Target.skipChecks then
 		Compiler.long = 32
 		Pass("Skipped (assuming " .. Compiler.long ..")")
 		return

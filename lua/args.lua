@@ -23,8 +23,11 @@ return "\tcc\t- Handle everything yourself with CC,CFLAGS,LD enviroment variable
 end
 
 function OptionHelpStr()
-return "\t-h, --help, /? - Show this help\n" ..
-"\t-s, /s         - Skip compiler checks\n"
+return [[
+	-h, --help, /? - Show this help
+	-c, /c         - Cross compiling, skip native checks
+	-s, /s         - Skip all compiler checks
+]]
 end
 
 function GetOpt()
@@ -36,6 +39,7 @@ function GetOpt()
 			end
 		end
 
+		if a == '-c' or a == '/c' then Target.crossCompile = true end
 		if a == '-s' or a == '/s' then Target.skipChecks = true end
 	end
 end
