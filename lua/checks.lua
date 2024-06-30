@@ -5,30 +5,19 @@ require("lua.util")
 
 function CheckSystemFamily()
 	Check("Determining operating system family")
-	local path = os.getenv("PATH")
+	-- Every Microsoft operating system since PC-DOS 2 sets %COMSPEC%
+	local env = os.getenv("COMSPEC")
 
-	if not path then
-		Error()
-	end
+	if env then
+		-- Every Microsoft operating system since Windows 95 sets %WINDIR%
+		env = os.getenv("WINDIR")
 
-	-- Try find part of a absolute drive path like 'C:\Windows\System32'
-	dos = string.match(path, ":\\")
-
-	if dos then
-		local output = UniqueName()
-		os.execute("ver > " .. output)
-		handle = io.open(output)
-		if handle then
-		local output = handle:read("*a")
-			handle:close()
-			if string.find( string.lower(output), "windows" ) then
-				r = "Windows"
-			else
-				r = "Dos"
-			end
+		if env then
+			r = "Windows"
+		else
+			r = "Dos"
 		end
-		os.remove(output)
-	else -- Assume Posix compliant
+	else -- Assume POSIX compliant Unix system
 		r = "Unix"
 	end
 
