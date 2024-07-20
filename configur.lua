@@ -8,15 +8,13 @@ Target = {}
 Target.makefile = CheckMakefileRequestValid()
 GetOpt()
 
--- Can the system acheve basic things?
-System = {}
-System.family = CheckSystemFamily()
+-- Can the system achieve basic things?
+System = CheckSystemFamily()
 TmpFolder = UniqueName()
 
-System.divider = System.family == "Unix" and "/" or "\\"
-System.md = CheckCreateDirCmd(TmpFolder)
-System.rm = CheckRemoveFileCmd(TmpFolder)
-System.rd = CheckRemoveDirCmd(TmpFolder)
+CheckCreateDirCmd(TmpFolder)
+CheckRemoveFileCmd(TmpFolder)
+CheckRemoveDirCmd(TmpFolder)
 
 -- Does the project directory look correct?
 CheckDirContains("inc", {"net/if.h", "tcp.h"}) -- TODO: Add all the important headers in a table and call in place of this inline variable
@@ -28,7 +26,7 @@ CheckAssembler()
 CheckCompiler()
 
 -- Check size of standard types an actual 32-bit typedef can be defined
-CheckCompilerNative() -- Can these tests even be done?
+CheckCompilerNative() -- Check that these tests can be done (or skipped)
 CheckCompilerIntSize()
 CheckCompilerLongSize()
 

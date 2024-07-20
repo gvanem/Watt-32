@@ -4,25 +4,36 @@ require("lua.linker")
 require("lua.util")
 
 function CheckSystemFamily()
+	local sys = {}
+
 	Check("Determining operating system family")
 	-- Every Microsoft operating system since PC-DOS 2 sets %COMSPEC%
 	local env = os.getenv("COMSPEC")
 
 	if env then
-		-- Every Microsoft operating system since Windows 95 sets %WINDIR%
-		env = os.getenv("WINDIR")
+		sys.divider = "\\"
+		sys.md = "MD"
+		sys.rm = "DEL"
 
-		if env then
-			r = "Windows"
+		-- Every NT operating system sets %OS%
+		env = os.getenv("OS")
+		if env and env == "Windows_NT" then
+			sys.family = "Nt"
+			sys.rd = "RD /S /Q"
 		else
-			r = "Dos"
+			sys.family = "Dos"
+			sys.rd = "DELTREE /Y"
 		end
-	else -- Assume POSIX compliant Unix system
-		r = "Unix"
+	else -- Assume it's a Unix system
+		sys.divider = "/"
+		sys.family = "Unix"
+		sys.md = "mkdir"
+		sys.rd = "rm -R"
+		sys.rm = "rm"
 	end
 
-	Pass(r)
-	return r
+	Pass(sys.family)
+	return sys
 end
 
 function CheckEnvVar(var)
@@ -115,8 +126,7 @@ function CheckLinker()
 end
 
 function CheckRemoveFileCmd(filename)
-	local exec = System.family == "Unix" and "rm" or "DEL"
-	Check("Checking '" .. exec .. "' works")
+	Check("Checking '" .. System.rm .. "' works")
 
 	local path = SanitizePath(filename .. "/2.txt")
 
@@ -126,7 +136,7 @@ function CheckRemoveFileCmd(filename)
 
 	file:close()
 
-	local e = exec .. " " .. path
+	local e = System.rm .. " " .. path
 	RunCommand(e)
 
 	file = io.open(path)
@@ -140,8 +150,7 @@ function CheckRemoveFileCmd(filename)
 end
 
 function CheckRemoveDirCmd(filename)
-	local exec = System.family == "Unix" and "rm -R" or "RD /S /Q"
-	Check("Checking '" .. exec .."' works")
+	Check("Checking '" .. System.rd .."' works")
 
 	-- Ensure there's a file in the directory
 	local path = SanitizePath(filename .. "/1.txt")
@@ -152,41 +161,24 @@ function CheckRemoveDirCmd(filename)
 	file:close()
 
 	-- Delete the folder
-	local e = exec .. " " .. filename
+	local e = System.rd .. " " .. filename
 	RunCommand(e)
 
 	-- The file shouldn't open since its folder has been deleted
 	local file = io.open(path)
 	if file then
 		file:close()
-		if System.family == "Unix" then
-			os.remove(path)
-			Fail("No")
-		end
-
-		-- Trying 'RD /S /Q' didn't work, try 'DELTREE /Y'
-		Pass("No")
-		exec = "DELTREE /Y"
-		Check("Checking '" .. exec .."' works")
-		e = exec .. " " .. filename
-		RunCommand(e)
-		local file = io.open(path)
-		if file then
-			file:close()
-			os.remove(path)
-			Fail("No")
-		end
+		os.remove(path)
+		Fail("No")
 	end
 
 	Pass("Yes")
-	return exec
 end
 
 function CheckCreateDirCmd(filename)
-	local exec = System.family == "Unix" and "mkdir" or "MD"
-	Check("Checking '" .. exec .. "' works")
+	Check("Checking '" .. System.md .. "' works")
 
-	local e = exec .. " " .. filename
+	local e = System.md .. " " .. filename
 	RunCommand(e)
 
 	file = io.open(filename .. "/1.txt", "a")
@@ -195,8 +187,6 @@ function CheckCreateDirCmd(filename)
 		file:close()
 		Pass("Yes")
 	else Fail("No") end
-
-	return exec
 end
 
 function CheckDirContains(dir, files)
