@@ -1,6 +1,5 @@
 require("lua.asm")
 require("lua.compiler")
-require("lua.linker")
 require("lua.util")
 
 function CheckSystemFamily()
@@ -82,8 +81,7 @@ function CheckCompiler(makefile)
 		if makefile == "cc" then Fail("None") -- Nothing was specified
 		elseif makefile == "wcc" or makefile == "wcc386" then
 			Pass("Open Watcom")
-			if makefile == "wcc386" then CheckWcc386Compiler(tmpName)
-			else CheckWccCompiler(tmpName) end
+			require("lua.compiler.wcc")
 		else
 			Pass("GNU Compiler Collection or compatible")
 			if makefile == "clang" then
@@ -91,8 +89,11 @@ function CheckCompiler(makefile)
 			else
 				cc = "gcc"
 			end
-			CheckGccCompiler(cc, tmpName)
+			require("lua.compiler.gcc")
 		end
+
+		CheckCompiler(cc, tmpName)
+		CheckLinker()
 	else
 		return CheckCustomCompiler(cc, tmpName)
 	end
