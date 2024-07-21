@@ -1,46 +1,45 @@
 function PrintHelp()
-	print(
-"configur.lua [TARGET] [OPTIONS]\n" ..
-"Configures and generates Watt-32 makefiles regardless of host enviroment using Lua\n" ..
-"A platform agnostic alternative to `src/configur.sh` and `SRC\\CONFIGUR.BAT`\n" ..
-"\n[TARGET]:\n" ..
-TargetHelpStr() ..
-"\n[OPTIONS]:\n" ..
-OptionHelpStr()
+	print([[
+configur.lua [TARGET] [OPTIONS]
+Configures and generates Watt-32 makefiles regardless of host enviroment using Lua
+A platform agnostic alternative to `src/configur.sh` and `SRC\\CONFIGUR.BAT`
+[TARGET]:
+]] ..
+	TargetHelpStr() ..
+[[
+[OPTIONS]:
+]] ..
+	OptionHelpStr()
 	)
 
 	os.exit(3)
 end
 
 function TargetHelpStr()
-return "\tcc\t- Handle everything yourself with CC,CFLAGS,LD enviroment variables\n" ..
-"\tclang\t- A GCC compatible alternative compiler based on LLVM\n" ..
-"\tdjggp\t- A port of GCC for 80386+ DOS systems\n" ..
-"\tgcc\t- GNU Compiler Collection intended for Posix systems\n" ..
-"\tmingw\t- A port of GCC for Win32 based systems\n" ..
-"\twcc\t- Open Watcom C/C++ toolchain to build 8086-80286 targets\n" ..
-"\twcc386\t- Open Watcom C/C++ toolchain to build 80386+ targets\n"
+return [[
+	cc     - Handle everything yourself with CC,CFLAGS,LD enviroment variables
+	clang  - A GCC compatible alternative compiler based on LLVM
+	djggp  - A port of GCC for 80386+ DOS systems
+	gcc    - GNU Compiler Collection intended for Posix systems
+	mingw  - A port of GCC for Win32 based systems
+	wcc    - Open Watcom C/C++ toolchain to build 8086-80286 targets
+	wcc386 - Open Watcom C/C++ toolchain to build 80386+ targets
+]]
 end
 
 function OptionHelpStr()
 return [[
 	-h, --help, /? - Show this help
-	-c, /c         - Cross compiling, skip native checks
-	-s, /s         - Skip all compiler checks
+	-c, --xcom, /c - Cross compiling, skip native checks
+	-s, --skip, /s - Skip all compiler checks
 ]]
 end
 
 function GetOpt()
-	local help = { "-h", "--help", "/?" }
 	for _,a in ipairs(arg) do
-		for _,h in ipairs(help) do
-			if a == h then
-				PrintHelp()
-			end
-		end
-
-		if a == '-c' or a == '/c' then Target.crossCompile = true end
-		if a == '-s' or a == '/s' then Target.skipChecks = true end
+		if a == '-h' or a == '/?' or a == "--help" then PrintHelp() end
+		if a == '-c' or a == '/c' or a == "--xcom" then Target.xcom = true end
+		if a == '-s' or a == '/s' or a == "--skip" then Target.skip = true end
 	end
 end
 

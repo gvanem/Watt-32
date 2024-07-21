@@ -107,7 +107,7 @@ function CheckLinker()
 		Check("Guessing linker")
 		if Compiler.type == "watcom" then
 			Compiler.ld = "wlink"
-			if Target.skipChecks == true then
+			if Target.skip == true then
 				Pass("Skipped (assuming '" .. Compiler.ld .. "')")
 				return
 			end
@@ -115,7 +115,7 @@ function CheckLinker()
 			CheckWlinkLinker()
 		elseif Compiler.type == "gcc" then
 			Compiler.ld = "ld"
-			if Target.skipChecks == true then
+			if Target.skip == true then
 				Pass("Skipped (assuming '" .. Compiler.ld .. "')")
 				return
 			end

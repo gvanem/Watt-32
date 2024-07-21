@@ -73,7 +73,7 @@ end
 function CheckCustomAssembler(as, tmpName)
 	Check("Checking '" .. as .. "' compiler understands MASM format")
 
-	if Target.skipChecks then
+	if Target.skip then
 		Pass("Skipped")
 		return
 	end
@@ -138,7 +138,7 @@ function CheckGccAssembler(as, tmpName)
 
 	Check("Checking '" .. gcc .. "' is available")
 
-	if Target.skipChecks then
+	if Target.skip then
 		Pass("Skipped")
 		Compiler.as = gcc
 		Compiler.aext = ".s"
@@ -166,7 +166,7 @@ function CheckWasmAssembler(as, tmpName)
 
 	Check("Checking " .. wasm .. " is available")
 
-	if Target.skipChecks then
+	if Target.skip then
 		Compiler.as = "wasm"
 		Compiler.aext = ".asm"
 		Pass("Skipped")

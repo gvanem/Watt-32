@@ -16,7 +16,7 @@ end
 function CheckCustomCompiler(cc, tmpName)
 	Check("Checking CC compiler works")
 
-	if Target.skipChecks then
+	if Target.skip then
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return
@@ -70,7 +70,7 @@ function CheckGccCompiler(cc, tmpName)
 
 	Check("Checking '" .. gcc .. "' is available")
 
-	if Target.skipChecks then
+	if Target.skip then
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		Compiler.cc = gcc
@@ -143,7 +143,7 @@ function CheckWccCompiler(tmpName)
 
 	Check("Checking wcc is available")
 
-	if Target.skipChecks then
+	if Target.skip then
 		Compiler.cc = "wcc"
 		Compiler.cl = "wcl"
 		Compiler.m16 = true
@@ -178,7 +178,7 @@ function CheckWcc386Compiler(tmpName)
 
 	Check("Checking wcc386 is available")
 
-	if Target.skipChecks then
+	if Target.skip then
 		Compiler.cc = "wcc386"
 		Compiler.cl = "wcl386"
 		Compiler.m32 = true
@@ -221,7 +221,7 @@ end
 
 function CheckCompilerNative()
 	Check("Checking if '" .. Compiler.cl .. "' builds native binaries")
-	if Target.skipChecks then
+	if Target.skip then
 		Pass("Skipped (assuming no)")
 		return
 	end
@@ -254,14 +254,14 @@ int main(void) {
 		os.remove(tmpName .. ".txt")
 	else
 		Pass("No")
-		Target.crossCompile = true
+		Target.xcom = true
 	end
 end
 
 function CheckCompilerIntSize()
 	Check("Checking actual size of 'int' C type in bits")
 
-	if Target.crossCompile or Target.skipChecks then
+	if Target.xcom or Target.skip then
 		Compiler.int = Target.makefile == "wcc" and 16 or 32
 		Pass("Skipped (assuming " .. Compiler.int ..")")
 		return
@@ -304,7 +304,7 @@ end
 function CheckCompilerLongSize()
 	Check("Checking actual size of 'long' C type in bits")
 
-	if Target.crossCompile or Target.skipChecks then
+	if Target.xcom or Target.skip then
 		Compiler.long = 32
 		Pass("Skipped (assuming " .. Compiler.long ..")")
 		return

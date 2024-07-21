@@ -3,10 +3,12 @@ require("lua.checks")
 require("lua.makefile")
 require("lua.util")
 
--- Check parameters and which makefile to generate
 Target = {}
-Target.makefile = CheckMakefileRequestValid()
 GetOpt()
+
+-- Check parameters and which makefile to generate
+
+Target.makefile = CheckMakefileRequestValid()
 
 -- Can the system achieve basic things?
 System = CheckSystemFamily()
