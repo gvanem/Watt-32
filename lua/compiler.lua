@@ -1,4 +1,6 @@
-require("lua.util")
+--[[
+	compiler.lua contains functions common to testing all C compilers.
+]]
 
 function CreateCTestFile(name, src)
 	if not src then src = "int main(void) {\n\treturn 0;\n}\n" end
@@ -11,54 +13,6 @@ function CreateCTestFile(name, src)
 	end
 
 	return false
-end
-
-function CheckCustomCompiler(cc, tmpName)
-	Check("Checking CC compiler works")
-
-	if Target.skip then
-		os.remove(tmpName .. ".c")
-		Pass("Skipped")
-		return
-	end
-
-	RunCommand (
-		cc ..
-		" " ..
-		tmpName ..
-		".c"
-	)
-
-	local exists = CheckAndRemoveCommonArtifacts(tmpName)
-	if exists > 0 then Pass("Yes") else
-		os.remove(tmpName .. ".c")
-		Fail("No")
-	end
-
-	Compiler.cc = cc
-	Compiler.cl = cc
-
-	local cflags = CheckEnvVar("CFLAGS")
-	if cflags then
-		Check("Checking if C compiler works with CFLAGS")
-		local r = RunCommand (
-			cc ..
-			" " ..
-			cflags ..
-			" " ..
-			tmpName ..
-			".c"
-		)
-
-		local exists = CheckAndRemoveCommonArtifacts(tmpName)
-		if exists > 0 then Pass("Yes")
-		else
-			os.remove(tmpName .. ".c")
-			Fail("No")
-		end
-
-		Compiler.cflags = cflags
-	end
 end
 
 function GetBitSizeResult(fileName)

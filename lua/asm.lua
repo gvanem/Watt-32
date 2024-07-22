@@ -1,4 +1,6 @@
-require("lua.util")
+--[[
+	asm.lua contains functions for testing assemblers.
+]]
 
 function CreateMasmTestFile(name, src)
 	if not src then

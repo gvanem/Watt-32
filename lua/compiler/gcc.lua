@@ -1,3 +1,9 @@
+--[[
+	gcc.lua contains the functions needed to test
+	GNU Compiler Collection compatible C compilers
+	including Clang and DJGPP and of cource GCC.
+]]
+
 function CheckCompiler(cc, tmpName)
 	local gcc = cc or "gcc"
 

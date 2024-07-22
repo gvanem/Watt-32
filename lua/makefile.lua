@@ -1,4 +1,6 @@
-require("lua.util")
+--[[
+	makefile.lua contains functions for generating makefiles
+]]
 
 function MakefileHeader()
 	return
@@ -6,11 +8,9 @@ function MakefileHeader()
 #
 # NB! THIS MAKEFILE WAS AUTOMATICALLY GENERATED.
 # If you make manual edits, be sure to save them as a different name
-# otherwise the script may overwrite your changes.
+# otherwise your changes might be overwriten.
 #
 # Consider running "<lua> configur.lua <target>" instead of editing
-#
-# Makefile for the Watt-32 TCP/IP stack.
 #
 ]]
 end
@@ -226,13 +226,12 @@ function GenerateMakefileWatcom(file)
 	end
 
 	file:write(
-MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. "\n" ..
-MakefileCreateVariable("BINPATH", binPath) .. "\n" ..
-MakefileCreateVariable("LIBPATH", libPath) .. "\n" ..
-MakefileCreateVariable("OBJPATH", objPath) .. "\n" ..
-MakefileCreateVariable("STAT_LIB", [[$(LIBPATH)]] .. libName) .. "\n" ..
-"\n" ..
-GenerateMakefileWatcomLarge() ..
-GenerateCleanRule(objPath)
-)
+		MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. "\n" ..
+		MakefileCreateVariable("BINPATH", binPath) .. "\n" ..
+		MakefileCreateVariable("LIBPATH", libPath) .. "\n" ..
+		MakefileCreateVariable("OBJPATH", objPath) .. "\n" ..
+		MakefileCreateVariable("STAT_LIB", [[$(LIBPATH)]] .. libName) .. "\n\n" ..
+		GenerateMakefileWatcomLarge() ..
+		GenerateCleanRule(objPath)
+	)
 end

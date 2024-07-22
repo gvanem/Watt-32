@@ -1,3 +1,7 @@
+--[[
+	util.lua contains useful functions that have nowhere better to live.
+]]
+
 function UniqueName()
 	local filename = tostring(os.time()):sub(-8)
 	local file = io.open(filename, "r")
@@ -61,27 +65,6 @@ function CheckAndRemoveCommonArtifacts(baseName)
 	return r
 end
 
-function FileExists(name)
-	local file = io.open(name)
-	if file then
-		file:close()
-		return true
-	end
-
-	return false
-end
-
-function SanitizePath(path)
-	local sanitize
-	if System.family == "Unix" then
-		sanitize = path:gsub([[\]], [[/]])
-	else
-		sanitize = path:gsub([[/]], [[\]])
-	end
-
-	return sanitize
-end
-
 function SearchForExecutable(exec, delimiter)
 	local path = os.getenv("PATH")
 
@@ -101,10 +84,11 @@ end
 
 function StringToHexArray(str)
 	local hexArray = {}
+
 	for i = 1, #str do
-		local byte = string.byte(str, i)
-		hexArray[#hexArray + 1] = string.format("0x%02X", byte)
+		hexArray[#hexArray + 1] = string.format("0x%02X", string.byte(str, i))
 	end
+
 	return "[" .. table.concat(hexArray, ", ") .. "]"
 end
 
@@ -117,23 +101,4 @@ function RunCommand(exec)
 	os.execute(exec)
 	-- Keep memory free on DOS systems
 	collectgarbage("step", 9001)
-end
-
-function Check(msg)
-	io.write(msg .. "... ")
-	io.flush()
-end
-
-function Pass(msg)
-	print(msg)
-end
-
-function Fail(msg)
-	print(msg)
-	os.exit(1)
-end
-
-function Error()
-	print("Error!")
-	os.exit(2)
 end

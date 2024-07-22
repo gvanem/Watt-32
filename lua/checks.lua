@@ -1,39 +1,6 @@
-require("lua.asm")
-require("lua.compiler")
-require("lua.util")
-
-function CheckSystemFamily()
-	local sys = {}
-
-	Check("Determining operating system family")
-	-- Every Microsoft operating system since PC-DOS 2 sets %COMSPEC%
-	local env = os.getenv("COMSPEC")
-
-	if env then
-		sys.divider = "\\"
-		sys.md = "MD"
-		sys.rm = "DEL"
-
-		-- Every NT operating system sets %OS%
-		env = os.getenv("OS")
-		if env and env == "Windows_NT" then
-			sys.family = "Nt"
-			sys.rd = "RD /S /Q"
-		else
-			sys.family = "Dos"
-			sys.rd = "DELTREE /Y"
-		end
-	else -- Assume it's a Unix system
-		sys.divider = "/"
-		sys.family = "Unix"
-		sys.md = "mkdir"
-		sys.rd = "rm -R"
-		sys.rm = "rm"
-	end
-
-	Pass(sys.family)
-	return sys
-end
+--[[
+	check.lua contains functions for miscellaneous yet common checks.
+]]
 
 function CheckEnvVar(var)
 	Check("Checking '" .. var .. "' enviroment variable")
@@ -53,7 +20,8 @@ function CheckAssembler(makefile)
 	if not makefile then makefile = Target.makefile end
 
 	local as = CheckEnvVar("AS")
-	if not cc then
+	if not as then
+		require("lua.asm")
 		Check("Guessing assembler")
 		if makefile == "cc" then Fail("None") -- Nothing was specified
 		elseif makefile == "wcc" or makefile == "wcc386" then
@@ -69,6 +37,7 @@ function CheckAssembler(makefile)
 end
 
 function CheckCompiler(makefile)
+	require("lua.compiler")
 	local tmpName = UniqueName()
 
 	if not makefile then makefile = Target.makefile end
@@ -91,12 +60,11 @@ function CheckCompiler(makefile)
 			end
 			require("lua.compiler.gcc")
 		end
-
-		CheckCompiler(cc, tmpName)
-		CheckLinker()
 	else
-		return CheckCustomCompiler(cc, tmpName)
+		require("lua.compiler.custom")
 	end
+
+	CheckCompiler(cc, tmpName)
 
 	os.remove(tmpName .. ".c")
 end
@@ -188,17 +156,4 @@ function CheckCreateDirCmd(filename)
 		file:close()
 		Pass("Yes")
 	else Fail("No") end
-end
-
-function CheckDirContains(dir, files)
-	Check("Checking '" .. dir .. "' contains required files")
-
-	for _, file in ipairs(files) do
-		local path = SanitizePath(dir .. "/" .. file)
-
-		if not FileExists(path) then Fail("Missing '" .. file .. "'") end
-	end
-
-	Pass("Yes")
-	return true
 end
