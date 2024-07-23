@@ -82,16 +82,6 @@ function SearchForExecutable(exec, delimiter)
 	return false
 end
 
-function StringToHexArray(str)
-	local hexArray = {}
-
-	for i = 1, #str do
-		hexArray[#hexArray + 1] = string.format("0x%02X", string.byte(str, i))
-	end
-
-	return "[" .. table.concat(hexArray, ", ") .. "]"
-end
-
 function RunCommandLocal(exec)
 	if System.family == "Unix" then exec = "./" .. exec end
 	RunCommand(exec)

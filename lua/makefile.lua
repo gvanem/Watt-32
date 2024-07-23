@@ -158,6 +158,14 @@ function GetMakefileOutputName()
 end
 
 function GenerateMakefile()
+	if Target.makefile == "wcc" or Target.makefile == "wcc386" then
+		require("lua.makefile.watcom")
+		GenerateMakefile()
+	end
+end
+
+--[[
+function GenerateMakefile()
 	local fileName = GetMakefileOutputName()
 	Check("Generating makefile '" .. fileName .. "'")
 
@@ -180,7 +188,7 @@ function GenerateMakefile()
 	file:close()
 	Pass("Done")
 end
-
+--]]
 function GenerateMakefileUnix(file)
 	-- TODO: write a unix style makefile depending on -m32 or -m64
 	file:write([[# A Unix makefile would go here in the completed version]])
