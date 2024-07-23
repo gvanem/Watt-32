@@ -102,3 +102,23 @@ function RunCommand(exec)
 	-- Keep memory free on DOS systems
 	collectgarbage("step", 9001)
 end
+
+function mkdir(path)
+	Check("Creating folder '" .. path .. "'")
+	local currentPath = "."
+	for part in string.gmatch(path, "[^" .. System.divider .. "]+") do
+		currentPath = SanitizePath(currentPath .. System.divider .. part)
+		if not FileExists(currentPath) then
+			RunCommand(System.md .. ' ' .. currentPath)
+			if not FileExists(currentPath) then
+				Error()
+			end
+		end
+	end
+
+	if FileExists(path) then
+		Pass("Done")
+	else
+		Error()
+	end
+end
