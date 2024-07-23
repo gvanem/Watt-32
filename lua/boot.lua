@@ -159,9 +159,14 @@ function CheckSystemFamily()
 end
 
 function FileExists(name)
-	local file = io.open(name)
+	local file, err = io.open(name)
 	if file then
 		file:close()
+		return true
+	end
+
+	-- Directory testing
+	if err:match("Is a directory") or err:match("Permission denied") then
 		return true
 	end
 
