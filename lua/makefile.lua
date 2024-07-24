@@ -159,9 +159,11 @@ end
 
 function GenerateMakefile()
 	if Target.makefile == "wcc" or Target.makefile == "wcc386" then
-		require("lua.makefile.watcom")
-		GenerateMakefile()
+		require("lua.makefile.wmake")
+	elseif Target.makefile == "clang" or Target.makefile == "djgpp" or Target.makefile == "gcc" then
+		require("lua.makefile.make")
 	end
+	GenerateMakefile()
 end
 
 --[[

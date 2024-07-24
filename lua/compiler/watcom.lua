@@ -1,5 +1,5 @@
 --[[
-	wcc.lua contains the functions needed to test
+	watcom.lua contains the functions needed to test
 	Open Watcoms 1.9 or later C compilers (wcc and wcc386)
 ]]
 

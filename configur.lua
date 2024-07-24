@@ -10,8 +10,10 @@ CheckDirContains("lua", {
 	"compiler.lua",
 	"compiler/custom.lua",
 	"compiler/gcc.lua",
-	"compiler/wcc.lua",
+	"compiler/watcom.lua",
 	"makefile.lua",
+	"makefile/make.lua",
+	"makefile/wmake.lua",
 	"util.lua",
 	}
 )

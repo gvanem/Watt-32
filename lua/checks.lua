@@ -50,7 +50,7 @@ function CheckCompiler(makefile)
 		if makefile == "cc" then Fail("None") -- Nothing was specified
 		elseif makefile == "wcc" or makefile == "wcc386" then
 			Pass("Open Watcom")
-			require("lua.compiler.wcc")
+			require("lua.compiler.watcom")
 		else
 			Pass("GNU Compiler Collection or compatible")
 			if makefile == "clang" then
