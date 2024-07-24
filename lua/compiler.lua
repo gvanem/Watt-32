@@ -65,6 +65,8 @@ int main(void) {
 		Pass("No")
 		Target.xcom = true
 	end
+
+	CheckAndRemoveCommonArtifacts(tmpName)
 end
 
 function CheckCompilerIntSize()
