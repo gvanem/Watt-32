@@ -125,8 +125,19 @@ function SanitizePath(path)
 	return sanitize
 end
 
+local function CheckLuaPath()
+	Check("Checking Lua interpretor process path")
+	local lua = arg[-1]
+	if not lua then Fail("Unresolvable") end
+	Pass(lua)
+	return lua
+end
+
 function CheckSystemFamily()
 	local sys = {}
+
+	-- If the lua runtime can't be resolved continuing is a lost cause
+	sys.lua = CheckLuaPath()
 
 	Check("Determining operating system family")
 	-- Every Microsoft operating system since PC-DOS 2 sets %COMSPEC%
