@@ -7,11 +7,10 @@ function MakefileHeader()
 [[
 #
 # NB! THIS MAKEFILE WAS AUTOMATICALLY GENERATED.
-# If you make manual edits, be sure to save them as a different name
+# After making manual edits, be sure to save with a different name
 # otherwise your changes might be overwriten.
 #
-# Consider running "<lua> configur.lua <target>" instead of editing
-#
+
 ]]
 end
 
@@ -123,6 +122,15 @@ function MakefileAllDosObjects(prepend, append)
 	return common
 end
 
+function MakefileAllWinObjects(prepend, append)
+	local common = MakefileCommon(prepend, append)
+	local win = {"win_dll", "winadinf", "winmisc", "winpkt"}
+	TableStringFormat(win, prepend, append)
+
+	table.move(win, 1, #win, #common + 1, common)
+	return common
+end
+
 function MakefileCreateVariable(name, value)
 	if type(value) == "table" then
 		return name .. " = " .. table.concat(value, " ")
@@ -133,7 +141,7 @@ end
 
 function GenerateAsmSources()
 	return MakefileCreateVariable("ASM_SOURCE",
-		MakefileAssembly(nil, Compiler.aext)
+		MakefileAssembly(nil, ".asm")
 	)
 end
 
@@ -153,6 +161,29 @@ function GenerateZlibSources()
 	return MakefileCreateVariable("ZLIB_SOURCE", MakefileZlibSource())
 end
 
+
+function GenerateSources(sourceType)
+	local str = ""
+	if(sourceType:gmatch("asm")) then str = str .. GenerateAsmSources() .. '\n' end
+	if(sourceType:gmatch("bind")) then str = str .. GenerateBindSources() .. '\n' end
+	if(sourceType:gmatch("bsd")) then str = str .. GenerateBsdSources() .. '\n' end
+	if(sourceType:gmatch("core")) then str = str .. GenerateCoreSources() .. '\n' end
+	if(sourceType:gmatch("zlib")) then str = str .. GenerateZlibSources() .. '\n' end
+	return str
+end
+
+function GenerateObjects(sourceType)
+	local str = ""
+	if(sourceType:gmatch("dos")) then
+		str = MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. '\n'
+	elseif(sourceType:gmatch("win")) then
+		str = MakefileCreateVariable("OBJS", MakefileAllWinObjects([[$(OBJPATH)]], ".obj")) .. '\n'
+	else
+		str = MakefileCreateVariable("OBJS", MakefileCommon([[$(OBJPATH)]], ".obj")) .. '\n'
+	end
+	return str
+end
+
 function GetMakefileOutputName()
 	return "src" .. System.divider .. Target.makefile .. ".mak"
 end
@@ -164,36 +195,6 @@ function GenerateMakefile()
 		require("lua.makefile.make")
 	end
 	GenerateMakefile()
-end
-
---[[
-function GenerateMakefile()
-	local fileName = GetMakefileOutputName()
-	Check("Generating makefile '" .. fileName .. "'")
-
-	local file = io.open(fileName, "w")
-	if not file then Error() end
-
-	file:write(MakefileHeader() .. "\n")
-	file:write(GenerateAsmSources() .. "\n")
-	file:write(GenerateBindSources() .. "\n")
-	file:write(GenerateBsdSources() .. "\n")
-	file:write(GenerateCoreSources() .. "\n")
-	file:write(GenerateZlibSources() .. "\n")
-
-	if Target.makefile == "wcc" or Target.makefile == "wcc386" then
-		GenerateMakefileWatcom(file)
-	else
-		GenerateMakefileUnix(file)
-	end
-
-	file:close()
-	Pass("Done")
-end
---]]
-function GenerateMakefileUnix(file)
-	-- TODO: write a unix style makefile depending on -m32 or -m64
-	file:write([[# A Unix makefile would go here in the completed version]])
 end
 
 function GenerateCleanRule(path)

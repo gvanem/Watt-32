@@ -10,104 +10,124 @@ local function StringToHexArray(str)
 	return table.concat(hexArray, ", ")
 end
 
-local function MakeBuildFilesLarge()
-	local objdir = SanitizePath(objroot .. "large")
+local function MakeBuildFiles(makefile, objPath, cc, cflags, aflags, statlib)
+	Check("Generating '" .. makefile .. "'")
+	local objdir = SanitizePath(objroot .. objPath)
 	mkdir(objdir)
-	local cflags = "-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC"
 
+	-- Create cflags.h
 	local dir = SanitizePath(objdir .. "/cflags.h")
-	Check("Writing cflags to '" .. dir .. "'")
 	local file = io.open(dir, "w")
 	if not file then Error() end
 	file:write([[
 const char *w32_cflags = "]] .. cflags .. [[";
-const char *w32_cc     = "*]] .. Compiler.cc16 .. [[";
+const char *w32_cc     = "*]] .. cc .. [[";
 ]]
 	)
 	file:close()
-	Pass("Done")
 
+	-- Create cflagsbf.h (hex array of cflag string
 	dir = SanitizePath(objdir .. "/cflagsbf.h")
-	Check("Writing cflags hex array to '" .. dir .. "'")
 	file = io.open(dir, "w")
 	if not file then Error() end
 	file:write(StringToHexArray(cflags))
 	file:close()
+
+	-- Create makefile
+	dir = SanitizePath("src/" .. makefile)
+	file = io.open(dir, "w")
+	if not file then Error() end
+
+	-- Generate a 'tag' string so that only required sources and objects are added to the makefile
+	local tag = "bindbsdcore"
+	if objPath == "large" or objPath == "flat" then
+		tag = tag .. "asmdos"
+	elseif objPath == "win32" then
+		tag = tag .. "win"
+	end
+
+	file:write(
+		MakefileHeader() ..
+		GenerateSources(tag) ..
+		"\nBINPATH = " .. SanitizePath("../bin/") .. '\n' ..
+		"LIBPATH = " .. SanitizePath("../lib/") .. '\n' ..
+		"LUAPATH = " .. SanitizePath("../lua/") .. '\n' ..
+		"\nOBJPATH = " .. SanitizePath(objdir .. "/") .. '\n' ..
+		GenerateObjects(tag) ..
+		"\nAS = " .. Compiler.as .. "\n" ..
+		"AR = " .. Compiler.ar .. "\n" ..
+		"CC = " .. cc .. "\n" ..
+		"LUA = " .. System.lua .. '\n' ..
+		"\nCFLAGS = " .. cflags .. "\n" ..
+		"AFLAGS = " .. aflags .. "\n" ..
+		"\nSTAT_LIB = $(LIBPATH)" .. statlib .. "\n"
+	)
+	file:close()
 	Pass("Done")
 end
 
-local function WMake_Asm()
-	return [[
-AS = *]] .. Compiler.as or "wasm" .. [[
-AR = *]] .. Compiler.ld or "wlib" .. [[
-
-]]
-end
-
-local function WMake_3()
-	return [[
-CC       = *]] .. Compiler.cc or "wcc386" .. [[
-CFLAGS   = ]] .. Compiler.cflags or "-bt=dos -ms -3r -oaxt -s -zlf -DWATT32_STATIC" .. [[
-AFLAGS   = ]] .. Compiler.aflags or "-bt=dos -3s -dDOSX -dDOS4GW" .. [[
-STAT_LIB = $(LIBPATH)wattcpw3.lib
-OBJDIR   = $(OBJROOT)small32
-]]
-end
-
-local function WMake_F()
-	return [[
-CC       = *]] .. Compiler.cc or "wcc386" .. [[
-CFLAGS   = ]] .. Compiler.cflags or "-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC" .. [[
-AFLAGS   = ]] .. Compiler.aflags or "-bt=dos -3r -dDOSX -dDOS4GW" .. [[
-STAT_LIB = $(LIBPATH)wattcpwf.lib
-OBJDIR   = $(OBJROOT)flat
-]]
-end
-
-local function WMake_L()
-	return [[
-CC       = *]] .. Compiler.cc16 or "wcc" .. [[
-CFLAGS   = ]] .. Compiler.cflags or "-bt=dos -ml -0 -os -s -zc -zm -zlf -DWATT32_STATIC" .. [[
-AFLAGS   = ]] .. Compiler.aflags or "-bt=dos" .. [[
-STAT_LIB = $(LIBPATH)wattcpwl.lib
-OBJDIR   = $(OBJROOT)large
-]]
-end
-
-local function WMake_S()
-	return [[
-CC       = *]] .. Compiler.cc16 or "wcc" .. [[
-CFLAGS   = ]] .. Compiler.cflags or "-bt=dos -ms -0 -os -s -zc -zm -zlf -DWATT32_STATIC" .. [[
-AFLAGS   = ]] .. Compiler.aflags or "-bt=dos" .. [[
-STAT_LIB = $(LIBPATH)wattcpws.lib
-OBJDIR   = $(OBJROOT)small
-]]
-end
-
-local function WMake_W()
-	return [[
-CC       = *]] .. Compiler.cc or "wcc386" .. [[
-CFLAGS   = ]] .. Compiler.cflags or "-bt=nt -mf -3r -fp6 -oilrtfm -s -bm -zri -zlf" .. [[
-AFLAGS   = ]] .. Compiler.aflags or "-bt=nt -3s -dDOSX" .. [[
-LDFLAGS  = system nt_dll
-STAT_LIB = $(LIBPATH)wattcpww.lib
-IMP_LIB  = $(LIBPATH)wattcpww_imp.lib
-WATT_DLL = $(DLLPATH)watt-32.dll
-OBJDIR   = $(OBJROOT)win32
-RESOURCE = $(OBJPATH)watt-32.res
-]]
-end
-
-local function WMake_X()
-	return [[
-CC       = *]] .. Compiler.cc or "wcc386" .. [[
-CFLAGS   = ]] .. Compiler.cflags or "-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC" .. [[
-AFLAGS   = ]] .. Compiler.aflags or "-bt=dos -3r -dDOSX -dDOS4GW" .. [[
-STAT_LIB = $(LIBPATH)wattcpwf.lib
-OBJDIR   = $(OBJROOT)flat
-]]
-end
-
 function GenerateMakefile()
-	MakeBuildFilesLarge()
+	if Compiler.cc16 then
+		-- Generate Large memory model makefile
+		MakeBuildFiles(
+			"watcom_l.mak",
+			"large",
+			Compiler.cc16,
+			[[-bt=dos -ml -0 -os -s -zc -zm -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=dos -zq -w3 -d1 -I"../inc"]],
+			"wattcpwl.lib"
+		)
+
+		-- Generate small memory model makefile
+		MakeBuildFiles(
+			"watcom_s.mak",
+			"small",
+			Compiler.cc16,
+			[[-bt=dos -ms -0 -os -s -zc -zm -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=dos -zq -w3 -d1 -I"../inc"]],
+			"wattcpws.lib"
+		)
+	end
+
+	if Compiler.cc then
+		-- Generate Flat DOS4GW memory model makefile (space optimized)
+		MakeBuildFiles(
+			"watcom_3.mak",
+			"flat",
+			Compiler.cc,
+			[[-bt=dos -ms -3r -oaxt -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
+			"wattcpw3.lib"
+		)
+
+		-- Generate Flat DOS4GW memory model makefile
+		MakeBuildFiles(
+			"watcom_f.mak",
+			"flat",
+			Compiler.cc,
+			[[-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
+			"wattcpwf.lib"
+		)
+
+		-- Generate 32-bit small memory model makefile
+		MakeBuildFiles(
+			"watcom_x.mak",
+			"small32",
+			Compiler.cc,
+			[[-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
+			"wattcpwx.lib"
+		)
+
+		-- Generate Win32 makefile
+		MakeBuildFiles(
+			"watcom_w.mak",
+			"win32",
+			Compiler.cc,
+			[[-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
+			"wattcpww.lib"
+		)
+	end
 end
