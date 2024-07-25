@@ -60,7 +60,8 @@ CheckCompilerNative() -- Check that these tests can be done (or skipped)
 CheckCompilerIntSize()
 CheckCompilerLongSize()
 
--- Check linker works
+-- Check archiver and linker works
+CheckArchiver()
 CheckLinker()
 
 -- Generate makefile

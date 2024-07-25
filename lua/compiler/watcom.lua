@@ -6,6 +6,8 @@
 local function CheckWccCompiler(tmpName)
 	Compiler.type = "watcom"
 	Compiler.output = "-fo="
+	Compiler.ar = "wlib"
+	Compiler.ld = "wlink"
 
 	Check("Checking wcc is available")
 
@@ -40,6 +42,7 @@ end
 local function CheckWcc386Compiler(tmpName)
 	Compiler.type = "watcom"
 	Compiler.output = "-fo="
+	Compiler.ar = "wlib"
 	Compiler.ld = "wlink"
 
 	Check("Checking wcc386 is available")
@@ -70,8 +73,42 @@ local function CheckWcc386Compiler(tmpName)
 	Compiler.pp = Compiler.cc .. " -P"
 end
 
+function CheckArchiver()
+	Check("Checking '" .. Compiler.ar .. "' works")
+	local tmpName = UniqueName()
+
+	if not CreateCTestFile(tmpName .. ".c") then Error() end
+
+	if Compiler.cc16 then
+	RunCommand (
+		Compiler.cc16 .. " " ..
+		Compiler.output .. tmpName .. ".o "  ..
+		tmpName .. ".c"
+	)
+	else
+		RunCommand (
+		Compiler.cc .. " " ..
+		Compiler.output .. tmpName .. ".o "  ..
+		tmpName .. ".c"
+	)
+	end
+
+	local file = io.open(tmpName .. ".o")
+	if not file then Error() end
+	file:close()
+
+	RunCommand(Compiler.ar .. " +" .. tmpName .. ".o " .. tmpName .. ".lib")
+	os.remove(tmpName .. ".c")
+
+	file = io.open(tmpName .. ".lib")
+	CheckAndRemoveCommonArtifacts(tmpName)
+	if not file then Fail("No") end
+	os.remove(tmpName .. ".lib")
+	Pass("Yes")
+end
+
 function CheckLinker()
-	Check("Checking wlink works")
+	Check("Checking '" .. Compiler.ld .. "' works")
 	local tmpName = UniqueName()
 
 	if not CreateCTestFile(tmpName .. ".c") then Error() end

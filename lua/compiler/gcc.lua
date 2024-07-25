@@ -9,6 +9,7 @@ function CheckCompiler(cc, tmpName)
 
 	Compiler.type = "gcc"
 	Compiler.output = "-o "
+	Compiler.ar = "ar"
 	Compiler.ld = "ld"
 
 	Check("Checking '" .. gcc .. "' is available")
@@ -83,8 +84,34 @@ function CheckCompiler(cc, tmpName)
 	else Pass("No") end
 end
 
+function CheckArchiver()
+	Check("Checking '" .. Compiler.ar .. "' works")
+	local tmpName = UniqueName()
+
+	if not CreateCTestFile(tmpName .. ".c") then Error() end
+
+	RunCommand (
+		Compiler.cc .. " -c " ..
+		Compiler.output .. tmpName .. ".o "  ..
+		tmpName .. ".c"
+	)
+
+	local file = io.open(tmpName .. ".o")
+	if not file then Error() end
+	file:close()
+
+	RunCommand(Compiler.ar .. " r " .. tmpName .. ".a " .. tmpName .. ".o")
+	os.remove(tmpName .. ".c")
+
+	file = io.open(tmpName .. ".a")
+	CheckAndRemoveCommonArtifacts(tmpName)
+	if not file then Fail("No") end
+	os.remove(tmpName .. ".a")
+	Pass("Yes")
+end
+
 function CheckLinker()
-	Check("Checking ld works")
+	Check("Checking '" .. Compiler.ld .. "' works")
 	local tmpName = UniqueName()
 
 	if not CreateCTestFile(tmpName .. ".c") then Error() end
