@@ -69,31 +69,6 @@ function CheckCompiler(makefile)
 	os.remove(tmpName .. ".c")
 end
 
-function CheckLinker()
-	local ld = CheckEnvVar("LD")
-	if ld then Compiler.ld = ld
-	else
-		Check("Guessing linker")
-		if Compiler.type == "watcom" then
-			Compiler.ld = "wlink"
-			if Target.skip == true then
-				Pass("Skipped (assuming '" .. Compiler.ld .. "')")
-				return
-			end
-			Pass(Compiler.ld)
-			CheckWlinkLinker()
-		elseif Compiler.type == "gcc" then
-			Compiler.ld = "ld"
-			if Target.skip == true then
-				Pass("Skipped (assuming '" .. Compiler.ld .. "')")
-				return
-			end
-			Pass(Compiler.ld)
-			CheckLdLinker()
-		else Fail("Unknown") end
-	end
-end
-
 function CheckRemoveFileCmd(filename)
 	Check("Checking '" .. System.rm .. "' works")
 
