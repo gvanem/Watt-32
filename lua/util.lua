@@ -94,7 +94,6 @@ function RunCommand(exec)
 end
 
 function mkdir(path)
-	Check("Creating folder '" .. path .. "'")
 	local currentPath = "."
 	for part in string.gmatch(path, "[^" .. System.divider .. "]+") do
 		currentPath = SanitizePath(currentPath .. System.divider .. part)
@@ -106,9 +105,7 @@ function mkdir(path)
 		end
 	end
 
-	if FileExists(path) then
-		Pass("Done")
-	else
+	if not FileExists(path) then
 		Error()
 	end
 end
