@@ -164,24 +164,50 @@ end
 
 function GenerateSources(sourceType)
 	local str = ""
-	if(sourceType:gmatch("asm")) then str = str .. GenerateAsmSources() .. '\n' end
-	if(sourceType:gmatch("bind")) then str = str .. GenerateBindSources() .. '\n' end
-	if(sourceType:gmatch("bsd")) then str = str .. GenerateBsdSources() .. '\n' end
-	if(sourceType:gmatch("core")) then str = str .. GenerateCoreSources() .. '\n' end
-	if(sourceType:gmatch("zlib")) then str = str .. GenerateZlibSources() .. '\n' end
+	if(sourceType.asm) then str = str .. GenerateAsmSources() .. '\n' end
+	if(sourceType.bind) then str = str .. GenerateBindSources() .. '\n' end
+	if(sourceType.bsd) then str = str .. GenerateBsdSources() .. '\n' end
+	if(sourceType.core) then str = str .. GenerateCoreSources() .. '\n' end
+	if(sourceType.zlib) then str = str .. GenerateZlibSources() .. '\n' end
 	return str
 end
 
 function GenerateObjects(sourceType)
 	local str = ""
-	if(sourceType:gmatch("dos")) then
+	if(sourceType.dos) then
 		str = MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. '\n'
-	elseif(sourceType:gmatch("win")) then
+	elseif(sourceType.win) then
 		str = MakefileCreateVariable("OBJS", MakefileAllWinObjects([[$(OBJPATH)]], ".obj")) .. '\n'
 	else
 		str = MakefileCreateVariable("OBJS", MakefileCommon([[$(OBJPATH)]], ".obj")) .. '\n'
 	end
 	return str
+end
+
+function GenerateConfigurables(sourceType, cc, cflags, aflags, ldflags)
+	local str = "# Build Binaries"
+	if sourceType.asm then str = str .. "\nAS  = " .. Compiler.as end
+	str = str .. "\nAR  = " .. Compiler.ar
+	if not cc then cc = Compiler.cc end
+	str = str .. "\nCC  = " .. cc
+	if sourceType.link then str = str .. "\nLD  = " .. Compiler.ld end
+	str = str .. "\nLUA = " .. System.lua .. "\n\n# Build Flags"
+	if sourceType.asm then
+		if not aflags then aflags = Compiler.aflags end
+		str = str .. "\nAFLAGS   = " .. aflags
+	end
+	if not cflags then cflags = Compiler.cflags end
+	str = str .. "\nCFLAGS   = " .. cflags
+	if sourceType.link then str = str .. "\nLDFLAGS  = " .. Compiler.ldflags	end
+	return str
+end
+
+function GeneratePaths(objdir)
+	return
+"# Project Paths\nBINPATH = " .. SanitizePath("../bin/") .. '\n' ..
+"LIBPATH = " .. SanitizePath("../lib/") .. '\n' ..
+"LUAPATH = " .. SanitizePath("../lua/") .. '\n' ..
+"OBJPATH = " .. SanitizePath(objdir .. "/") .. '\n'
 end
 
 function GetMakefileOutputName()
@@ -200,49 +226,4 @@ end
 function GenerateCleanRule(path)
 	return "clean:\n" ..
 	"\t" .. System.rd .. " " .. path .. "\n\n"
-end
-
-function GenerateMakefileWatcomLarge()
-	-- TODO: Temporary function, rewrite to handle all memory types
-	return [[
-$(STAT_LIB): $(OBJS) $(LIB_ARGS)
-	*wlib -q -b -c -pa -z=export.tmp $^@ @$(LIB_ARGS)
-
-$(OBJPATH)language.obj: language.c lang.c
-$(OBJPATH)asmpkt.obj:   asmpkt.asm
-$(OBJPATH)cpumodel.obj: cpumodel.asm
-
-.c{$(OBJDIR)}.obj: .AUTODEPEND
-	*]].. Compiler.cc .. " " .. Compiler.cflags .. [[ $[@ -fo=$^@
-
-.asm{$(OBJDIR)}.obj: .AUTODEPEND
-	*wasm ]] .. Compiler.aflags .. [[ $[@ -fo=$^@
-
-]]
-end
-
-function GenerateMakefileWatcom(file)
-	-- TODO: Setup parameters so it can be used to write all memory models not just large
-	local binPath = SanitizePath("../bin/")
-	local libPath = SanitizePath("../lib/")
-	local libName = "wattcpwl.lib"
-	local objPath = SanitizePath("build/watcom/large/")
-
-	if not Compiler.aflags then
-		Compiler.aflags = [[-bt=dos -zq -w3 -d1 -I"../inc"]]
-	end
-
-	if not Compiler.cflags then
-		Compiler.cflags = [[-bt=dos -ml -0 -os -s -zc -zm -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -I"$(%WATCOM)/h"]]
-	end
-
-	file:write(
-		MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. "\n" ..
-		MakefileCreateVariable("BINPATH", binPath) .. "\n" ..
-		MakefileCreateVariable("LIBPATH", libPath) .. "\n" ..
-		MakefileCreateVariable("OBJPATH", objPath) .. "\n" ..
-		MakefileCreateVariable("STAT_LIB", [[$(LIBPATH)]] .. libName) .. "\n\n" ..
-		GenerateMakefileWatcomLarge() ..
-		GenerateCleanRule(objPath)
-	)
 end

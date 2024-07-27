@@ -10,7 +10,7 @@ local function StringToHexArray(str)
 	return table.concat(hexArray, ", ")
 end
 
-local function MakeBuildFiles(header, makefile, objPath, cc, cflags, aflags, statlib)
+local function MakeBuildFiles(header, makefile, objPath, cc, cflags, aflags, statlib, extra)
 	Check("Generating '" .. makefile .. "'")
 	local objdir = SanitizePath(objroot .. objPath)
 	mkdir(objdir)
@@ -39,30 +39,37 @@ const char *w32_cc     = "*]] .. cc .. [[";
 	if not file then Error() end
 
 	-- Generate a 'tag' string so that only required sources and objects are added to the makefile
-	local tag = "bindbsdcore"
-	if objPath == "large" or objPath == "flat" then
-		tag = tag .. "asmdos"
-	elseif objPath == "win32" then
-		tag = tag .. "win"
+	local tag = { bind = true, bsd = true, core = true }
+
+	if objPath == "win32" then
+		tag.win = true
+		tag.link = true
+		if not Compiler.ld then Compiler.ld = "wlink" end
+		if not Compiler.ldflags then Compiler.ldflags = "system nt_dll" end
+		extra =
+[[
+
+# Win32 specifics
+IMP_LIB  = $(LIBPATH)wattcpww_imp.lib
+WATT_DLL = $(BINPATH)watt-32.dll
+RESOURCE = $(OBJPATH)watt-32.re
+]]
+	else
+		tag.asm = true
+		tag.dos = true
 	end
 
 	if not header then header = MakefileHeader() end
+	if not extra then extra = "" end
 
 	file:write(
 		header .. '\n' ..
-		GenerateSources(tag) ..
-		"\nBINPATH = " .. SanitizePath("../bin/") .. '\n' ..
-		"LIBPATH = " .. SanitizePath("../lib/") .. '\n' ..
-		"LUAPATH = " .. SanitizePath("../lua/") .. '\n' ..
-		"\nOBJPATH = " .. SanitizePath(objdir .. "/") .. '\n' ..
-		GenerateObjects(tag) ..
-		"\nAS = " .. Compiler.as .. '\n' ..
-		"AR = " .. Compiler.ar .. '\n' ..
-		"CC = " .. cc .. "\n" ..
-		"LUA = " .. System.lua .. '\n' ..
-		"\nCFLAGS = " .. cflags .. '\n' ..
-		"AFLAGS = " .. aflags .. '\n' ..
-		"\nSTAT_LIB = $(LIBPATH)" .. statlib .. '\n'
+		GeneratePaths(objdir) .. '\n' ..
+		GenerateConfigurables(tag, cc, cflags, aflags) .. '\n' ..
+		"STAT_LIB = $(LIBPATH)" .. statlib .. '\n' ..
+		extra .. '\n' ..
+		GenerateSources(tag) .. '\n' ..
+		GenerateObjects(tag)
 	)
 	file:close()
 	Pass("Done")
@@ -70,6 +77,7 @@ end
 
 function GenerateMakefile()
 	if Compiler.cc16 then
+		local aflags = [[-bt=dos -zq -w3 -d1 -I"../inc"]]
 		local wccHelp =
 [[
 #
@@ -93,7 +101,7 @@ function GenerateMakefile()
 			"large",
 			Compiler.cc16,
 			[[-bt=dos -ml -0 -os -s -zc -zm -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
-			[[-bt=dos -zq -w3 -d1 -I"../inc"]],
+			aflags,
 			"wattcpwl.lib"
 		)
 
@@ -104,7 +112,7 @@ function GenerateMakefile()
 			"small",
 			Compiler.cc16,
 			[[-bt=dos -ms -0 -os -s -zc -zm -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
-			[[-bt=dos -zq -w3 -d1 -I"../inc"]],
+			aflags,
 			"wattcpws.lib"
 		)
 	end
@@ -141,7 +149,7 @@ function GenerateMakefile()
 			"small32",
 			Compiler.cc,
 			[[-bt=dos -ms -3r -oaxt -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
-			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
+			[[-bt=dos -3s -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
 			"wattcpw3.lib"
 		)
 
@@ -162,8 +170,8 @@ function GenerateMakefile()
 			"watcom_w.mak",
 			"win32",
 			Compiler.cc,
-			[[-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
-			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
+			[[-bt=nt -mf -3r -fp6 -oilrtfm -s -bm -zri -zlf -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
+			[[-bt=nt -3s -dDOSX -zq -w3 -d1 -I"../inc"]],
 			"wattcpww.lib"
 		)
 	end
