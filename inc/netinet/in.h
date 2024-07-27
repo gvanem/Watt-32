@@ -398,50 +398,50 @@ struct ip_mreq {
  */
 #ifndef IN6_IS_ADDR_UNSPECIFIED
 #define IN6_IS_ADDR_UNSPECIFIED(a)      \
-           (((u_int32_t*)(a))[0] == 0   \
-         && ((u_int32_t*)(a))[1] == 0   \
-         && ((u_int32_t*)(a))[2] == 0   \
-         && ((u_int32_t*)(a))[3] == 0)
+           (((const u_int32_t*)(a))[0] == 0   \
+         && ((const u_int32_t*)(a))[1] == 0   \
+         && ((const u_int32_t*)(a))[2] == 0   \
+         && ((const u_int32_t*)(a))[3] == 0)
 #endif
 
 #ifndef IN6_IS_ADDR_LOOPBACK
 #define IN6_IS_ADDR_LOOPBACK(a)         \
-           (((u_int32_t*)(a))[0] == 0   \
-         && ((u_int32_t*)(a))[1] == 0   \
-         && ((u_int32_t*)(a))[2] == 0   \
-         && ((u_int32_t*)(a))[3] == htonl (1))
+           (((const u_int32_t*)(a))[0] == 0   \
+         && ((const u_int32_t*)(a))[1] == 0   \
+         && ((const u_int32_t*)(a))[2] == 0   \
+         && ((const u_int32_t*)(a))[3] == htonl (1))
 #endif
 
 #ifndef IN6_IS_ADDR_MULTICAST
-#define IN6_IS_ADDR_MULTICAST(a) (((u_int8_t*) (a))[0] == 0xff)
+#define IN6_IS_ADDR_MULTICAST(a) (((const u_int8_t*) (a))[0] == 0xff)
 #endif
 
 #define IN6_IS_ADDR_LINKLOCAL(a) \
-        ((((u_int32_t*)(a))[0] & htonl(0xffc00000)) == htonl(0xfe800000))
+        ((((const u_int32_t*)(a))[0] & htonl(0xffc00000)) == htonl(0xfe800000))
 
 #ifndef IN6_IS_ADDR_SITELOCAL
 #define IN6_IS_ADDR_SITELOCAL(a) \
-        ((((u_int32_t*)(a))[0] & htonl(0xffc00000)) == htonl(0xfec00000))
+        ((((const u_int32_t*)(a))[0] & htonl(0xffc00000)) == htonl(0xfec00000))
 #endif
 
 #ifndef IN6_IS_ADDR_V4MAPPED
 #define IN6_IS_ADDR_V4MAPPED(a)         \
-           ((((u_int32_t*)(a))[0] == 0) \
-         && (((u_int32_t*)(a))[1] == 0) \
-         && (((u_int32_t*)(a))[2] == htonl(0xffff)))
+           ((((const u_int32_t*)(a))[0] == 0) \
+         && (((const u_int32_t*)(a))[1] == 0) \
+         && (((const u_int32_t*)(a))[2] == htonl(0xffff)))
 #endif
 
 #ifndef IN6_IS_ADDR_V4COMPAT
 #define IN6_IS_ADDR_V4COMPAT(a)         \
-           ((((u_int32_t*)(a))[0] == 0) \
-         && (((u_int32_t*)(a))[1] == 0) \
-         && (((u_int32_t*)(a))[2] == 0) \
-         && (ntohl(((u_int32_t*)(a))[3]) > 1))
+           ((((const u_int32_t*)(a))[0] == 0) \
+         && (((const u_int32_t*)(a))[1] == 0) \
+         && (((const u_int32_t*)(a))[2] == 0) \
+         && (ntohl(((const u_int32_t*)(a))[3]) > 1))
 #endif
 
 #ifndef IN6_ARE_ADDR_EQUAL
 #define IN6_ARE_ADDR_EQUAL(a, b) \
-        (memcmp ((void*)(a), (void*)(b), sizeof(struct in6_addr)) == 0)
+        (memcmp ((const void*)(a), (void*)(b), sizeof(struct in6_addr)) == 0)
 #endif
 
 #ifndef IN6_ADDR_EQUAL
@@ -450,27 +450,27 @@ struct ip_mreq {
 
 #ifndef IN6_IS_ADDR_MC_NODELOCAL
 #define IN6_IS_ADDR_MC_NODELOCAL(a) \
-        (IN6_IS_ADDR_MULTICAST(a) && ((((u_int8_t*)(a))[1] & 0xf) == 0x1))
+        (IN6_IS_ADDR_MULTICAST(a) && ((((const u_int8_t*)(a))[1] & 0xf) == 0x1))
 #endif
 
 #ifndef IN6_IS_ADDR_MC_LINKLOCAL
 #define IN6_IS_ADDR_MC_LINKLOCAL(a) \
-        (IN6_IS_ADDR_MULTICAST(a) && ((((u_int8_t*)(a))[1] & 0xf) == 0x2))
+        (IN6_IS_ADDR_MULTICAST(a) && ((((const u_int8_t*)(a))[1] & 0xf) == 0x2))
 #endif
 
 #ifndef IN6_IS_ADDR_MC_SITELOCAL
 #define IN6_IS_ADDR_MC_SITELOCAL(a) \
-        (IN6_IS_ADDR_MULTICAST(a) && ((((u_int8_t*)(a))[1] & 0xf) == 0x5))
+        (IN6_IS_ADDR_MULTICAST(a) && ((((const u_int8_t*)(a))[1] & 0xf) == 0x5))
 #endif
 
 #ifndef IN6_IS_ADDR_MC_ORGLOCAL
 #define IN6_IS_ADDR_MC_ORGLOCAL(a)  \
-        (IN6_IS_ADDR_MULTICAST(a) && ((((u_int8_t*)(a))[1] & 0xf) == 0x8))
+        (IN6_IS_ADDR_MULTICAST(a) && ((((const u_int8_t*)(a))[1] & 0xf) == 0x8))
 #endif
 
 #ifndef IN6_IS_ADDR_MC_GLOBAL
 #define IN6_IS_ADDR_MC_GLOBAL(a)    \
-        (IN6_IS_ADDR_MULTICAST(a) && ((((u_int8_t*)(a))[1] & 0xf) == 0xe))
+        (IN6_IS_ADDR_MULTICAST(a) && ((((const u_int8_t*)(a))[1] & 0xf) == 0xe))
 #endif
 
 #endif /* __NETINET_IN_H */
