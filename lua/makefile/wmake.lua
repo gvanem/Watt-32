@@ -65,7 +65,7 @@ RESOURCE = $(OBJPATH)watt-32.re
 	file:write(
 		header .. '\n' ..
 		GenerateConfigurables(tag, cc, cflags, aflags) .. '\n' ..
-		GeneratePaths(objdir) .. '\n' ..
+		GeneratePaths(string.sub(objdir, string.find(objdir, System.divider) + 1)) .. '\n' ..
 		"# Output library\nSTAT_LIB = $(LIBPATH)" .. statlib .. '\n' ..
 		extra .. '\n' ..
 		GenerateSources(tag) .. '\n' ..
