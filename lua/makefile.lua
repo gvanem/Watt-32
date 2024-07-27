@@ -163,7 +163,7 @@ end
 
 
 function GenerateSources(sourceType)
-	local str = ""
+	local str = "# Source code\n"
 	if(sourceType.asm) then str = str .. GenerateAsmSources() .. '\n' end
 	if(sourceType.bind) then str = str .. GenerateBindSources() .. '\n' end
 	if(sourceType.bsd) then str = str .. GenerateBsdSources() .. '\n' end
@@ -173,13 +173,13 @@ function GenerateSources(sourceType)
 end
 
 function GenerateObjects(sourceType)
-	local str = ""
+	local str = "# Objects to build\n"
 	if(sourceType.dos) then
-		str = MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. '\n'
 	elseif(sourceType.win) then
-		str = MakefileCreateVariable("OBJS", MakefileAllWinObjects([[$(OBJPATH)]], ".obj")) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileAllWinObjects([[$(OBJPATH)]], ".obj")) .. '\n'
 	else
-		str = MakefileCreateVariable("OBJS", MakefileCommon([[$(OBJPATH)]], ".obj")) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileCommon([[$(OBJPATH)]], ".obj")) .. '\n'
 	end
 	return str
 end
@@ -204,10 +204,16 @@ end
 
 function GeneratePaths(objdir)
 	return
-"# Project Paths\nBINPATH = " .. SanitizePath("../bin/") .. '\n' ..
+"\n# Project Paths\nBINPATH = " .. SanitizePath("../bin/") .. '\n' ..
 "LIBPATH = " .. SanitizePath("../lib/") .. '\n' ..
 "LUAPATH = " .. SanitizePath("../lua/") .. '\n' ..
-"OBJPATH = " .. SanitizePath(objdir .. "/") .. '\n'
+"OBJPATH = " .. SanitizePath(objdir .. "/") .. '\n' .. [[
+
+# Watcom Arguments
+C_ARGS    = $(OBJPATH)wcc.arg
+LIB_ARGS  = $(OBJPATH)wlib.arg
+LINK_ARGS = $(OBJPATH)wlink.arg
+]]
 end
 
 function GetMakefileOutputName()
