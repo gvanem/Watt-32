@@ -68,7 +68,7 @@ end
 
 function GenerateMakefile()
 	if Compiler.cc16 then
-		-- Generate Large memory model makefile
+		-- large model (16-bit)
 		MakeBuildFiles(
 			"watcom_l.mak",
 			"large",
@@ -78,7 +78,7 @@ function GenerateMakefile()
 			"wattcpwl.lib"
 		)
 
-		-- Generate small memory model makefile
+		-- small model (16-bit)
 		MakeBuildFiles(
 			"watcom_s.mak",
 			"small",
@@ -90,17 +90,17 @@ function GenerateMakefile()
 	end
 
 	if Compiler.cc then
-		-- Generate Flat DOS4GW memory model makefile (space optimized)
+		-- small model (32-bit DOS4GW)
 		MakeBuildFiles(
 			"watcom_3.mak",
-			"flat",
+			"small32",
 			Compiler.cc,
 			[[-bt=dos -ms -3r -oaxt -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
 			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
 			"wattcpw3.lib"
 		)
 
-		-- Generate Flat DOS4GW memory model makefile
+		-- flat model  (DOS4GW)
 		MakeBuildFiles(
 			"watcom_f.mak",
 			"flat",
@@ -110,17 +110,7 @@ function GenerateMakefile()
 			"wattcpwf.lib"
 		)
 
-		-- Generate 32-bit small memory model makefile
-		MakeBuildFiles(
-			"watcom_x.mak",
-			"small32",
-			Compiler.cc,
-			[[-bt=dos -mf -3r -zff -zgf -oilrtfm -s -zlf -DWATT32_STATIC -zq -wx -DWATT32_BUILD -I. -I"../inc" -d1]],
-			[[-bt=dos -3r -dDOSX -dDOS4GW -zq -w3 -d1 -I"../inc"]],
-			"wattcpwx.lib"
-		)
-
-		-- Generate Win32 makefile
+		-- Win32
 		MakeBuildFiles(
 			"watcom_w.mak",
 			"win32",
