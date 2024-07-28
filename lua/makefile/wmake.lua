@@ -1,24 +1,52 @@
 local objroot = "src/build/watcom/"
 
+local function GenerateMakefileRules(sourceType)
+return [[
+TARGETS = $(STAT_LIB)
+
+all: $(PKT_STUB) $(OBJPATH)cflags.h $(OBJPATH)cflagsbf.h $(TARGETS) .SYMBOLIC
+	@echo All done
+
+$(STAT_LIB): $(OBJS) $(LIB_ARGS)
+	$(AR) -q -b -c -pa -z=export.tmp $^@ @$(LIB_ARGS)
+
+$(OBJPATH)language.obj: language.c lang.c
+$(OBJPATH)asmpkt.obj:   asmpkt.asm
+$(OBJPATH)cpumodel.obj: cpumodel.asm
+
+.c{$(OBJDIR)}.obj: .AUTODEPEND $(C_ARGS)
+	$(CC) @$(C_ARGS) $[@ -fo=$^@
+
+.asm{$(OBJDIR)}.obj: .AUTODEPEND
+	$(AS) $(AFLAGS) $[@ -fo=$^@
+
+$(C_ARGS): $(__MAKEFILES__)
+	%create $^@
+	@%append $^@ $(CFLAGS)
+
+$(LIB_ARGS): $(__MAKEFILES__)
+	%create $^@
+	@for %f in ($(OBJS)) do @%append $^@ +- %f
+
+$(OBJPATH)cflags.h: $(__MAKEFILES__)
+	%create $^@
+	@%append $^@ const char *w32_cflags = "$(CFLAGS)";
+	@%append $^@ const char *w32_cc     = "$(CC)";
+
+$(OBJPATH)cflagsbf.h: $(C_ARGS)
+	$(LUA) $(LUAPATH)bin2c.lua $(C_ARGS) > $^@
+]]
+end
+
 local function MakeBuildFiles(header, makefile, objPath, cc, cflags, aflags, statlib, extra)
 	Check("Generating '" .. makefile .. "'")
+	-- Create build directory
 	local objdir = SanitizePath(objroot .. objPath)
 	mkdir(objdir)
 
-	-- Create cflags.h
-	local dir = SanitizePath(objdir .. "/cflags.h")
-	local file = io.open(dir, "w")
-	if not file then Error() end
-	file:write([[
-const char *w32_cflags = "]] .. cflags .. [[";
-const char *w32_cc     = "*]] .. cc .. [[";
-]]
-	)
-	file:close()
-
 	-- Create makefile
-	dir = SanitizePath("src/" .. makefile)
-	file = io.open(dir, "w")
+	local dir = SanitizePath("src/" .. makefile)
+	local file = io.open(dir, "w")
 	if not file then Error() end
 
 	-- Generate a 'tag' string so that only required sources and objects are added to the makefile
@@ -52,7 +80,8 @@ RESOURCE = $(OBJPATH)watt-32.re
 		"# Output library\nSTAT_LIB = $(LIBPATH)" .. statlib .. '\n' ..
 		extra .. '\n' ..
 		GenerateSources(tag) .. '\n' ..
-		GenerateObjects(tag)
+		GenerateObjects(tag) .. '\n' ..
+		GenerateMakefileRules(tag)
 	)
 	file:close()
 	Pass("Done")
