@@ -1,15 +1,5 @@
 local objroot = "src/build/watcom/"
 
-local function StringToHexArray(str)
-	local hexArray = {}
-
-	for i = 1, #str do
-		hexArray[#hexArray + 1] = string.format("0x%02X", string.byte(str, i))
-	end
-
-	return table.concat(hexArray, ", ")
-end
-
 local function MakeBuildFiles(header, makefile, objPath, cc, cflags, aflags, statlib, extra)
 	Check("Generating '" .. makefile .. "'")
 	local objdir = SanitizePath(objroot .. objPath)
@@ -24,13 +14,6 @@ const char *w32_cflags = "]] .. cflags .. [[";
 const char *w32_cc     = "*]] .. cc .. [[";
 ]]
 	)
-	file:close()
-
-	-- Create cflagsbf.h (hex array of cflag string
-	dir = SanitizePath(objdir .. "/cflagsbf.h")
-	file = io.open(dir, "w")
-	if not file then Error() end
-	file:write(StringToHexArray(cflags))
 	file:close()
 
 	-- Create makefile
