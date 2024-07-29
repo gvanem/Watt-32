@@ -210,6 +210,7 @@ function GeneratePaths(objdir)
 "OBJPATH = " .. SanitizePath(objdir .. "/") .. '\n' .. [[
 
 # Watcom Arguments
+A_ARGS    = $(OBJPATH)wasm.arg
 C_ARGS    = $(OBJPATH)wcc.arg
 LIB_ARGS  = $(OBJPATH)wlib.arg
 LINK_ARGS = $(OBJPATH)wlink.arg

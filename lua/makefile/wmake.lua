@@ -1,8 +1,14 @@
 local objroot = SanitizePath("src/build/watcom/")
 
 local function GenerateMakefileRules(sourceType)
-return [[
-TARGETS = $(STAT_LIB)
+	local str
+	if sourceType.win then
+		str = [[TARGETS = $(STAT_LIB) $(IMP_LIB) $(WATT_DLL)]]
+	else
+		str = [[TARGETS = $(STAT_LIB)]]
+	end
+	str = str ..
+[[
 
 all: $(PKT_STUB) $(OBJPATH)cflags.h $(OBJPATH)cflagsbf.h $(TARGETS) .SYMBOLIC
 	@echo All done
@@ -17,8 +23,12 @@ $(OBJPATH)cpumodel.obj: cpumodel.asm
 .c{$(OBJDIR)}.obj: .AUTODEPEND $(C_ARGS)
 	$(CC) @$(C_ARGS) $[@ -fo=$^@
 
-.asm{$(OBJDIR)}.obj: .AUTODEPEND
-	$(AS) $(AFLAGS) $[@ -fo=$^@
+.asm{$(OBJDIR)}.obj: .AUTODEPEND $(A_ARGS)
+	$(AS) @$(A_ARGS) $[@ -fo=$^@
+
+$(A_ARGS): $(__MAKEFILES__)
+	%create $^@
+	@%append $^@ $(AFLAGS)
 
 $(C_ARGS): $(__MAKEFILES__)
 	%create $^@
@@ -36,6 +46,38 @@ $(OBJPATH)cflags.h: $(__MAKEFILES__)
 $(OBJPATH)cflagsbf.h: $(C_ARGS)
 	$(LUA) $(LUAPATH)bin2c.lua $(C_ARGS) > $^@
 ]]
+
+	if sourceType.m32 then
+		str = str .. [[
+
+$(OBJPATH)pcpkt.obj: asmpkt.nas
+
+# TODO: Test for nasm in configur.lua
+NASM=nasm
+
+$(PKT_STUB): asmpkt.nas
+	$(NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
+	$(LUA) $(LUAPATH)bin2c.lua asmpkt.bin > $@
+]]
+	elseif sourceType.win then
+		str = str .. [[
+
+$(IMP_LIB): $(WATT_DLL)
+	@%null
+
+$(WATT_DLL): $(OBJS) $(RESOURCE) $(LINK_ARGS)
+	*$(LD) $(LDFLAGS) name $^@ @$(LINK_ARGS)
+
+DEBUGRC = 0
+
+# TODO: Test for wrc in configur.lua
+
+$(RESOURCE): watt-32.rc
+	*wrc -q -bt=nt -dDEBUG=0 -D__WATCOMC__ -r -zm -fo=$^@ $<
+]]
+	end
+
+	return str
 end
 
 local function MakeBuildFiles(header, makefile, objPath, cc, cflags, aflags, statlib, extra)
@@ -68,6 +110,20 @@ RESOURCE = $(OBJPATH)watt-32.re
 	else
 		tag.asm = true
 		tag.dos = true
+		if objPath == "small" or objPath == "large" then
+			tag.m16 = true
+		else
+			tag.m32 = true
+			extra = [[
+
+#
+# This generated file is used for all 32-bit MSDOS targets
+# (and when USE_FAST_PKT is defined). This enables a faster real-mode
+# callback for the PKTDRVR receiver. Included as an array in pcpkt2.c.
+#
+PKT_STUB = pkt_stub.h
+]]
+		end
 	end
 
 	if not header then header = MakefileHeader() end
@@ -121,10 +177,17 @@ local function GenerateErrorFile()
 end
 
 function PrintFooterHelper()
+	-- Maximum of 80 columns, 24 rows
 	local str = [[
-Makefiles generated successfully
 
-To build run `cd src` then wmake on one of the targets:
+Watcom makefiles generated successfully. Here's what to do next:
+
+1) Run "cd src" to make "src" working directory
+
+2) Open "config.h" in a text editor and change "#undef" to "#define"
+for any feature the application needs then save the file
+
+3) Run "wmake" on one or more of the makefiles like so...
 ]]
 	if Compiler.cc16 then
 		str = str .. [[
@@ -139,6 +202,17 @@ To build run `cd src` then wmake on one of the targets:
 	"wmake -h -f watcom_w.mak" for Win32
 ]]
 	end
+
+	str = str .. [[
+
+4) After building the library will be place in the "../lib" folder
+named "wattcpw#.lib" where # is the last character of the makefile name
+
+5) Include headers in the application with:
+"wcc(386) ... -i="<#path to inc>"
+
+6) Link the libary into the application with
+"wlink ... LIBP <#path to lib> LIBF <#lib file>"]]
 	print(str)
 end
 
