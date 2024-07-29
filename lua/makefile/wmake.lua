@@ -1,4 +1,4 @@
-local objroot = "src/build/watcom/"
+local objroot = SanitizePath("src/build/watcom/")
 
 local function GenerateMakefileRules(sourceType)
 return [[
@@ -87,7 +87,40 @@ RESOURCE = $(OBJPATH)watt-32.re
 	Pass("Done")
 end
 
+local function GenerateErrorFile()
+	local cErrFilePath = objroot .. "syserr.c"
+	local hErrFilePath = SanitizePath("inc/sys/watcom.err")
+	Check("Generating syserr files for Watcom")
+
+	-- Do nothing if syserr.c and watcom.err already exists
+	if FileExists(cErrFilePath) and FileExists(hErrFilePath) then Pass("Skipped") return end
+
+	local headerPath = SanitizePath("$(%WATCOM)/h")
+	local sourcePath = SanitizePath("util/errnos.c")
+	local targetPath = SanitizePath("util/wc_err.exe")
+
+	-- Choose between wcl or wcl386
+	if Compiler.cl16 then
+		RunCommand(Compiler.cl16 .. [[-zq -bcl=dos -ml -wx -I"inc" -I"]] .. headerPath .. [[" -fe=]] .. targetPath .. ' ' .. sourcePath)
+	elseif Compiler.cl then
+		RunCommand(Compiler.cl .. [[-zq -bcl=dos4g -mf -wx -I"inc" -I"]] .. headerPath .. [[" -fe=]] .. targetPath .. ' ' .. sourcePath)
+	else
+		Fail("No compiler/linker set")
+	end
+
+	if not FileExists(targetPath) then Fail("Failed to compile " .. sourcePath) end
+
+	RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
+	RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)
+	Pass("Done")
+end
+
 function GenerateMakefile()
+	-- Setup enviroment
+	mkdir(objroot)
+	GenerateErrorFile()
+
+	-- Generate makefiles
 	if Compiler.cc16 then
 		local aflags = [[-bt=dos -zq -w3 -d1 -I"../inc"]]
 		local wccHelp =

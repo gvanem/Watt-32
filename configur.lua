@@ -37,6 +37,12 @@ CheckCreateDirCmd(TmpFolder)
 CheckRemoveFileCmd(TmpFolder)
 CheckRemoveDirCmd(TmpFolder)
 
+-- Check 'util' contains required source code files
+CheckDirContains("util", {
+	"errnos.c",
+	}
+)
+
 -- Check 'inc' contains required files (for application to include)
 CheckDirContains("inc", {
 	"arpa/inet.h",
