@@ -32,8 +32,7 @@ return [[
 	djggp  - A port of GCC for 80386+ DOS systems
 	gcc    - GNU Compiler Collection intended for Posix systems
 	mingw  - A port of GCC for Win32 based systems
-	wcc    - Open Watcom C/C++ toolchain to build 8086-80286 targets
-	wcc386 - Open Watcom C/C++ toolchain to build 80386+ targets
+	watcom - Open Watcom C/C++ toolchain to build 8086-80386 targets
 ]]
 end
 
@@ -74,8 +73,7 @@ function CheckMakefileRequestValid()
 		"djgpp",
 		"gcc",
 		"mingw",
-		"wcc",
-		"wcc386",
+		"watcom",
 	}
 
 	for _, a in ipairs(arg) do

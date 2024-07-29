@@ -24,7 +24,7 @@ function CheckAssembler(makefile)
 		require("lua.asm")
 		Check("Guessing assembler")
 		if makefile == "cc" then Fail("None") -- Nothing was specified
-		elseif makefile == "wcc" or makefile == "wcc386" then
+		elseif makefile == "watcom" then
 			Pass("Open Watcom")
 			CheckWasmAssembler(as, tmpName)
 		else
@@ -48,7 +48,7 @@ function CheckCompiler(makefile)
 		Check("Guessing compiler")
 
 		if makefile == "cc" then Fail("None") -- Nothing was specified
-		elseif makefile == "wcc" or makefile == "wcc386" then
+		elseif makefile == "watcom" then
 			Pass("Open Watcom")
 			require("lua.compiler.watcom")
 		else

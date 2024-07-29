@@ -95,17 +95,22 @@ local function GenerateErrorFile()
 	-- Do nothing if syserr.c and watcom.err already exists
 	if FileExists(cErrFilePath) and FileExists(hErrFilePath) then Pass("Skipped") return end
 
-	local headerPath = SanitizePath("$(%WATCOM)/h")
 	local sourcePath = SanitizePath("util/errnos.c")
 	local targetPath = SanitizePath("util/wc_err.exe")
 
-	-- Choose between wcl or wcl386
-	if Compiler.cl16 then
-		RunCommand(Compiler.cl16 .. [[-zq -bcl=dos -ml -wx -I"inc" -I"]] .. headerPath .. [[" -fe=]] .. targetPath .. ' ' .. sourcePath)
-	elseif Compiler.cl then
-		RunCommand(Compiler.cl .. [[-zq -bcl=dos4g -mf -wx -I"inc" -I"]] .. headerPath .. [[" -fe=]] .. targetPath .. ' ' .. sourcePath)
+	if Target.skip then
+		if not FileExists(targetPath) then Fail(targetPath .. " has not been built") end
 	else
-		Fail("No compiler/linker set")
+		-- Choose between wcl or wcl386
+		local headerPath = SanitizePath("$(%WATCOM)/h")
+
+		if Compiler.cl16 then
+			RunCommand(Compiler.cl16 .. [[ -zq -bcl=dos -ml -wx -I"inc" -I"]] .. headerPath .. [[" -fe=]] .. targetPath .. ' ' .. sourcePath)
+		elseif Compiler.cl then
+			RunCommand(Compiler.cl .. [[ -zq -bcl=dos4g -mf -wx -I"inc" -I"]] .. headerPath .. [[" -fe=]] .. targetPath .. ' ' .. sourcePath)
+		else
+			Fail("No compiler/linker set")
+		end
 	end
 
 	if not FileExists(targetPath) then Fail("Failed to compile " .. sourcePath) end
@@ -113,6 +118,28 @@ local function GenerateErrorFile()
 	RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
 	RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)
 	Pass("Done")
+end
+
+function PrintFooterHelper()
+	local str = [[
+Makefiles generated successfully
+
+To build run `cd src` then wmake on one of the targets:
+]]
+	if Compiler.cc16 then
+		str = str .. [[
+	"wmake -h -f watcom_s.mak" for small model (16-bit)
+	"wmake -h -f watcom_l.mak" for large model (16-bit)
+]]
+	end
+	if Compiler.cc then
+		str = str .. [[
+	"wmake -h -f watcom_3.mak" for small model (32-bit DOS4GW)
+	"wmake -h -f watcom_f.mak" for flat model  (32-bit DOS4GW)
+	"wmake -h -f watcom_w.mak" for Win32
+]]
+	end
+	print(str)
 end
 
 function GenerateMakefile()

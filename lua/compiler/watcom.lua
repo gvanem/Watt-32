@@ -50,7 +50,7 @@ local function CheckWcc386Compiler(tmpName)
 	if Target.skip then
 		Compiler.cc = "wcc386"
 		Compiler.cl = "wcl386"
-		Compiler.pp = Compiler.cc32 .. " -P"
+		Compiler.pp = Compiler.cc .. " -P"
 		os.remove(tmpName .. ".c")
 		Pass("Skipped")
 		return

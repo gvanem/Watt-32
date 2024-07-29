@@ -221,7 +221,7 @@ function GetMakefileOutputName()
 end
 
 function GenerateMakefile()
-	if Target.makefile == "wcc" or Target.makefile == "wcc386" then
+	if Target.makefile == "watcom" then
 		require("lua.makefile.wmake")
 	elseif Target.makefile == "clang" or Target.makefile == "djgpp" or Target.makefile == "gcc" then
 		require("lua.makefile.make")

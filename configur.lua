@@ -70,12 +70,19 @@ CheckCompilerLongSize()
 CheckArchiver()
 CheckLinker()
 
+-- Free memory (nessasary for real mode DOS systems)
+package.loaded["lua.boot"] = nil
+package.loaded["lua.checks"] = nil
+package.loaded["lua.compiler"] = nil
+package.loaded["lua.compiler.custom"] = nil
+package.loaded["lua.compiler.gcc"] = nil
+package.loaded["lua.compiler.watcom"] = nil
+collectgarbage("collect", 9001)
+
 -- Generate makefile
 GenerateMakefile()
 
--- TODO: Print valid makefile commands the same as 'configur(.bat/.sh)'
-
-Check("Checking script is still work-in-progress")
-Fail("Yes, thanks for testing. Please provide feedback.")
+-- Print helpful commands to run next
+PrintFooterHelper()
 
 os.exit()
