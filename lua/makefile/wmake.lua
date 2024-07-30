@@ -48,17 +48,20 @@ $(OBJPATH)cflagsbf.h: $(C_ARGS)
 ]]
 
 	if sourceType.m32 then
-		str = str .. [[
+		local nasmRules =
+[[
 
 $(OBJPATH)pcpkt.obj: asmpkt.nas
-
-# TODO: Test for nasm in configur.lua
-NASM=nasm
 
 $(PKT_STUB): asmpkt.nas
 	$(NASM) -f bin -l asmpkt.lst -o asmpkt.bin asmpkt.nas
 	$(LUA) $(LUAPATH)bin2c.lua asmpkt.bin > $@
 ]]
+		if Compiler.nasm then
+			str = str .. "\nNASM=" .. Compiler.nasm .. "\n" .. nasmRules
+		else
+			str = str .. "\n#NASM=Unknown (USE_FAST_PKT unavailable)\n" .. nasmRules:gsub("([^\r\n]*)([\r\n]*)", '#' .. "%1%2")
+		end
 	elseif sourceType.win then
 		str = str .. [[
 

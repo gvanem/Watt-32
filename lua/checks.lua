@@ -34,6 +34,8 @@ function CheckAssembler(makefile)
 	else
 		CheckCustomAssembler(as, tmpName)
 	end
+
+	CheckNasmAssembler(tmpName)
 end
 
 function CheckCompiler(makefile)

@@ -2,6 +2,36 @@
 	asm.lua contains functions for testing assemblers.
 ]]
 
+function CreateNasmTestFile(name, src)
+	if not src then
+		src =
+[[
+org 100h            ; Origin point for .COM files
+
+; Print string
+mov ah, 09h         ; Function to print string
+mov dx, helloMsg    ; Load address of the message directly into dx
+int 21h             ; Call DOS interrupt to print the string
+
+; Terminate program
+mov ah, 4Ch         ; DOS function to terminate program
+int 21h             ; Call DOS interrupt
+
+helloMsg db 'Hello, NASM!', '$'
+]]
+	end
+
+	local file = io.open(name, "w")
+	if file then
+		file:write(src)
+		file:close()
+		src = nil
+		return true
+	end
+
+	return false
+end
+
 function CreateMasmTestFile(name, src)
 	if not src then
 		src =
@@ -161,6 +191,29 @@ function CheckGccAssembler(as, tmpName)
 	os.remove(tmpName .. ".s")
 	Compiler.as = gcc
 	Compiler.aext = ".s"
+end
+
+function CheckNasmAssembler(tmpName)
+	local nasm = CheckEnvVar("NASM") or "nasm"
+
+	Check("Checking " .. nasm .. " is available")
+
+	if not CreateNasmTestFile(tmpName .. ".nas") then Error() end
+
+	RunCommand (nasm .. " -f bin -o " ..
+	tmpName .. ".com " ..
+	tmpName .. ".nas"
+	)
+
+	os.remove(tmpName .. ".nas")
+
+	local exist = CheckAndRemoveCommonArtifacts(tmpName)
+	if exist > 0 then
+		Pass("Yes")
+		Compiler.nasm = nasm
+	else
+		Pass("No")
+	end
 end
 
 function CheckWasmAssembler(as, tmpName)
