@@ -1,7 +1,8 @@
 --[[
-	This lua script converts an ASCII characters into to a 
-	C hex array for generating cflagsbf.h. 
-	It is executed by makefiles
+	This lua script converts an ASCII characters into to a
+	C hex array for generating cflagsbf.h and asmpkt.bin
+
+	Usage: lua bin2c.lua [file] (> [output file])
 ]]
 
 -- Silent exit with error if no readable file can be found
