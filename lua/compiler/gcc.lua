@@ -82,6 +82,22 @@ function CheckCompiler(cc, tmpName)
 		Pass("Yes")
 		Compiler.colorOption = true
 	else Pass("No") end
+
+	Check("Checking '" .. gcc .. "' version")
+
+	RunCommand (gcc .. " --version > " .. tmpName .. ".txt")
+	if not FileExists(tmpName .. ".txt") then Error() end
+
+	local file = io.open(tmpName .. ".txt")
+	if not file then os.remove(tmpName .. ".txt") Error() end
+
+	local txt = file:read()
+	Compiler.version = txt:match("%d+%.%d+%.%d+")
+	txt = nil
+	file:close()
+	os.remove(tmpName .. ".txt")
+
+	if Compiler.version then Pass(Compiler.version) else Fail("Unknown") end
 end
 
 function CheckArchiver()
