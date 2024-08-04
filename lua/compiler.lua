@@ -58,14 +58,20 @@ int main(void) {
 	RunCommandLocal(bin .. " > " .. tmpName .. ".txt")
 	os.remove(bin)
 
-	if FileExists(tmpName .. ".txt") then
-		Pass("Yes")
+	local file = io.open(tmpName .. ".txt", "r")
+	if file then
+		local txt = file:read()
+		file:close()
 		os.remove(tmpName .. ".txt")
-	else
-		Pass("No")
-		Target.xcom = true
+		if txt and txt:gsub("\n", "") == "Hello World" then
+			Pass("Yes")
+			CheckAndRemoveCommonArtifacts(tmpName)
+			return
+		end
 	end
 
+	Pass("No")
+	Target.xcom = true
 	CheckAndRemoveCommonArtifacts(tmpName)
 end
 
