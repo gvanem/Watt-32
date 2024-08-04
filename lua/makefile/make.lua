@@ -60,6 +60,13 @@ $(RESOURCE): watt-32.rc
 		end
 	end
 
+	str = str .. [[
+
+$(OBJPATH)cflags.h: $(MAKEFILE_LIST)
+	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) CFLAGS "const char *w32_cflags = \"~\";" > $(OBJPATH)cflags.h
+	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) CC "const char *w32_cc = \"~\";" >> $(OBJPATH)cflags.h
+]]
+
 	return str
 end
 
