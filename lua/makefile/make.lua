@@ -104,7 +104,7 @@ $(OBJPATH)cflags.h: $(MAKEFILE_LIST)
 end
 
 local function GenerateDjgpp()
-	Check("Generating '" .. Target.makefile .. "'")
+	Check("Generating '" .. Target.makefile .. ".mak'")
 
 	-- Create build directory
 	objroot = SanitizePath("src/build/djgpp")
@@ -151,8 +151,6 @@ local function GenerateErrorFile()
 	local sourcePath = SanitizePath("util/errnos.c")
 	local targetPath = SanitizePath("util/dj_err.exe")
 
-	-- TODO: What about cross compiling?
-
 	if Target.skip then
 		if not FileExists(targetPath) then Fail(targetPath .. " has not been built") end
 	else
@@ -161,8 +159,14 @@ local function GenerateErrorFile()
 
 	if not FileExists(targetPath) then Fail("Failed to compile " .. sourcePath) end
 
-	RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
-	RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)
+	if Target.xcom then
+		RunCommand(System.emu .. ' "' .. targetPath .. ' -e" > ' .. hErrFilePath)
+		RunCommand(System.emu .. ' "' .. targetPath .. ' -s" > ' .. cErrFilePath)
+	else
+		RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
+		RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)
+	end
+
 	Pass("Done")
 end
 

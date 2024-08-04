@@ -63,6 +63,7 @@ CheckCompiler()
 
 -- Check size of standard types an actual 32-bit typedef can be defined
 CheckCompilerNative() -- Check that these tests can be done (or skipped)
+CheckDosEmu()
 CheckCompilerIntSize()
 CheckCompilerLongSize()
 
