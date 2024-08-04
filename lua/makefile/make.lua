@@ -1,7 +1,29 @@
 local objroot
 
 function PrintFooterHelper()
-	if Target.makefile == "djgpp" then print("Done!") end
+	local str
+	if Target.makefile == "djgpp" then
+	str = [[
+
+DJGPP makefiles generated successfully. Here's what to do next:
+
+1) Run "cd src" to make "src" working directory
+
+2) Open "config.h" in a text editor and change "#undef" to "#define"
+for any feature the application needs then save the file
+
+3) Run "make -f djgpp.mak"
+
+4) After building the library will be place in the "../lib" folder
+named "libwatt.a"
+
+5) Include headers in the application with:
+"gcc ... -I<#path to inc>"
+
+6) Link the libary into the application with
+"gcc ... libwatt.a"]]
+	end
+	print(str)
 end
 
 local function GenerateMakefileRules(sourceType)
@@ -62,6 +84,17 @@ $(RESOURCE): watt-32.rc
 
 	str = str .. [[
 
+$(C_ARGS): $(MAKEFILE_LIST)
+	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) CFLAGS > $@
+
+$(LIB_ARGS): $(OBJS) $(MAKEFILE_LIST)
+	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) OBJS > $@
+
+$(LINK_ARGS): $(OBJS) $(MAKEFILE_LIST)
+	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) OBJS > $@
+
+$(OBJPATH)cpumodel.o: cpumodel.S
+
 $(OBJPATH)cflags.h: $(MAKEFILE_LIST)
 	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) CFLAGS "const char *w32_cflags = \"~\";" > $(OBJPATH)cflags.h
 	$(LUA) $(LUAPATH)resfile.lua $(MAKEFILE_LIST) CC "const char *w32_cc = \"~\";" >> $(OBJPATH)cflags.h
@@ -83,7 +116,7 @@ local function GenerateDjgpp()
 	dir = nil
 	if not file then Error() end
 
-	local tag = {asm = true, dos = true, m32 = true}
+	local tag = {asm = true, bind = true, bsd = true, core = true, dos = true, m32 = true, zlib = true}
 	local cflags = [[-O3 -g -I. -I../inc -DWATT32_BUILD -W -Wall -Wno-strict-aliasing -march=i386 -mtune=i586]]
 	if Compiler.colorOption then cflags = cflags .. " -fdiagnostics-color=never" end
 	if tonumber(Compiler.version:match("%d+")) >= 5 then cflags = cflags .. " -fgnu89-inline" end
@@ -100,10 +133,11 @@ endif
 		GeneratePaths(string.sub(objroot, string.find(objroot, System.divider) + 1)) .. '\n' ..
 		"# Output library\nSTAT_LIB = $(LIBPATH)libwatt.a\n\n" ..
 		GenerateSources(tag) .. '\n' ..
-		GenerateObjects(tag) .. '\n' ..
+		GenerateObjects(tag) .. "OBJS := $(subst .obj,.o,$(OBJS))\n\n" ..
 		GenerateMakefileRules(tag)
 	)
 	file:close()
+	Pass("Done")
 end
 
 function GenerateMakefile()
