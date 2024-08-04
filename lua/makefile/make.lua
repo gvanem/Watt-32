@@ -1,4 +1,4 @@
-local objroot
+local objroot = SanitizePath("src/build/")
 
 function PrintFooterHelper()
 	local str
@@ -140,6 +140,38 @@ endif
 	Pass("Done")
 end
 
+local function GenerateErrorFile()
+	local cErrFilePath = objroot .. Target.makefile .. System.divider .. "syserr.c"
+	local hErrFilePath = SanitizePath("inc/sys/djgpp.err")
+	Check("Generating syserr files for " .. Target.makefile)
+
+	-- Do nothing if syserr.c and watcom.err already exists
+	if FileExists(cErrFilePath) and FileExists(hErrFilePath) then Pass("Skipped") return end
+
+	local sourcePath = SanitizePath("util/errnos.c")
+	local targetPath = SanitizePath("util/dj_err.exe")
+
+	-- TODO: What about cross compiling?
+
+	if Target.skip then
+		if not FileExists(targetPath) then Fail(targetPath .. " has not been built") end
+	else
+		RunCommand(Compiler.cl .. [[ -s -I../inc -o ]] .. targetPath .. ' ' .. sourcePath)
+	end
+
+	if not FileExists(targetPath) then Fail("Failed to compile " .. sourcePath) end
+
+	RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
+	RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)
+	Pass("Done")
+end
+
 function GenerateMakefile()
-	if Target.makefile == "djgpp" then GenerateDjgpp() end
+	-- Setup enviroment
+	mkdir(objroot .. Target.makefile)
+
+	if Target.makefile == "djgpp" then
+		GenerateErrorFile()
+		GenerateDjgpp()
+	end
 end
