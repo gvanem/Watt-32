@@ -92,8 +92,10 @@ function CheckCompiler(cc, tmpName)
 	if not file then os.remove(tmpName .. ".txt") Error() end
 
 	local txt = file:read()
-	Compiler.version = txt:match("%d+%.%d+%.%d+")
-	txt = nil
+	if txt then
+		Compiler.version = txt:match("%d+%.%d+%.%d+")
+		txt = nil
+	end
 	file:close()
 	os.remove(tmpName .. ".txt")
 
