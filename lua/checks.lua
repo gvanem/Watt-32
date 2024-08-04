@@ -71,31 +71,6 @@ function CheckCompiler(makefile)
 	os.remove(tmpName .. ".c")
 end
 
-function CheckDosEmu()
-	Check("Checking 'dosemu' is available")
-
-	if not Target.xcom then Pass("Not required") return end
-
-	local filename = UniqueName()
-	local file = io.open("emu.cfg", "w")
-	if not file then Error() end
-
-	file:write([[$_layout = "us"]]) -- This prevents a halt in dosemu
-	file:close()
-
-	RunCommand([[dosemu -f emu.cfg -dumb "echo test" > ]] .. filename .. ".txt")
-	file = io.open(filename .. ".txt", "r")
-	if not file then Error() end
-	local txt = file:read()
-	file:close()
-	if txt:gsub("%s+$", "") == "test" then
-		Pass("Yes")
-		System.emu = [[dosemu -f emu.cfg -dumb]]
-	else
-		Fail("No")
-	end
-end
-
 function CheckRemoveFileCmd(filename)
 	Check("Checking '" .. System.rm .. "' works")
 

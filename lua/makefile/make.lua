@@ -154,14 +154,16 @@ local function GenerateErrorFile()
 	if Target.skip then
 		if not FileExists(targetPath) then Fail(targetPath .. " has not been built") end
 	else
-		RunCommand(Compiler.cl .. [[ -s -I../inc -o ]] .. targetPath .. ' ' .. sourcePath)
+		RunCommand(Compiler.cl .. [[ -s -Iinc -o ]] .. targetPath .. ' ' .. sourcePath)
 	end
 
 	if not FileExists(targetPath) then Fail("Failed to compile " .. sourcePath) end
 
 	if Target.xcom then
-		RunCommand(System.emu .. ' "' .. targetPath .. ' -e" > ' .. hErrFilePath)
-		RunCommand(System.emu .. ' "' .. targetPath .. ' -s" > ' .. cErrFilePath)
+		local cmds = {targetPath .. ' -e  > ' .. hErrFilePath, targetPath .. ' -s  > ' .. cErrFilePath}
+		local bat = CreateBatchScript(cmds)
+		RunCommand(System.emu .. ' ' .. bat)
+		--os.remove(bat)
 	else
 		RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
 		RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)

@@ -63,7 +63,7 @@ int main(void) {
 		local txt = file:read()
 		file:close()
 		os.remove(tmpName .. ".txt")
-		if txt and txt:gsub("\n", "") == "Hello World" then
+		if txt and txt:gsub("%s+$", "") == "Hello World" then
 			Pass("Yes")
 			CheckAndRemoveCommonArtifacts(tmpName)
 			return
@@ -73,12 +73,19 @@ int main(void) {
 	Pass("No")
 	Target.xcom = true
 	CheckAndRemoveCommonArtifacts(tmpName)
+	require("lua.emu")
+	Check("Getting full working directory")
+	System.wd = GetWorkingDirectory()
+	if not System.wd then Fail("Unknown") end
+	Pass(System.wd)
+	CheckDosEmu()
 end
 
 function CheckCompilerIntSize()
 	Check("Checking actual size of 'int' C type in bits")
 
 	if Target.xcom or Target.skip then
+		-- TODO: Use an emulator to run if xcom true and skip false
 		Compiler.int = Target.makefile == "wcc" and 16 or 32
 		Pass("Skipped (assuming " .. Compiler.int ..")")
 		return
@@ -122,6 +129,7 @@ function CheckCompilerLongSize()
 	Check("Checking actual size of 'long' C type in bits")
 
 	if Target.xcom or Target.skip then
+		-- TODO: Use an emulator to run if xcom true and skip false
 		Compiler.long = 32
 		Pass("Skipped (assuming " .. Compiler.long ..")")
 		return
