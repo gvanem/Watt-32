@@ -203,17 +203,28 @@ function GenerateConfigurables(sourceType, cc, cflags, aflags, ldflags)
 end
 
 function GeneratePaths(objdir)
-	return
-"\n# Project Paths\nBINPATH = " .. SanitizePath("../bin/") .. '\n' ..
-"LIBPATH = " .. SanitizePath("../lib/") .. '\n' ..
-"LUAPATH = " .. SanitizePath("../lua/") .. '\n' ..
-"OBJPATH = " .. SanitizePath(objdir .. "/") .. '\n' .. [[
+	local function MakefilePath(path)
+		local sanitize
+		if Target.makefile == "wmake" then
+			sanitize = path:gsub([[/]], [[\]])
+		else
+			sanitize = path:gsub([[\]], [[/]])
+		end
 
-# Watcom Arguments
-A_ARGS    = $(OBJPATH)wasm.arg
-C_ARGS    = $(OBJPATH)wcc.arg
-LIB_ARGS  = $(OBJPATH)wlib.arg
-LINK_ARGS = $(OBJPATH)wlink.arg
+		return sanitize
+	end
+
+	return
+"\n# Project Paths\nBINPATH = " .. MakefilePath("../bin/") .. '\n' ..
+"LIBPATH = " .. MakefilePath("../lib/") .. '\n' ..
+"LUAPATH = " .. MakefilePath("../lua/") .. '\n' ..
+"OBJPATH = " .. MakefilePath(objdir .. "/") .. '\n' .. [[
+
+# Arguments files
+A_ARGS    = $(OBJPATH)as.arg
+C_ARGS    = $(OBJPATH)cc.arg
+LIB_ARGS  = $(OBJPATH)ar.arg
+LINK_ARGS = $(OBJPATH)ld.arg
 ]]
 end
 
