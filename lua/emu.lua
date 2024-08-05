@@ -31,7 +31,11 @@ function CheckDosEmu()
 	if not file then Error() end
 
 	-- Setting layout prevents a potenical halt in dosemu
-	file:write([[$_layout = "us"]])
+	-- full cpu emu required for DPMI features to function
+	file:write([[
+$_layout = "us"
+$_cpu_emu = "full"
+]])
 	file:close()
 
 	RunCommand([[dosemu -f dosemu.cfg -dumb "echo test" > ]] .. filename .. ".txt")
