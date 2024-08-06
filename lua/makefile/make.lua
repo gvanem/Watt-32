@@ -117,7 +117,7 @@ local function GenerateDjgpp()
 	if not file then Error() end
 
 	local tag = {asm = true, bind = true, bsd = true, core = true, dos = true, m32 = true, zlib = true}
-	local cflags = [[-O3 -g -I. -I../inc -DWATT32_BUILD -W -Wall -Wno-strict-aliasing -march=i386 -mtune=i586]]
+	local cflags = [[-c -O3 -g -I. -I../inc -DWATT32_BUILD -W -Wall -Wno-strict-aliasing -march=i386 -mtune=i586]]
 	if Compiler.colorOption then cflags = cflags .. " -fdiagnostics-color=never" end
 	if tonumber(Compiler.version:match("%d+")) >= 5 then cflags = cflags .. " -fgnu89-inline" end
 
