@@ -65,7 +65,7 @@
   #include <sys/version.h>      /* for DJGPP_MINOR */
 #endif
 
-#if defined(__DJGPP__) && !defined(WATT32_DJGPP_MINGW)
+#if (defined(__DJGPP__) && DJGPP_MINOR >= 4) && !defined(WATT32_DJGPP_MINGW)
   #include <sys/uio.h>          /* for struct iovec */
   #define IOVEC_DEFINED
 #endif
