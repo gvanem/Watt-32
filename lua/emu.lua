@@ -21,13 +21,8 @@ function GetWorkingDirectory()
 	if txt then return txt else Error() end
 end
 
-function CheckDosEmu()
-	Check("Checking 'dosemu' is available")
-
-	if not Target.xcom then Pass("Not required") return end
-
-	local filename = UniqueName()
-	local file = io.open("dosemu.cfg", "w")
+local function CreateDosEmuConfigurationFile(filename)
+	local file = io.open(filename .. ".cfg", "w")
 	if not file then Error() end
 
 	-- Setting layout prevents a potenical halt in dosemu
@@ -35,31 +30,49 @@ function CheckDosEmu()
 	file:write([[
 $_layout = "us"
 $_cpu_emu = "full"
-]])
+]]	)
 	file:close()
 
-	RunCommand([[dosemu -f dosemu.cfg -dumb "echo test" > ]] .. filename .. ".txt")
-	file = io.open(filename .. ".txt", "r")
+	return filename .. ".cfg"
+end
+
+function CheckDosEmu()
+	Check("Checking 'dosemu' is available")
+
+	if not Target.xcom then Pass("Not required") return end
+
+	local filename = UniqueName()
+
+	local cfgFileName = CreateDosEmuConfigurationFile(filename)
+	local outFileName = filename .. ".txt"
+
+	RunCommand(
+		[[dosemu -f ]] .. cfgFileName ..
+		[[ -dumb "echo test" > ]] .. outFileName
+	)
+	file = io.open(outFileName, "r")
 	if not file then Error() end
 	local txt = file:read()
 	file:close()
+
+	os.remove(cfgFileName)
+	os.remove(outFileName)
+
 	if txt:gsub("%s+$", "") == "test" then
 		Pass("Yes")
-		System.emu = [[dosemu -f dosemu.cfg -dumb]]
+		System.emu = [[dosemu]]
 	else
 		Fail("No")
 	end
 end
 
-function CreateBatchScript(exec, filename)
+local function CreateBatchScript(exec, filename)
 	if not filename then filename = UniqueName() end
 	local file = io.open(filename .. ".bat", "w")
 	if not file then Error() end
 
-	file:write([["lredir C: linux\fs]] .. GetWorkingDirectory() .. '\n')
-
 	if type(exec) == "string" then file:write(exec .. '\n')
-	elseif type(input) == "table" then
+	elseif type(exec) == "table" then
 		for _, e in ipairs(exec) do
 			if type(e) == "string" then file:write(e .. '\n') end
 		end
@@ -67,4 +80,16 @@ function CreateBatchScript(exec, filename)
 	file:close()
 
 	return filename .. ".bat"
+end
+
+function RunCommandEmu(execs, filename)
+	-- TODO: Only support dosemu at the moment. Generalize for Dosbox, Wine, Vdos etc...
+	if not filename then filename = UniqueName() end
+
+	local batFileName = CreateBatchScript(execs, filename)
+	local cfgFileName = CreateDosEmuConfigurationFile(filename)
+
+	RunCommand(System.emu .. [[ -f ]] .. cfgFileName .. [[ -dumb ]] .. batFileName)
+	os.remove(cfgFileName)
+	os.remove(batFileName)
 end

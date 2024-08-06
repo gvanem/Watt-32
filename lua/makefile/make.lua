@@ -160,10 +160,11 @@ local function GenerateErrorFile()
 	if not FileExists(targetPath) then Fail("Failed to compile " .. sourcePath) end
 
 	if Target.xcom then
-		local cmds = {targetPath .. ' -e  > ' .. hErrFilePath, targetPath .. ' -s  > ' .. cErrFilePath}
-		local bat = CreateBatchScript(cmds)
-		RunCommand(System.emu .. ' ' .. bat)
-		--os.remove(bat)
+		local cmds = {
+			targetPath:gsub([[/]], [[\]]) .. ' -e  > ' .. hErrFilePath,
+			targetPath:gsub([[/]], [[\]]) .. ' -s  > ' .. cErrFilePath
+		}
+		RunCommandEmu(cmds)
 	else
 		RunCommandLocal(targetPath .. " -e > " .. hErrFilePath)
 		RunCommandLocal(targetPath .. " -s > " .. cErrFilePath)
