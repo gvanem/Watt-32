@@ -207,7 +207,7 @@ end
 function GeneratePaths(objdir)
 	local function MakefilePath(path)
 		local sanitize
-		if Target.makefile == "wmake" then
+		if Target.makefile == "watcom" then
 			sanitize = path:gsub([[/]], [[\]])
 		else
 			sanitize = path:gsub([[\]], [[/]])
