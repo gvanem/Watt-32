@@ -110,12 +110,15 @@ function MakefileCommon(prepend, append)
 	return common
 end
 
-function MakefileAllDosObjects(prepend, append)
+function MakefileAllDosObjects(prepend, append, sourceType)
 	local common = MakefileCommon(prepend, append)
 	local dos = {
 	"fsext", "pcpkt32", "pcpkt", "pcintr", "powerpak", "qmsg",
 	"wdpmi", "x32vm"
 	}
+
+	if sourceType and sourceType.m16 then table.insert(dos, "asmpkt") end
+
 	TableStringFormat(dos, prepend, append)
 
 	table.move(dos, 1, #dos, #common + 1, common)
@@ -177,7 +180,7 @@ function GenerateObjects(sourceType, pre)
 	local ext = Target.makefile == "watcom" and ".obj" or ".o"
 	if not pre then pre = [[$(OBJPATH)]] end
 	if(sourceType.dos) then
-		str = str .. MakefileCreateVariable("OBJS", MakefileAllDosObjects(pre, ext)) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileAllDosObjects(pre, ext, sourceType)) .. '\n'
 	elseif(sourceType.win) then
 		str = str .. MakefileCreateVariable("OBJS", MakefileAllWinObjects(pre, ext)) .. '\n'
 	else
