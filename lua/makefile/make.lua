@@ -27,16 +27,16 @@ named "libwatt.a"
 end
 
 local function GenerateMakefileRules(sourceType)
-	local str
+	local str = Compiler.nasm and "PKT_STUB = pkt_stub.h\n" or "# NASM required to build pkt_stub\n#PKT_STUB = pkt_stub.h\n"
 	if sourceType.dos then
-		str = [[
+		str = str .. [[
 TARGETS = $(STAT_LIB)
 
 all: $(PKT_STUB) $(OBJPATH)cflags.h $(TARGETS)
 	@echo "All done"
 
 $(STAT_LIB): $(OBJS) $(LIB_ARGS)
-	$(AR) $@ @$(LIB_ARGS)
+	$(AR) rs $@ @$(LIB_ARGS)
 
 $(OBJPATH)%.o: %.c $(C_ARGS)
 	$(CC) @$(C_ARGS) -o $@ $<
@@ -70,7 +70,7 @@ $(IMP_LIB): $(WATT_DLL)
 	@%null
 
 $(WATT_DLL): $(OBJS) $(RESOURCE) $(LINK_ARGS)
-	*$(LD) $(LDFLAGS) name $^@ @$(LINK_ARGS)
+	$(LD) $(LDFLAGS) name $^@ @$(LINK_ARGS)
 
 DEBUGRC = 0
 
@@ -120,6 +120,7 @@ local function GenerateDjgpp()
 	local cflags = [[-c -O3 -g -I. -I../inc -DWATT32_BUILD -W -Wall -Wno-strict-aliasing -march=i386 -mtune=i586]]
 	if Compiler.colorOption then cflags = cflags .. " -fdiagnostics-color=never" end
 	if tonumber(Compiler.version:match("%d+")) >= 5 then cflags = cflags .. " -fgnu89-inline" end
+	local objdir = string.sub(objroot, string.find(objroot, System.divider) + 1)
 
 	file:write(
 		MakefileHeader() .. [[
@@ -130,10 +131,10 @@ MAKEFILE_LIST = djgpp.mak
 endif
 ]] .. '\n' ..
 		GenerateConfigurables(tag, Compiler.cc, cflags, "", "") .. '\n' ..
-		GeneratePaths(string.sub(objroot, string.find(objroot, System.divider) + 1)) .. '\n' ..
+		GeneratePaths(objdir) .. '\n' ..
 		"# Output library\nSTAT_LIB = $(LIBPATH)libwatt.a\n\n" ..
 		GenerateSources(tag) .. '\n' ..
-		GenerateObjects(tag) .. "OBJS := $(subst .obj,.o,$(OBJS))\n\n" ..
+		GenerateObjects(tag, objdir:gsub([[\]], [[/]]) .. '/') .. '\n' ..
 		GenerateMakefileRules(tag)
 	)
 	file:close()

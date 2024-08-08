@@ -113,7 +113,7 @@ end
 function MakefileAllDosObjects(prepend, append)
 	local common = MakefileCommon(prepend, append)
 	local dos = {
-	"asmpkt", "fsext", "pcpkt32", "pcpkt", "pcintr", "powerpak", "qmsg",
+	"fsext", "pcpkt32", "pcpkt", "pcintr", "powerpak", "qmsg",
 	"wdpmi", "x32vm"
 	}
 	TableStringFormat(dos, prepend, append)
@@ -172,14 +172,16 @@ function GenerateSources(sourceType)
 	return str
 end
 
-function GenerateObjects(sourceType)
+function GenerateObjects(sourceType, pre)
 	local str = "# Objects to build\n"
+	local ext = Target.makefile == "watcom" and ".obj" or ".o"
+	if not pre then pre = [[$(OBJPATH)]] end
 	if(sourceType.dos) then
-		str = str .. MakefileCreateVariable("OBJS", MakefileAllDosObjects([[$(OBJPATH)]], ".obj")) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileAllDosObjects(pre, ext)) .. '\n'
 	elseif(sourceType.win) then
-		str = str .. MakefileCreateVariable("OBJS", MakefileAllWinObjects([[$(OBJPATH)]], ".obj")) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileAllWinObjects(pre, ext)) .. '\n'
 	else
-		str = str .. MakefileCreateVariable("OBJS", MakefileCommon([[$(OBJPATH)]], ".obj")) .. '\n'
+		str = str .. MakefileCreateVariable("OBJS", MakefileCommon(pre, ext)) .. '\n'
 	end
 	return str
 end
