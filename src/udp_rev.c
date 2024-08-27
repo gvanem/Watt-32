@@ -105,8 +105,7 @@ static BOOL reverse_lookup (const struct DNS_query *q, size_t qlen,
   BOOL        quit  = FALSE;
   WORD        sec;
   DWORD       timer;
-  _udp_Socket dom_sock;
-  sock_type  *sock = NULL;
+  sock_type   dom_sock, *sock = NULL;
 
   if (!nameserver)      /* no nameserver, give up */
   {
@@ -115,7 +114,7 @@ static BOOL reverse_lookup (const struct DNS_query *q, size_t qlen,
     return (FALSE);
   }
 
-  if (!udp_open(&dom_sock, DOM_SRC_PORT, nameserver, DOM_DST_PORT, NULL))
+  if (!udp_open(&dom_sock.udp, DOM_SRC_PORT, nameserver, DOM_DST_PORT, NULL))
   {
     dom_errno = DNS_CLI_SYSTEM;
     return (FALSE);
@@ -125,7 +124,7 @@ static BOOL reverse_lookup (const struct DNS_query *q, size_t qlen,
 
   for (sec = 2; sec < dns_timeout-1 && !quit && !_resolve_exit; sec *= 2)
   {
-    sock = (sock_type*)&dom_sock;
+    sock = &dom_sock;
     sock_write (sock, (const BYTE*)q, qlen);
     ip_timer_init (sock, sec);               /* per server expiry */
 

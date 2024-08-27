@@ -493,8 +493,7 @@ static int lookup_domain (
        BOOL              is_aaaa,       /* Query A or AAAA record */
        void             *addr)          /* return address */
 {
-  _udp_Socket sock;
-  sock_type  *dom_sock = NULL;
+  sock_type  sock, *dom_sock = NULL;
 
   struct DNS_query reply;
   char   namebuf [3*MAX_HOSTLEN]; /* may overflow!! */
@@ -570,7 +569,7 @@ static int lookup_domain (
          id_cache [id_index++] = q->head.ident;
     else outsnl (_LANG("udp_dom(): ID cache full"));
 
-    dom_sock = (sock_type*) &sock;
+    dom_sock = &sock;
 
     if (!send_query(dom_sock, q, namebuf, nameserver, qtype))
     {

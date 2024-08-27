@@ -249,10 +249,16 @@ char *_strlcpy (char *dst, const char *src, size_t len)
  */
 char *strltrim (const char *s)
 {
+  int ch;
   WATT_ASSERT (s != NULL);
 
-  while (s[0] && s[1] && VALID_CH((int)s[0]) && ISSPACE(s[0]))
-       s++;
+  while (s[0] && s[1])
+  {
+    ch = s[0];
+    if (VALID_CH(ch) && ISSPACE(ch))
+      break;
+    s++;
+  }
   return (char*)s;
 }
 

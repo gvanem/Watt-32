@@ -2179,7 +2179,7 @@ static void dbug_dump (const void *sock, const in_Header *ip,
                        const char *fname, unsigned line, BOOL out)
 {
   static BOOL print_once = FALSE;
-  char   sz_buf [30];
+  char   sz_buf [28];
   int    err;
 
   WATT_ASSERT (ip);
@@ -2243,7 +2243,7 @@ static void dbug_dump (const void *sock, const in_Header *ip,
      dbug_putc ('\n');   /* !! Why do I need this? */
 
   if (dbg_print_size)    /* debug.rx_size = 1 */
-       snprintf (sz_buf, sizeof(sz_buf), ", size %u",
+       sprintf (sz_buf, ", size %u",
                  out ? _eth_last.tx.size : _eth_last.rx.size);
   else sz_buf [0] = '\0';
 
@@ -2305,7 +2305,7 @@ static void dbug_dump (const void *sock, const in_Header *ip,
     {
       pppoe_disc_dump ((const struct pppoe_Packet*) pkt->eth.data);
       goto quit;
-  }
+    }
     if (type == PPPOE_SESS_TYPE)
     {
       pppoe_sess_dump (sock, (const struct pppoe_Packet*) pkt->eth.data);

@@ -360,6 +360,8 @@ static uint64 tsc_microsec (const uint64 *base)
   return (rc);
 }
 
+/* This function has a midnight bug, disabled for now.*/
+#if 0
 static void adjust_cpu_clock (const struct timeval *tv)
 {
   static DWORD last = 0;
@@ -397,6 +399,7 @@ static void adjust_cpu_clock (const struct timeval *tv)
     last = tick;
   }
 }
+#endif
 
 /*
  * Return a 'timeval' from a CPU timestamp.

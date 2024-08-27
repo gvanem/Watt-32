@@ -240,7 +240,7 @@ ret_copy:
 
 void W32_CALL freehostent (struct hostent *he)
 {
-  char *p;
+  char **p;
 
   SOCK_DEBUGF (("\nfreehostent: %s ", he->h_name));
 
@@ -249,11 +249,11 @@ void W32_CALL freehostent (struct hostent *he)
 
   DO_FREE (he->h_name);
 
-  for (p = he->h_addr_list[0]; p; p++)
-      free (p);
+  for (p = he->h_addr_list; *p; p++)
+      free (*p);
 
-  for (p = he->h_aliases[0]; p; p++)
-      free (p);
+  for (p = he->h_aliases; *p; p++)
+      free (*p);
 
   free (he->h_aliases);
   free (he->h_addr_list);
