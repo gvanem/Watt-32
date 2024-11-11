@@ -144,7 +144,6 @@ W32_CLANG_PACK_WARN_DEF()
 
   static void tcp_no_arp   (_tcp_Socket *s);
   static void tcp_rtt_win  (_tcp_Socket *s);
-  static void tcp_upd_win  (_tcp_Socket *s, unsigned line);
   static BOOL tcp_checksum (const in_Header *ip, const tcp_Header *tcp, int len);
 #endif
 
@@ -826,8 +825,7 @@ _tcp_Socket *_tcp_handler (const in_Header *ip, BOOL broadcast)
   }
 
   if (flags & tcp_FlagPUSH)       /* EE 2002.2.28 */
-       s->locflags |= LF_GOT_PUSH;
-  else s->locflags &= ~LF_GOT_PUSH;
+     s->locflags |= LF_GOT_PUSH;
 
   tcp_rtt_win (s);        /* update retrans timer, windows etc. */
 
@@ -1271,17 +1269,6 @@ void tcp_Retransmitter (BOOL force)
         next = _tcp_unthread (s, TRUE);
       }
       continue;
-    }
-
-    /* Need to send a window update? Because we advertised a 0 window
-     * in a previous _tcp_send() (but only in ESTAB state).
-     */
-    if ((s->locflags & LF_WINUPDATE) && sock_rbleft((sock_type*)s) > 0)
-    {
-      STAT (tcpstats.tcps_sndwinup++);
-      s->locflags &= ~LF_WINUPDATE;
-      s->flags |= tcp_FlagACK;
-      TCP_SEND (s);
     }
 
     else if (s->tx_datalen > 0 || s->unhappy || s->karn_count == 1)
@@ -1835,22 +1822,37 @@ static int tcp_read (_tcp_Socket *s, BYTE *buf, int maxlen)
   {
     int to_move;
 
+    s->rx_datalen -= len;
+
+    if (s->recv_win < (long)s->adv_win)
+    {
+      /* ACK every second segment, or when PUSH received.
+       */
+      if (s->adv_win - s->recv_win > s->max_seg ||
+          (s->locflags & LF_GOT_PUSH))
+         TCP_SEND (s);
+      else
+         TCP_SENDSOON (s);
+    }
+    else if (s->rx_datalen == 0 &&
+             s->recv_win <= 2 * s->max_seg)
+    {
+      /* Update window now if it was (nearly) closed.
+       */
+      TCP_SEND (s);
+    }
+
+    s->locflags &= ~LF_GOT_PUSH;
+
     if (buf)
        memcpy (buf, s->rx_data, len);
-    s->rx_datalen -= len;
 
     to_move = s->rx_datalen;
     if (s->missed_seq[0] != s->missed_seq[1])
        to_move += s->missed_seq[1] - s->recv_next;
 
     if (to_move > 0)
-    {
-      memmove (s->rx_data, s->rx_data + len, to_move);
-
-      TCP_SENDSOON (s);     /* delayed ACK */
-    }
-    else
-      tcp_upd_win (s, __LINE__);
+       memmove (s->rx_data, s->rx_data + len, to_move);
   }
   else if (s->state == tcp_StateCLOSWT)
           _tcp_close (s);
@@ -1981,7 +1983,7 @@ static void tcp_sockreset (_tcp_Socket *s, BOOL proxy)
     s->unhappy  = FALSE;
     s->hisport  = 0;
     s->hisaddr  = 0UL;
-    s->locflags &= ~(LF_WINUPDATE | LF_KEEPALIVE | LF_GOT_FIN | LF_GOT_ICMP);
+    s->locflags &= ~(LF_KEEPALIVE | LF_GOT_FIN | LF_GOT_ICMP);
 
     s->datatimer   = 0UL;
     s->inactive_to = 0;
@@ -2143,20 +2145,6 @@ static void tcp_rtt_win (_tcp_Socket *s)
       s->rtt_time = timeout;
 
   s->datatimer = 0UL; /* resetting tx-timer, EE 99.08.23 */
-}
-
-/**
- * Check if receive window needs an update.
- */
-static void tcp_upd_win (_tcp_Socket *s, unsigned line)
-{
-  UINT winfree = s->max_rx_data - (UINT)s->rx_datalen;
-
-  if (winfree < s->max_seg/2)
-  {
-    _tcp_send (s, __FILE__, line);  /* update window now */
-    TRACE_CONSOLE (2, "tcp_upd_win(%d): win-free %u\n", line, winfree);
-  }
 }
 
 /**
@@ -2364,9 +2352,28 @@ int _tcp_send (_tcp_Socket *s, const char *file, unsigned line)
   int          opt_len;          /* total length of TCP options */
   int          pkt_num;          /* 0 .. s->cwindow-1 */
   int          rtt;
+  int          new_window;
 
   s->recent = 0;
   dst = (_pktserial ? NULL : &s->his_ethaddr);
+
+  new_window = s->max_rx_data - s->rx_datalen;
+  if (s->max_rx_data >= s->max_seg * 4)
+  {
+    /* For large buffers, use half the buffer size, and round to a
+     * multiple of MSS.  Only update if the difference is at least
+     * one segment (recommended by RFC 1122).
+     */
+    new_window = min (new_window, s->max_rx_data / 2);
+    if (new_window > s->max_seg)
+    {
+      if (new_window - s->recv_win >= s->max_seg)
+         new_window -= new_window % s->max_seg;
+      else
+         new_window = s->recv_win;
+    }
+  }
+  s->adv_win = s->recv_win = new_window;
 
 #if defined(USE_IPV6)
   if (s->is_ip6)
@@ -2425,7 +2432,6 @@ int _tcp_send (_tcp_Socket *s, const char *file, unsigned line)
     tcp->seqnum   = intel (s->send_next + start_data); /* unacked - no longer send_tot_len */
     tcp->acknum   = intel (s->recv_next);
 
-    s->adv_win    = s->max_rx_data - s->rx_datalen;    /* Our new advertised recv window */
     tcp->window   = intel16 ((WORD)s->adv_win);
     tcp->flags    = (BYTE) (s->flags & ~tcp_FlagPUSH);
     tcp->unused   = 0;
@@ -2461,7 +2467,7 @@ int _tcp_send (_tcp_Socket *s, const char *file, unsigned line)
            memcpy (data, s->tx_queue+start_data, send_data_len);
       else memcpy (data, s->tx_data +start_data, send_data_len);
 
-      if (send_data_len == send_tot_data &&
+      if ((unsigned)start_data + send_data_len == s->tx_datalen &&
           (s->flags & tcp_FlagPUSH))
       {
         /* Set PUSH bit on last segment.
