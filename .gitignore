@@ -148,7 +148,6 @@ bin/ping.bat
 bin/PMAIL
 bin/POPMAIL
 bin/RDATE
-bin/RDEBUG
 bin/resolv.cnf
 bin/revip.bat
 bin/RMTD
@@ -165,7 +164,6 @@ bin/SMTPD
 bin/SNARF.70
 bin/sniff.bat
 bin/SSH
-bin/SUCK
 bin/syslogd2
 bin/TALK
 bin/TELNET
