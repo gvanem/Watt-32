@@ -1,0 +1,8 @@
+SRC       = rdebug.c getopt.c
+DJGPP_EXE = rdebug32.exe
+
+include ../djcommon.mak
+
+# DO NOT DELETE THIS LINE
+rdebug.o: rdebug.c getopt.h
+getopt.o: getopt.c getopt.h

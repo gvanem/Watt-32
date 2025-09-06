@@ -1,0 +1,114 @@
+
+
+
+LMOVE(1)                                                 LMOVE(1)
+
+
+NAME
+       lmove - move articles into /news/group/number directories
+
+SYNOPSIS
+       lmove  -d directory [ -c filename ] [ -a filename ] [ -e |
+       -E filename ] [ -l phrase_file ] [ -D ]
+
+
+OPTIONS
+       -a filename
+
+       This is the location of the active file.  See  description
+       of  file  below.   If  this  option  is  not provided, the
+       default of "active" is used.
+
+       -c filename
+
+       This is the  location  of  the  configuration  file.   See
+       description  of  file  below.   If this option is not pro-
+       vided, the default of "lmove.cfg" is used.
+
+       -d directory
+
+       This option is required. This is the directory  that  con-
+       tains  the  articles  for  lmove to put into the directory
+       structure.  It should be on the  same  filesystem  as  the
+       BASE  directory (see ACTIVE FILE below), since some ..IX's
+       move command can not move files across file systems.
+
+       -D
+
+       This option tells lmove to log various debugging  messages
+       to debug.suck.  This is primarily used by the developer to
+       trace various problems.
+
+       -e | -E filename
+
+       These options will send all error messages (normally  dis-
+       played  on  stderr), to an alternate file.  The lower case
+       version, -e, will send the error messages to the compiled-
+       in  default defined in suck_config.h.  The upper case ver-
+       sion, -E, requires the filename parameter.  All error mes-
+       sages will then be sent to this file.
+
+       -l phrase_file
+
+       This  option  tells  lmove  to load in an alternate phrase
+       file, instead of using the built-in messages.  This allows
+       you to have lmove print phrases in another language, or to
+       allow you to customize the  messages  without  re-building
+       lmove.   See  the "FOREIGN LANGUAGE PHRASES" in suck.1 for
+       more details.
+
+
+DESCRIPTION
+       Lmove will take articles in a single  directory  (such  as
+       those  retrieved with "suck" ), and put them into a direc-
+       tory tree based on newsgroups.   Lmove  uses  an  "active"
+       file  to  determine where to put the various articles, and
+       to keep track of the highest numbered  articles  in  these
+       directories.   Lmove  will  scan  each  article  to find a
+       matching group in the active file, then store the  article
+       in  that  group's directory, increasing the highest number
+       for that group.
+
+
+CONFIGURATION FILE
+       The configuration file should contain two lines:
+
+              BASE=/usr/spool/news
+              ACTIVE=/usr/spool/news/active
+
+       The BASE= tells lmove the base directory for all articles.
+       This is where the articles are actually stored.
+
+       The  ACTIVE=  tells  lmove  where to find the active file,
+       described below.
+
+
+ACTIVE FILE
+       The active file consists of newsgroup names,  the  current
+       highest article number, the current lowest article number,
+       and the current status of the group.  Lmove only uses  the
+       newsgroup  name  and  highest  article  number.  The other
+       fields are just rewritten, and not modified  in  any  way.
+       These are here for use by other programs.
+
+       Example:
+
+              comp.os.linux.announce 1000 1 y
+
+       The  lines  are  a  listing of the valid groups that lmove
+       will store articles in.  The highest article number for  a
+       new group should be either 0 or 1.
+
+       Upon  completion,  lmove will move the current active file
+       to "active.old", and write out a new active file with  the
+       new  highest article numbers.  Any articles not moved into
+       the directory structure are left in the  original  article
+       directory.
+
+
+EXIT VALUES
+       0 on success, -1 on failure.
+
+SEE ALSO
+       suck(1), rpost(1), testhost(1).
+

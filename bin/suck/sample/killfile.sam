@@ -1,0 +1,8 @@
+HILINES=10000
+LOWLINES=10
+PATH=news.pixi.com,localhost
+Subject:win-95
+From:nerd@xxx
+From:geek@yyy
+QUOTE=\
+GROUP=keep comp.os.linux.announce cola

@@ -1,0 +1,245 @@
+
+
+
+RPOST(1)                                                 RPOST(1)
+
+
+NAME
+       rpost - post an article to an NNTP news server
+
+SYNOPSIS
+       rpost  [  hostname  ] [ @filename ] [ -s | -S filename ] [
+       -e | -E filename ] [ -b batchfile ] [ -p prefix ] [ -d ] [
+       -U userid ] [ -P password ] [ -M ] [ -N port_number ] [ -l
+       phrase_file ] [ -D ] [ -T timeout ] [ -u  ]  [  -f  filter
+       $$o=<outfile> filter_arg1 ...  ]
+
+DESCRIPTION
+       Rpost  will  post one or more articles, specified by host-
+       name.  If hostname is not specified, rpost  will  use  the
+       environment variable NNTPSERVER.
+
+Generic Options
+       @filename
+
+       This  option tells rpost to read other options from a file
+       in addition to the command line.
+
+       -D This option tells rpost to log various  debugging  mes-
+       sages to "debug.suck", primarily for use by the developer.
+
+       -e|-E filename
+
+       These options will send all error messages (normally  dis-
+       played  on  stderr), to an alternate file.  The lower case
+       version, -e, will send the error messages to the compiled-
+       in  default  defined  in  suck_config.h.   The  default is
+       suck.errlog.  The upper case  version,  -E,  requires  the
+       filename  parameter.  All error messages will then be sent
+       to this file.
+
+       -l phrase_file
+
+       This option tells rpost to load  in  an  alternate  phrase
+       file, instead of using the built-in messages.  This allows
+       you to have rpost print phrases in another language, or to
+       allow  you  to customize the messages without re-building.
+       See the "FOREIGN LANGUAGE  PHRASES"  in  suck.1  for  more
+       details.
+
+       -M
+
+       This  option tells rpost to send the "mode reader" command
+       to the remote server.  If you get an invalid command  mes-
+       sage  from  rpost  immediately after the welcome announce-
+       ment, then try this option.
+
+       -N port_number
+
+       This option tells rpost to use an alternate NNRP port num-
+       ber  when  connecting  to the host, instead of the default
+       port number, 119.
+
+       -s|-S filename
+
+       These options will send all status messages (normally dis-
+       played  on  stdout), to an alternate file.  The lower case
+       version, -s, will send the status  messages  to  the  com-
+       piled-in default defined in suck_config.h.  The default is
+       /dev/null, so no status messages will be  displayed.   The
+       upper  case  version, -S, requires the filename parameter.
+       All status messages will then be sent to this file.
+
+       -T This option overrides the  compiled-in  TIMEOUT  value.
+       This is how long rpost waits for data from the remote host
+       before timing out and aborting.
+
+       -u This option tells rpost to send the AUTHINFO USER  com-
+       mand immediately upon connect to the remote server, rather
+       than wait for a request for authorization.  You must  sup-
+       ply the -U and -P options when you use this option.
+
+       -U userid -P password
+
+       These  two  options let you specify a userid and password,
+       if your NNTP server requires them.
+
+
+STDIN MODE
+       rpost
+
+       rpost hostname
+
+       rpost reads one article from stdin and  sends  it  to  the
+       NNTP  server.  The  article must have a header of at least
+       two lines, namely Newsgroups: and Subject: and a body (the
+       article).  Header  and body have to be separated by a new-
+       line.  Rpost does not change the article in any way.
+
+       Rpost uses the POST command to  post  your  article,  just
+       like  any  standard  newsreader.  This is handy when using
+       SLIP and PPP, since most providers do not allow any  other
+       method to post articles (such as nntpsend or innxmit).
+
+BATCH MODE
+       rpost hostname
+
+       -b  batchfile  -p  prefix  -d -f filter $$o=<outfile> fil-
+       ter_arg1 ...
+
+       -b batchfile
+
+       A listing of the articles to be posted.  This parameter is
+       REQUIRED.   This  file contains one article per line, with
+       the line  being  the  path  to  the  file  containing  the
+       article. For example:
+
+              -b /usr/spool/news/out.going/pixi
+
+       IF  there are any problems uploading a specific article, a
+       "failed" file will be created.  It will be called  "batch-
+       file".fail,  and  contain the line from this batchfile for
+       the article(s) that did  not  successfully  upload.   This
+       file  can  be  used  to re-run the failed messages through
+       rpost.  NOTE: duplicate articles  are  NOT  considered  an
+       error for the fail file.
+
+       -d
+
+       If  the upload of articles is successful, this option will
+       cause rpost to
+        delete the batchfile named in the -b option.
+
+       -p prefix
+
+       If the batchfile does not contain a full path, but  rather
+       a partial path, this parameter must be specified.  This is
+       useful when the batch file is generated  by  another  pro-
+       gram.   For  example,  Inn lists the path in the out.going
+       file relative to its base directory  /usr/spool/news.   In
+       that case just use:
+
+               -p /usr/spool/news
+
+       -f filter $$o=<outfile> filter_arg1 filter_arg2 ...
+
+       In  many  cases,  each article must be massaged before the
+       remote NNTP will accept it.  This option lets you do that.
+       Note  that  the -f .... option must be the LAST option, as
+       everything that follows it is passed to the filter, except
+       as  noted below.  There are three required parameters with
+       this:
+
+       $$o=<outfile>  - <outfile> is the name of  the  file  pro-
+       duced  by your filter that will get uploaded to the remote
+       NNTP server.  THIS IS NOT passed to your  filter  program.
+       This  can  be specified anywhere on the command line AFTER
+       the -f filter argument, either before the filter name,  or
+       after it.
+
+       filter  -  name  of the program to call.  Whatever follows
+       filter, EXCEPT for the $$o, are arguments  passed  to  the
+       filter.
+
+       arg1  -  The first argument to your filter program/script.
+       It most likely will be $$i, which rpost fills in with  the
+       name of the article that needs to be cleaned up.
+
+       arg2 ... - any additional args needed can be specified.
+
+       Let's  clarify  this  a  bit  with  an example.  Some NNTP
+       servers don't like to receive articles with the NNTP-Post-
+       ing-Host filled in.  Create a short shell script to delete
+       this from a file:
+
+       -myscr--------------------------------------------
+
+       #!/bin/sh
+
+       sed -e "/^NNTP-Posting-Host/d" $1 > $2
+
+       -end myscr----------------------------------------
+
+       Then call rpost like this:
+              rpost -b  /usr/spool/news/out.going/pixi  -f  myscr
+              \$\$o=/tmp/FILTERED_MSG \$\$i /tmp/FILTERED_MSG
+
+       Then,  before  each  article  is uploaded, myscr is called
+       like such:
+              myscr infilename /tmp/FILTERED_MSG
+
+       After myscr has finished, rpost  uploads  the  cleaned  up
+       article,  stored  in /tmp/FILTERED_MSG, to the remote NNTP
+       server.
+
+NOTE:
+       The $$o and $$i have to be escaped, using either the back-
+       slashes  as  above,  or with single quotes, to prevent the
+       shell from trying to interpret these as variables.   Fail-
+       ure to escape them will result in rpost not working!
+
+
+WARNING:
+       Be  very careful with what the filter program deletes from
+       the article.  Deleting the wrong line can have bad effects
+       later  on.  For example, do not delete the MSG-ID line, as
+       this could cause a single message to be posted many times,
+       depending  on  the  configuration  of  both  the local and
+       remote newserver.
+
+
+RPOST ARGUMENT FILE
+       If you specify @filename on the command line,  rpost  will
+       read from filename and parse it for any arguments that you
+       wish to pass to rpost.  You specify the same arguments  in
+       this  file  as  you do on the command line.  The arguments
+       can be on one line, or spread  out  among  more  than  one
+       line.  You may also use comments.  Comments begin with '#'
+       and go to the end of a line.  All command  line  arguments
+       override  arguments  in  the file.  One advantage to using
+       the file instead of the command line, is  that  you  don't
+       have to escape any special characters, such as $.
+
+              # Sample Argument file
+              -b batch # batch file option
+              -M   # use mode reader option
+
+
+EXIT VALUES
+       Rpost returns the following exit values:
+
+              0 = success
+              1 = error posting an article
+              2 = unable to do NNTP authorization with the remote
+              server.
+              3 = unexpected answer to command  when  doing  NNTP
+              authorization.
+              -1 = other fatal error.
+
+
+SEE ALSO
+       suck(1), testhost(1), lpost(1).
+
+
+
+

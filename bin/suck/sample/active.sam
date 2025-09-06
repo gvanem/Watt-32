@@ -1,0 +1,9 @@
+#
+#  The active file consists of newsgroup names,  the  current
+#  highest article number, the current lowest article number,
+#  and the current status of the group.
+#
+#  Example:
+#
+comp.os.linux.announce 1000 1 y
+

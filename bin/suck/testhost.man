@@ -1,0 +1,102 @@
+
+
+
+TESTHOST(1)                                           TESTHOST(1)
+
+
+NAME
+       testhost - test the status of an NNTP news server
+
+SYNOPSIS
+       testhost hostname [ -a|-n date time ] [ -s|-S filename ] [
+       -e|-E filename ] [ -N port_number ] [ -U  userid  ]  [  -P
+       password ] [ -l phrase_file ] [ -T timeout ] [ -d ] [ -q ]
+
+
+OPTIONS
+       -a     Get the active list from hostname
+
+       -d
+
+       This option tells testhost get  the  descriptions  of  the
+       newsgroups on the remote server by sending the 'list news-
+       groups' command.  The remote server may or may not support
+       this command.
+
+       -e | -E filename
+
+       These  options will send all error messages (normally dis-
+       played on stderr), to an alternate file.  The  lower  case
+       version, -e, will send the error messages to the compiled-
+       in default  defined  in  suck_config.h.   The  default  is
+       suck.errlog.   The  upper  case  version, -E, requires the
+       filename parameter.  All error messages will then be  sent
+       to this file.
+
+       -l phrase_file
+
+       This  option tells testhost to load in an alternate phrase
+       file, instead of using the built-in messages.  This allows
+       you to have testhost print phrases in another language, or
+       to allow you to customize the messages  without  re-build-
+       ing.   See  the  "FOREIGN  LANGUAGE PHRASES" in suck.1 for
+       more details.
+
+       -n date time
+
+       Get the newgroups created on the host since the  date  and
+       time  specified. The date must be in YYMMDD format and the
+       time must be in HHMMSS format.
+
+       -N port_number
+
+       This option will tell testhost to use  an  alternate  NNRP
+       port  number  when  connecting to the host, instead of the
+       default, 119.
+
+       -q
+
+       This option tells testhost to not display  the  connection
+       and announcement messages, rather only display the results
+       of the actual command run.
+
+       -s | -S filename
+
+       These options will send all status messages (normally dis-
+       played  on  stdout), to an alternate file.  The lower case
+       version, -s, will send the status  messages  to  the  com-
+       piled-in default defined in suck_config.h.  The default is
+       /dev/null, so no status messages will be  displayed.   The
+       upper  case  version, -S, requires the filename parameter.
+       All status messages will then be sent to this file.
+
+       -T
+
+       This option overrides the compiled-in TIMEOUT value.  This
+       is  how  long testhost waits for data from the remote host
+       before timing out and aborting.
+
+       -U userid
+
+       -P password
+
+       These two options let you specify a userid  and  password,
+       if your NNTP server requires them.
+
+
+DESCRIPTION
+       Testhost will query a NNTP news server, specified by host-
+       name.  The default action is to issue the help command  to
+       the  server,  to  see what software it is running and what
+       commands it accepts.
+
+       If the -a  option  is  used,  testhost  will  display  the
+       server's  active history list.  If the -n date time option
+       is used, testhost will display all new groups  created  on
+       the server since the date and time specified.
+
+EXIT VALUES
+       0 on success, -1 on failure.
+
+SEE ALSO
+       suck(1), rpost(1), lpost(1).

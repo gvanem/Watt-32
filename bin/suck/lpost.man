@@ -1,0 +1,43 @@
+
+
+
+LPOST(1)                                                 LPOST(1)
+
+
+NAME
+       lpost - post articles to local server using rnews.
+
+SYNOPSIS
+       lpost [ -v ]
+
+OPTIONS
+       -v     verbose, show each article as it is uploaded.
+
+NOTE
+       Use  the  batch  function of suck and avoid lpost, this is
+       not the most efficient way of doing things.   It  is  kept
+       solely  as a link to the past, since some people still use
+       it.  It is not compiled  nor  installed  by  default.   To
+       build and install lpost, from the source directory, run:
+
+               ./configure
+               make install_lpost
+
+
+DESCRIPTION
+       lpost  (local  post) reads stdin and pipes the articles to
+       rnews, typically found in /usr/lib/news. If it is  located
+       elsewhere, change #define RNEWS in suck_config.h.  A typi-
+       cal way to use lpost is:
+
+              zcat output.gz | lpost
+
+       This could take a while, so be patient.
+
+EXIT VALUES
+       0 on success, -1 on failure.
+
+SEE ALSO
+       suck(1), rpost(1), testhost(1).
+
+

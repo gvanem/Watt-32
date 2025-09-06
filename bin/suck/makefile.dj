@@ -1,0 +1,38 @@
+#
+#  GNU Makefile for Watt-32 suck (djgpp)
+#
+
+include suck.v
+
+SRC = active.c batch.c both.c bphrases.c chkhist.c dedupe.c \
+      killfile.c killprg.c lm_phras.c phrases.c rphrases.c  \
+      suck.c timer.c tphrases.c utils.c
+
+DJGPP_EXE = suck32.exe
+
+include ../djcommon.mak
+
+CFLAGS += -DHAVE_REGEX_H -DPOSIX_SIGNALS -DSUCK_VERSION=\"$(SUCK_VERSION)\"
+
+# DO NOT DELETE THIS LINE
+active.o: active.c suck.h config.h both.h phrases.h timer.h utils.h \
+  active.h
+batch.o: batch.c suck.h both.h config.h batch.h utils.h phrases.h \
+  active.h timer.h
+both.o: both.c suck.h config.h both.h phrases.h
+bphrases.o: bphrases.c
+chkhist.o: chkhist.c suck.h config.h both.h chkhist.h utils.h phrases.h \
+  timer.h
+dedupe.o: dedupe.c suck.h config.h both.h dedupe.h utils.h phrases.h \
+  timer.h
+killfile.o: killfile.c suck.h config.h both.h utils.h killfile.h \
+  phrases.h timer.h
+killprg.o: killprg.c suck.h config.h both.h utils.h killfile.h phrases.h
+lm_phras.o: lm_phras.c
+phrases.o: phrases.c
+rphrases.o: rphrases.c
+suck.o: suck.c suck.h config.h both.h utils.h dedupe.h phrases.h \
+  killfile.h timer.h active.h batch.h chkhist.h
+timer.o: timer.c suck.h config.h timer.h phrases.h both.h
+tphrases.o: tphrases.c
+utils.o: utils.c suck.h config.h both.h utils.h phrases.h

@@ -1,0 +1,796 @@
+
+
+
+SUCK(1)                                                   SUCK(1)
+
+
+NAME
+       suck - Pull a small newsfeed from an NNTP server, avoiding
+       the NEWNEWS command.
+
+SYNOPSIS
+       suck [ hostname ] [ @filename ] [ -V ] [ -K ] [ -L[SL] ] [
+       filename ] [ -H ] [ -d[tmd] dirname ] [ -s | -S filename ]
+       [ -e | -E filename ] [ -a ] [ -m ] [ -b[irlf] batchfile  ]
+       [  -r filesize ] [ -p extension ] [ -U userid ] [ -P pass-
+       word ] [ -c ] [ -M ] [ -N port_number ]  [  -W  pause_time
+       pause_nr_msgs  ]  [  -w  pause_time  pause_nr_msgs  ] [ -l
+       phrase_file ] [ -D ] [ -R ] [ -q ] [ -C count ] [ -k  ]  [
+       -A  ]  [  -AL  activefile ] [ -hl localhost ] [ -bp ] [ -T
+       timeout ] [ -n ] [ -u ] [ -z ] [ -x ] [ -B ] [ -O ]
+
+       Options valid in all modes
+
+       @filename
+
+       This option tells suck to read other options from  a  file
+       in addition to the commandline.
+
+       -a
+
+       This  option forces suck to always batch up any downloaded
+       articles, even if suck aborts  for  any  reason.   Without
+       this  option,  suck will only batch up articles if it fin-
+       ishes successfully  or  is  cancelled  by  a  signal  (see
+       below).
+
+       -A
+
+       This  option  tells  suck to scan the localhost (specified
+       with the -hl option) and use its active file to build  and
+       update  the sucknewsrc.   If you add a group to your local
+       server, suck will add it to sucknewsrc and download  arti-
+       cles.   Or,  if you delete a group from your local server,
+       it will be deleted from sucknewsrc.   If  posting  is  not
+       allowed to a particular group, then the line in sucknewsrc
+       is just commented out.  With this option, you should never
+       have to edit your sucknewsrc.  In case you have newsgroups
+       (like control and junk) that you  don't  want  downloaded,
+       you  can  put  these newsgroups in a file "active-ignore",
+       one per line, and suck will ignore these  newsgroups  when
+       it  scans the localhost.  If your system supports regex(),
+       you may use regular expressions in the active-ignore  file
+       to  skip  multiple  groups, eg: fred.*.  If you use the -p
+       (postfix) option, suck will check for the existence of  an
+       active-ignore  file  with  the  postfix.   If that doesn't
+       exist, then suck will check for the existence of the  file
+       without the postfix.
+
+       NOTE:  If  you use regular expressions, suck will silently
+       add a "^" to the beginning of the group name, and a "$" to
+       the  end of the group name if they aren't already present,
+       so that  if  you  have  "comp.os.linux",  it  won't  match
+       "comp.os.linux.answers" or if you have alt.test it doesn't
+       match comp.alt.test.
+
+       -AL activefile
+
+       This option is identical to the -A option, except it reads
+       the  active  file from the local file specified instead of
+       reading it from the localhost.  All the caveats  from  the
+       -A  option  apply to this option as well.  If both options
+       are used on the command line, suck first tries to use  the
+       -A option, then if that fails it uses this option.
+
+       -B
+
+       This option tells suck to attempt to batch up any articles
+       in its directory BEFORE  starting  to  download  messages.
+       This can be useful if you have a problem with the previous
+       download.  This option will only work  if  you  specify  a
+       batch  option  (see  below).   If there are no messages to
+       batch up, some of the batch options  may  produce  warning
+       messages.  They may be safely ignored.  Also, if the batch
+       files exist at the end of the run, in inn-batch  mode,  it
+       will be overwritten, since the new batch file will contain
+       all messages.  In rnews mode, if the batch file exists, it
+       will abort and not batch up any messages.
+
+       -c
+
+       If  this  option  is  specified,  suck will clean up after
+       itself.  This includes:
+              1. Moving sucknewsrc to sucknewsrc.old
+              2. Moving suck.newrc to sucknewsrc
+              3. rm suck.sorted and suckothermsgs.
+
+       -C count
+
+       This option tells suck to drop the connection  and  reopen
+       it  every  count  number of articles.  This is designed to
+       battle INN's LIKE_PULLERS=DONT  option,  that  some  folks
+       compile in. With LIKE_PULLERS=DONT, after 100 messages INN
+       will pause between every  message,  dramatically  reducing
+       your  download  speed.  I don't recommend the use of this,
+       but if you have no other choice....
+
+       -dd dirname
+
+       -dm dirname
+
+       -dt dirname
+
+       Specify the location of the various files used by suck.
+
+       -dd dirname = directory of data files used by suck  (suck-
+       newsrc suckkillfile suckothermsgs active-ignore)
+
+       -dm dirname = directory for storage of articles created in
+       Multifile mode or batch mode.  DO NOT make this  the  same
+       as  the directories used for the -dt or -d options, or you
+       will lose all your configuration files.
+
+       -dt dirname = directory of  temp  files  created  by  suck
+       (suck.newrc,    suck.sort,   suck.restart,   suck.killlog,
+       suck.post).
+
+       -D
+
+       This option tells suck to log various  debugging  messages
+       to "debug.suck", primarily for use by the maintainer.
+
+       -e | -E filename
+
+       These  options will send all error messages (normally dis-
+       played on stderr), to an alternate file.  The  lower  case
+       version, -e, will send the error messages to the compiled-
+       in default  defined  in  suck_config.h.   The  default  is
+       suck.errlog.   The  upper  case  version, -E, requires the
+       filename parameter.  All error messages will then be  sent
+       to this file.
+
+       -H
+
+       This option will cause suck to bypass the history check.
+
+       -hl localhost
+
+       This  option specifies the localhost name.  This option is
+       required with both the -A and the -bp option.
+
+       -k
+
+       This option tells suck to NOT attach the postfix from  the
+       -p  option  to the names of the killfiles, both the master
+       killfile and any group files.  This allows you to maintain
+       one set of killfiles for multiple servers.
+
+       -K
+
+       This  option  will cause suck to bypass checking the kill-
+       file(s).
+
+       -l phrase_file
+
+       This option tells suck to  load  in  an  alternate  phrase
+       file, instead of using the built-in messages.  This allows
+       you to have suck print phrases in another language, or  to
+       allow  you  to  customize the messages without re-building
+       suck.  See below.
+
+       -L
+
+       This option tells suck  to  NOT  log  killed  articles  to
+       suck.killlog.
+
+       -LF filename
+
+       This option allows you to override the built-in default of
+       "suck.killlog" for the file which contains the log entries
+       for killed articles.
+
+       -LL
+
+       This option tells suck to create long log entries for each
+       killed article.  The long entry  contains  the  short  log
+       entry and the header for the killed message.
+
+       -LS
+
+       This  option  tells  suck  to create short log entries for
+       each killed article.  The short entry contains which group
+       and which pattern was matched, as well as the MsgID of the
+       killed article.
+
+       -M
+
+       This option tells suck to send the "mode  reader"  command
+       to  the remote server.  If you get an invalid command mes-
+       sage immediately after the welcome announcement, then  try
+       this option.
+
+       -n
+
+       This  option tells suck to use the article number vice the
+       MsgId to retrieve the articles.  This option is supposedly
+       less  harsh  on  the remote server.  It can also eliminate
+       problems if your ISP ages off  articles  quickly  and  you
+       frequently get "article not found" errors.
+
+       -N port_number
+
+       This  option tells suck to use an alternate NNRP port num-
+       ber when connecting to the host, instead of  the  default,
+       119.
+
+       -O
+
+       This  option  tells  suck  to  skip the first article upon
+       restart.  This is used whenever there is a problem with an
+       article on the remote server.  For some reasons, some NNTP
+       servers, when they have a problem with a particular  arti-
+       cle, they time out.  Yet, when you restart, you're back on
+       the same article, and you time  out  again.   This  option
+       tells suck to skip the first article upon restart, so that
+       you can get the rest of the articles.
+
+       -p extension
+
+       This extension is added to all files so that you can  have
+       multiple  site  feeds.   For  example,  if  you specify -p
+       .dummy, then suck looks  for  sucknewsrc.dummy,  suckkill-
+       file.dummy,  etc, and creates its temp files with the same
+       extension.  This will allow you  to  keep  multiple  suck-
+       newsrc files, one for each site.
+
+       -q
+
+       This  option tells suck to not display the BPS and article
+       count messages during download.  Handy when  running  suck
+       unattended, such as from a crontab.
+
+       -R
+
+       This  option  tells  suck  to  skip a rescan of the remote
+       newserver upon a restart.  The default is  to  rescan  the
+       newserver for any new articles whenever suck runs, includ-
+       ing restarts.
+
+       -s | -S filename
+
+       These options will send all status messages (normally dis-
+       played  on  stdout), to an alternate file.  The lower case
+       version, -s, will send the status  messages  to  the  com-
+       piled-in default defined in suck_config.h.  The default is
+       /dev/null, so no status messages will be  displayed.   The
+       upper  case  version, -S, requires the filename parameter.
+       All status messages will then be sent to this file.
+
+       -T timeout
+
+       This option overrides the compiled-in TIMEOUT value.  This
+       is  how  long  suck  waits  for  data from the remote host
+       before timing out and aborting.
+
+       -u
+
+       This option tells suck to send the AUTHINFO  USER  command
+       immediately upon connect to the remote server, rather than
+       wait for a request for authorization.  You must supply the
+       -U and -P options when you use this option.
+
+       -U userid
+
+       -P password
+
+       These  two  options let you specify a userid and password,
+       if your NNTP server requires them.
+
+       -V
+
+       This option will cause suck to print out the version  num-
+       ber and then exit.
+
+       -w pause_timer pause_nr_msgs
+
+       This  option  allows  you  to slow down suck while pulling
+       articles.  If you send suck a predefined  signal  (default
+       SIGUSR1,  see  suck_config.h),  suck will swap the default
+       pause options (if specified by the -W  option),  with  the
+       values  from  this option.  For example, you run suck with
+       -w 2 2, and you send suck a  SIGUSR1  (using  kill),  suck
+       will  then  pause  2  seconds between every other message,
+       allowing the server to "catch its breath."   If  you  send
+       suck  another SIGUSR1, then suck will put back the default
+       pause options.  If no pause options were specified on  the
+       command  line  (you  omitted -W), then suck will return to
+       the default full speed pull.
+
+       -W pause_time pause_nr_msgs
+
+       This option tells suck to pause between  the  download  of
+       articles.   You need to specify how long to pause (in sec-
+       onds), and how often to pause (every X  nr  of  articles).
+       Ex:  -W  10  100  would cause suck to pause for 10 seconds
+       every 100 articles.  Why would you want to do this?   Suck
+       can  cause  heavy loads on a remote server, and this pause
+       allows the server to "catch its breath."
+
+       -x
+
+       This option tells suck to not check  the  Message-IDs  for
+       the  ending  >  character.   This option is for brain dead
+       NNTP servers that truncate  the  XHDR  information  at  72
+       characters.
+
+       -z
+
+       This  option tells suck to bypass the normal deduping pro-
+       cess.  This is  primarily  for  slow  machines  where  the
+       deduping takes longer than the download of messages would.
+       Not recommended.
+
+
+LONG OPTION EQUIVALENTS
+              -a  --always_batch
+              -bi --batch-inn
+              -br --batch_rnews
+              -bl --batch_lmove
+              -bf --batch_innfeed
+              -bp --batch_post
+              -c  --cleanup
+              -dt --dir_temp
+              -dd --dir_data
+              -dm --dir_msgs
+              -e  --def_error_log
+              -h  --host
+              -hl --localhost
+              -k  --kill_no_postfix
+              -l  --language_file
+              -m  --multifile
+              -n  --number_mode
+              -p  --postfix
+              -q  --quiet
+              -r  --rnews_size
+              -s  --def_status_log
+              -w  --wait_signal
+              -x  --no_chk_msgid
+              -z  --no_dedupe
+              -A  --active
+              -AL --read_active
+              -B   --pre-batch
+              -C  --reconnect
+              -D  --debug
+              -E  --error_log
+              -H  --no_history
+              -K  --killfile
+              -L  --kill_log_none
+              -LS --kill_log_short
+              -LL --kill_log_long
+              -M  --mode_reader
+              -N  --portnr
+              -O --skip_on_restart
+              -P  --password
+              -R  --no_rescan
+              -S  --status_log
+              -T  --timeout
+              -U  --userid
+              -V  --version
+              -W  --wait
+
+
+DESCRIPTION
+MODE 1 - stdout mode
+              %suck
+              %suck myhost.com
+
+       Suck grabs news from an NNTP server and sends the articles
+       to  stdout.  Suck  accepts as argument the name of an NNTP
+       server or if you don't give an argument it will  take  the
+       environment  variable  NNTPSERVER.  You  can  redirect the
+       articles to a file or compress them on the fly like  "suck
+       server.domain  | gzip -9 > output.gz".  Now it's up to you
+       what you do with the articles.  Maybe you have the  output
+       already on your local machine because you used a slip line
+       or you still have to transfer the  output  to  your  local
+       machine.
+
+MODE 2 - Multifile mode
+              %suck -m
+              %suck myhost.com -m
+
+       Suck  grabs news from an NNTP server and stores each arti-
+       cle in a separate file.  They are stored in the  directory
+       specified  in  suck_config.h  or  by  the -dm command line
+       option.
+
+MODE 3 - Batch mode
+              %suck -b[irlf] batchfile
+              or %suck -bp -hl localhost
+              %suck myhost.com -b[irlf] batchfile
+
+       Suck will grab news articles from an NNTP server and store
+       them  into  files,  one for each article (Multifile mode).
+       The location of the files  is  based  on  the  defines  in
+       suck_config.h and the command line -dm.  Once suck is done
+       downloading the articles, it will build a batch file which
+       can  be  processed  by either innxmit or rnews, or it will
+       call  lmove  to  put   the   files   directly   into   the
+       news/group/number format.
+
+       -bi - build batch file for innxmit.  The articles are left
+       intact, and a batchfile is built with a one-up listing  of
+       the  full  path  of  each  article.   Then  innxmit can be
+       called:
+
+              %innxmit localhost batchfile
+
+       -bl - suck will  call  lmove  to  put  the  articles  into
+       news/group/number  format.   You  must provide the name of
+       the configuration file on the command line.  The following
+       arguments from suck are passed to lmove:
+
+              The  configuration  file  name  (the batchfile name
+              provided with this option)
+              The directory specified for articles (-dm or built-
+              in default).
+              The  errorlog  to log errors to (-e or -E), if pro-
+              vided on the command line.
+              The phrases file (-l), if provided on  the  command
+              line.
+              The  Debug option, if provided on the command line.
+
+       -br - build batch file for rnews.  The articles  are  con-
+       catenated  together, with the #!rnews size article separa-
+       tor.  This can the be fed to rnews:
+
+              %rnews -S localhost batchfile
+
+       -r filesize  specify maximum batch file  size  for  rnews.
+       This  option  allows  you to specify the maximum size of a
+       batch file to  be  fed  to  rnews.   When  this  limit  is
+       reached,  a new batch file is created AFTER I finish writ-
+       ing the current article to the old batch file.  The second
+       and  successive  batch  files  get  a 1 up sequence number
+       attached to the file name specified with  the  -br.   Note
+       that  since I have to finish writing out the current arti-
+       cle after reaching the limit, the max file  size  is  only
+       approximate.
+
+       -bf - build a batch file for innfeed.  This batchfile con-
+       tains the MsgID and full path of each article.   The  main
+       difference between this and the innxmit option is that the
+       innfeed file is built as the articles are  downloaded,  so
+       that  innfeed can be posting the articles, even while more
+       articles are downloaded.
+
+       -bp - This option tells suck to build a  batch  file,  and
+       post  the  articles  in  that  batchfile  to the localhost
+       (specified with the -hl option).   This  option  uses  the
+       IHAVE command to post all downloaded articles to the local
+       host.  The batch file is called suck.post, and is  put  in
+       the temporary directory (-dt).  It is deleted upon comple-
+       tion, as are the successfully  posted  articles.   If  the
+       article  is  not  wanted by the server (usually because it
+       already exists on the server, or it is too old), the arti-
+       cle  is  also deleted.  If other errors occur, the article
+       is NOT deleted.  With the following command line, you  can
+       download  and  post  articles  without worrying if you are
+       using INND or CNEWS.
+
+              %suck news.server.com -bp -hl localhost -A -c
+
+
+SUCK ARGUMENT FILE
+       If you specify @filename on the command  line,  suck  will
+       read from filename and parse it for any arguments that you
+       wish to pass to suck.  You specify the same  arguments  in
+       this  file  as  you do on the command line.  The arguments
+       can be on one line, or spread  out  among  more  than  one
+       line.  You may also use comments.  Comments begin with '#'
+       and go to the end of a line.  All command  line  arguments
+       override arguments in the file.
+
+              # Sample Argument file
+              -bi batch # batch file option
+              -M   # use mode reader option
+
+
+SUCKNEWSRC
+       Suck  looks for a file sucknewsrc to see what articles you
+       want and which you already received. The format  of  suck-
+       newsrc  is  very  simple. It consists of one line for each
+       newsgroup.  The line contains two or  three  fields.   The
+       first  field  is the name of the group.  The next field is
+       the highest article number that was in the group when that
+       group  was  last  downloaded.   The  third field, which is
+       optional, limits the number of articles which can be down-
+       loaded at any given time.  If there are more articles than
+       this number, only the newest are downloaded.  If the third
+       field  is  0,  then  no  new messages are downloaded.  The
+       fields are separated by a space.
+
+              comp.os.linux.announce 1 [ 100 ]
+
+       When suck is finished,  it  creates  the  file  suck.newrc
+       which contains the new sucknewsrc with the updated article
+       numbers.
+
+       To add a new newsgroup, just stick it in sucknewsrc,  with
+       a  highest  article  number of -1 (or any number less than
+       0).  Suck will then get the newest X  number  of  messages
+       for  that newsgroup.  For example, a -100 would cause suck
+       to download the newest 100 articles for that newsgroup.
+
+       To tell suck to skip a newsgroup, put a  #  as  the  first
+       character of a line.
+
+
+SUCKKILLFILE and GROUP KEEP/KILLFILES
+       To  use  the  killfile/keepfile  routines,  uncomment  the
+       #define KILLFILE line in suck_config.h.   Then,  if  suck-
+       killfile  exists,   the  headers  of  all articles will be
+       scanned and the article downloaded or not,  based  on  the
+       parameters  in  the files.  If no logging option is speci-
+       fied (see the -L options above),  then  the  long  logging
+       option is used.
+
+       Comments  lines  are  allowed in the killfiles.  A comment
+       line has a "#" in the first  position.   Everything  on  a
+       comment line is ignored.
+
+       Here's how the whole keep/delete package works.  All arti-
+       cles are checked against the master kill  file  (suckkill-
+       file).   If  an  article  is not killed by the master kill
+       file, then its group line is  parsed.   If  a  group  file
+       exists  for  one of the groups then the article is checked
+       against that group file.  If it matches a keep file,  then
+       it  is  kept, otherwise it is flagged for deletion.  If it
+       matches a delete file, then it is  flagged  for  deletion,
+       otherwise it is kept.  This is done for every group on the
+       group line.
+
+       NOTES: With the exception of the USE_EXTENDED_REGEX param-
+       eter,  none of these parameters are passed from the master
+       killfile to the individual group file.  Each  killfile  is
+       separate  and  independant.   Also,  each  search is case-
+       insensitive  unless  specifically  specified  by  starting
+       search string with the QUOTE character (see below).
+
+PARAMETERS
+              LOWLINES=#######
+              HILINES=#######
+              NRGRPS=####
+              QUOTE=c
+              NON_REGEX=c
+              GROUP=keep   groupname  filename   OR  GROUP=delete
+              groupname filename
+              PROGRAM=pathname
+              TIEBREAKER_DELETE
+              GROUP_OVERRIDE_MASTER
+              USE_EXTENDED_REGEX
+              HEADER:
+              Any Valid Header Line:
+              BODY:
+              BODYSIZE>
+              BODYSIZE<
+
+KILL/KEEP Files Parameters
+       HILINES= Match any article longer than the number of lines
+       specified.
+
+       LOWLINES=  Match  any  article  shorter than the number of
+       lines specified.
+
+       NRGRPS= This line will match any article  which  has  more
+       groups  than the number specified.  Typically this is used
+       in a killfile to prevent  spammed  articles.   (A  spammed
+       article is one that is posted to many many groups, such as
+       those get-rich quick schemes, etc.)
+
+       HEADER: Any Valid Header Line: Suck allows you to scan any
+       single header line for a particular pattern/string, or you
+       may scan the entire article header.  To scan an individual
+       line,  just  specify it, for example to scan the From line
+       for boby@pixi.com, you would put
+
+              From:boby@pixi.com
+
+       Note that the header line EXACTLY  matches  what  is  con-
+       tained  in  the  article.   To scan the Followup-To: line,
+       simply put item must be on a separate line, eg:
+              From:boby@xxx
+              From:nerd@yyy
+              Subject:suck
+       The parameter HEADER: is a special case of the above.   If
+       you  use  the HEADER: parameter, then the entire header is
+       searched for the item.  You are allowed  multiple  HEADER:
+       lines in each killfile.
+
+       When  suck  searches for the pattern, it only searches for
+       what follows the :, and spaces following the : are signif-
+       icant.   With  the  above  example "Subject:suck", we will
+       search the Subject header line for the string "suck".   If
+       the  example  had  read  "Subject:  suck", suck would have
+       searched for the string " suck".  Note the extra space.
+
+       If your system has regex() routines on it, then the  items
+       searched  for can be POSIX regular expressions, instead of
+       just strings.   Note  that  the  QUOTE=  option  is  still
+       applied, even to regular expressions.
+
+       BODY:  This  parameter allows you to search the body of an
+       article for text.  Again, if your system has regex(),  you
+       can use regular expressions, and the QUOTE= option is also
+       applied.  You are allowed multiple  BODY:  lines  in  each
+       killfile.   WARNING:   Certain  regex  combinations, espe-
+       cially with .* at the beginning, (eg BODY:.*jpg), in  com-
+       bination  with large articles, can cause the regex code to
+       eat massive amounts of CPU, and suck will seem like it  is
+       doing nothing.
+
+       BODYSIZE> This parameter will match an article if the size
+       of its body (not including the  header)  is  greater  than
+       this parameter.  The size is specified in bytes.
+
+       BODYSIZE< This parameter will match an article if the size
+       of its body, is less than this  parameter.   The  size  is
+       specified in bytes.
+
+       QUOTE=  This  item  specifies the character that defines a
+       quoted string.  The default for this is  a  checked  as-is
+       (case  significant).   If  an item does not start with the
+       QUOTE character, then the item is checked with out  regard
+       to case.
+
+       NON_REGEX= This items specifies the character that defines
+       a non-regex string.  The default for this is a %.   If  an
+       item starts with the NON_REGEX character, then the item is
+       never  checked  for  regular  expressions.   If  the  item
+       doesn't start with the QUOTE character, then suck tries to
+       determine if it is a regular expression, and if it is, use
+       regex()  on it.  This item is so that you can tell suck to
+       treat strings like "$$$$ MONEY $$$$" as  non-regex  items.
+       IF  YOU  USE  BOTH  QUOTE  and  NON_REGEX  characters on a
+       string, the NON_REGEX character MUST appear first.
+
+       GROUP= This line allows you  to  specify  either  keep  or
+       delete  parameters  on  a group by group basis.  There are
+       three parts to this line.  Each part of this line must  be
+       separated  by exactly one space.  The first part is either
+       "keep" or "delete".  If it is keep, then only articles  in
+       that  group  which  match the parameters in the group file
+       are downloaded.  If it is delete, articles in  that  group
+       which match the parameters are not downloaded.  The second
+       part, the group name is the full group name  for  articles
+       to check against the group file.   The group name may con-
+       tain an * as the last character, to match multiple groups,
+       eg:          "comp.os.linux.*"          would        match
+       comp.os.linux.announce, comp.os.linux.answers, etc..   The
+       third  part  specifies  the  group file which contains the
+       parameters to check the articles against.  Note,  that  if
+       you  specified  a  postfix  with  the -p option, then this
+       postfix is attached to the name  of  the  file  when  suck
+       looks for it, UNLESS you use the -k option above.
+
+       GROUP_OVERRIDE_MASTER  This  allows  you  to  override the
+       default behavior of the master kill file.  If this  option
+       is  in  the  master  kill file, then even if an article is
+       flagged for deletion  by  the  master  kill  file,  it  is
+       checked  against the group files.  If the group files says
+       to not delete it, then the article is kept.
+
+       TIEBREAKER_DELETE This option allows you to  override  the
+       built-in  tie-breaker default.  The potential exists for a
+       message to be flagged by  one  group  file  as  kept,  and
+       another  group file as killed.  The built-in default is to
+       then keep the message.  The TIEBREAKER_DELETE option  will
+       override that, and caused the article to be deleted.
+
+       USE_EXTENDED_REGEX  This option tells suck to use extended
+       regular expressions vice standard regular expressions.  It
+       may  used in the master killfile, in which case it applies
+       to all killfiles, or in an individual killfile,  where  it
+       only applies to the parameters that follow it in the kill-
+       file.
+
+       PROGRAM= This line allows suck to call an external program
+       to  check  each article.  You may specify any arguments in
+       addition to the program name on this line.  If  this  line
+       is  in  your  suckkillfile,  all  other lines are ignored.
+       Instead, the headers are passed to the  external  program,
+       and  the  external  program  determines  whether or not to
+       download the article.  Here's how  it  works.   Suck  will
+       fork your program, with stdin and stdout redirected.  Suck
+       will feed the headers to  your  program  thru  stdin,  and
+       expect a reply back thru stdout.  Here's the data flow for
+       each article:
+
+              1. suck will write a 8 byte long string, which rep-
+              resents the length of the header record on stdin of
+              the external program.  Then length is in ascii,  is
+              left-aligned, and ends in a newline (example: "1234
+              \n").
+              2. suck will then write the header on stdin of  the
+              external program.
+              3.  suck  will wait for a 2 character response code
+              on stdout.  This response code is either  "0\n"  or
+              "1\n"  (NOT BINARY ZERO OR ONE, ASCII ZERO OR ONE).
+              If the return code is zero, suck will download  the
+              article, if it is one, suck won't.
+              4.  When  there  are  no  more articles, the length
+              written down (for step 1) will be  zero  (again  in
+              ascii  "0        \n").  Suck will then wait for the
+              external program to exit before continuing on.  The
+              external program can do any clean up it needs, then
+              exit.  Note:  suck  will  not  continue  processing
+              until the external program exits.
+
+
+       All  parameters are valid in both the master kill file and
+       the group files, with the  exception  of  GROUP,  PROGRAM.
+       TIEBREAKER_DELETE,  and  GROUP_OVERRIDE_MASTER.  These are
+       only valid in the master kill file.
+
+SUCKOTHERMSGS
+       If suckothermsgs exists, It must  contain  a  one-per-line
+       listing  of  Message-ID's,  with  the  <> included.  These
+       articles will then be downloaded, in addition to any arti-
+       cles  generated  by  processing the sucknewsrc file.  This
+       can be used to get articles in other groups, or  to  down-
+       load  an  article that was killed.  These articles ARE NOT
+       processed through the kill articles routines.
+
+FOREIGN LANGUAGE PHRASES
+       If  the  -l  phrases  option  is  specified  or  the  file
+       /usr/local/lib/suck.phrases   (defined  in  suck_config.h)
+       exists, then suck will load an alternate  language  phrase
+       file,  and use it for all status & error messages, instead
+       of the built-in defaults.  The command line overrides  the
+       build  in  default,  if both are present.  The phrase file
+       contains all messages used by suck, rpost,  testhost,  and
+       lmove, each on a separate line and enclosed in quotes.  To
+       generate a sample phrase file, run make phrases  from  the
+       command line.  This will create "phrases.engl", which is a
+       list of the  default  phrases.   Simply  edit  this  file,
+       changing  the  english  phrases  to  the  language of your
+       choosing, being  sure  to  keep  the  phrases  within  the
+       quotes.   These  phrases  may  contain  variables to print
+       items provided by the program, such  as  hostname.   Vari-
+       ables  are designated by %vN% where N is a one-up sequence
+       per phrase.  These variables may exist in any order on the
+       phrase line, for example,
+              "Hello, %v1%, welcome to %v2%"     or
+              "Welcome to %v2%, %v1%"
+       are  both valid phrases.  Phrases may contain,  \n, \r, or
+       \t to print a newline, carriage return,  or  tab,  respec-
+       tively.   Note  that  the first line of the phrase file is
+       the current version number.  This is checked  against  the
+       version  of suck running, to be sure that the phrases file
+       is the correct version.
+
+       If you modify any of the  source  code,  and  add  in  new
+       phrases,  you  will  need to regenerate phrases.h, so that
+       everything works correctly.  To recreate,  just  run  make
+       phrases.h from the command line.
+
+SIGNAL HANDLING
+       Suck  accepts  two signals, defined in suck_config.h.  The
+       first signal (default SIGTERM) will cause Suck  to  finish
+       downloading  the  current article, batch up whatever arti-
+       cles were downloaded, and exit, without an error.
+
+       The second signal (default SIGUSR1) will cause suck to use
+       the pause values defined with the -w option (see above).
+
+
+EXIT CODES
+       Suck will exit with the following return codes:
+              0 = success
+              1 = no articles available for download.
+              2  =  suck got an unexpected answer to a command it
+              issued to the remote server.
+              3 = the -V option was used.
+              4 = suck was unable to perform  NNTP  authorization
+              with the remote server.
+              -1 = general error.
+
+HISTORY
+              Original Author - Tim Smith (unknown address)
+              Maintainers -
+              March 1995 - Sven Goldt (goldt@math.tu-berlin.de)
+              July 1995  - Robert A. Yetman (boby@pixi.com)
+
+SEE ALSO
+       testhost(1), rpost(1), lpost(1).
+
