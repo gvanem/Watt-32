@@ -314,7 +314,7 @@
   static int get_city_from_ip (struct in_addr ip, char *city, size_t city_size);
 
 #elif defined(USE_IP2LOCATION)
-  #include "IP2Location.h"
+  #include "IP2Loc.h"
 
   static int init_geoip (const char *argv0);
   static int get_country_from_ip (struct in_addr addr,
@@ -492,7 +492,7 @@ struct in_addr last_addr;
  *   debug_mode >= 2 use GeoLiteCountry.dat + GeoLiteCity.dat
  *
  *  and if '-DUSE_IP2LOCATION' is defined:
- *    use only 'IP2Location.bin' in directory of 'tracert.exe' for both
+ *    use only 'IP2Loc.bin' in directory of 'tracert.exe' for both
  *    country and city information.
  */
 int get_country = 0;
@@ -1290,7 +1290,7 @@ const char *GetAddress (struct in_addr addr)
 
   if (!nflag && addr.s_addr)
   {
-    struct hostent *hp = gethostbyaddr ((char*)&addr,sizeof(addr),AF_INET);
+    struct hostent *hp = gethostbyaddr ((char*)&addr, sizeof(addr), AF_INET);
 
     if (hp)
     {
@@ -1410,7 +1410,7 @@ int init_geoip (const char *argv0)
 #endif
 
 #else   /* USE_IP2LOCATION */
-  snprintf (file1, sizeof(file1), "%s\\IP2Location.bin", home_dir);
+  snprintf (file1, sizeof(file1), "%s\\IP2Loc.bin", home_dir);
   file2[0] = '\0';
 #endif
 
