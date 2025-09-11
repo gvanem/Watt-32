@@ -231,7 +231,7 @@ BOOL get_file_version (const char *file_name,
   DWORD  ver_info_size;         /* Size of version information block */
   DWORD  err, ver_hnd = 0;      /* An 'ignored' parameter, always '0' */
   UINT   bytes_read;
-  char   sub_block[64];
+  char   sub_block [64];
   void  *res_buf, *vff_info;
 
   const struct LANG_AND_CODEPAGE {
@@ -284,7 +284,8 @@ BOOL get_file_version (const char *file_name,
   /* Create the file version string for the first (i.e. the only
    * one) language.
    */
-  sprintf (sub_block, "\\StringFileInfo\\%04x%04x\\FileVersion",
+  snprintf (sub_block, sizeof(sub_block),
+            "\\StringFileInfo\\%04x%04x\\FileVersion",
            lang_info->language, lang_info->code_page);
 
   /* Retrieve the file version string for the language. 'res_buf' will
