@@ -1163,11 +1163,28 @@ TARGETS = $(STAT_LIB)
 all: $(PKT_STUB) $(OBJPATH)cflags.h $(OBJPATH)cflagsbf.h $(TARGETS)
 	@echo All done
 
+
+#
+# Using MSVC's 'lib' for High-C .obj-files do not work:
+#   lib -nologo -out:../lib/wattcphf.lib @build/highc/lib.arg
+#   build\highc\accept.obj : fatal error LNK1107: invalid or corrupt file: cannot read at 0x2B68
+#
+# So on Windows this step should be done inside DOSBox-X or use OpenWatcom's 'lib' program.
+#
+WC_LIB_FOR_HIGHC ?= 1
+WC_LIB = $(realpath $(WATCOM))/binnt/lib
+
 $(STAT_LIB): $(OBJS)
 ifeq ($(OS),Windows_NT)
-	@echo -nologo -machine:x86 > $(OBJPATH)lib.arg
-	@echo $(OBJS)             >> $(OBJPATH)lib.arg
+  ifeq ($(WC_LIB_FOR_HIGHC),1)
+	@echo -machine:IX86  > $(OBJPATH)lib.arg
+	@echo $(OBJS)       >> $(OBJPATH)lib.arg
+	$(WC_LIB) -nologo -out:$(STAT_LIB) @$(OBJPATH)lib.arg
+  else
+	@echo -machine:x86          > $(OBJPATH)lib.arg
+	@echo $(OBJS)              >> $(OBJPATH)lib.arg
 	lib -nologo -out:$(STAT_LIB) @$(OBJPATH)lib.arg
+  endif
 else
 	@echo -nowarn -nobackup -twocase -pagesize 32 > $(OBJPATH)lib.arg
 	@echo -replace $(OBJS)                       >> $(OBJPATH)lib.arg
