@@ -5,12 +5,7 @@
 #  Target:
 #     GNU C 2.7+  (djgpp2 Dos extender)
 #
-
-.SUFFIXES: .exe .pro
-
-# Set to 1 to link to import library (DXE3 module)
-#
-DYNAMIC = 0
+OBJ_DIR = djgpp.obj
 
 # Set to 1 to make a profiling version
 #
@@ -38,25 +33,22 @@ MAKE_MAP = 0
 
 #
 # Add support for Geo-location in the 'tracert.c' program:
-#   GEOIP_LIB = 2 ==> compile with 'ip2location.c'
+#   GEOIP_LIB = 2 ==> compile with 'IP2Loc.c'
 #   GEOIP_LIB = 1 ==> compile with 'geoip.c'
 #   GEOIP_LIB = 0 ==> compile with neither.
 #
 GEOIP_LIB = 2
 
+#
+# In-case some variables are unset, let gnumake warn about them.
+#
+MAKEFLAGS += --warn-undefined-variables
+
 prefix = /dev/env/DJDIR/net/watt
 
 INC_DIR = ../inc
 
-ifeq ($(DYNAMIC),1)
-  CFLAGS   = -DDYNAMIC
-  USE_YAMD = 0
-  PROFILE  = 0
-  WATTLIB  = ../lib/impwatt.a
-else
-  WATTLIB = ../lib/libwatt.a
-  EXTRAS  = tiny.c
-endif
+EXTRAS = tiny.c
 
 CC      = gcc
 CFLAGS += -Wall -W -Wno-sign-compare -g -O2 -I$(INC_DIR) #-s # strip symbols from .exe
@@ -84,15 +76,21 @@ else
   LINK = $(CC)
 endif
 
-PROGS = ping.exe     popdump.exe  rexec.exe   tcpinfo.exe cookie.exe \
-        daytime.exe  dayserv.exe  finger.exe  host.exe    lpq.exe    \
-        lpr.exe      ntime.exe    ph.exe      stat.exe    htget.exe  \
-        revip.exe    tracert.exe  tcptalk.exe vlsm.exe    whois.exe  \
-        bping.exe    uname.exe    blather.exe lister.exe  wol.exe    \
-        eth-wake.exe ident.exe    country.exe
+SOURCES = ping.c     popdump.c  rexec.c   tcpinfo.c cookie.c \
+          daytime.c  dayserv.c  finger.c  host.c    lpq.c    \
+          lpr.c      ntime.c    ph.c      stat.c    htget.c  \
+          revip.c    tracert.c  tcptalk.c vlsm.c    whois.c  \
+          bping.c    uname.c    blather.c lister.c  wol.c    \
+          eth-wake.c ident.c    country.c
 
-all: $(PROGS)
-	@echo Protected-mode (djgpp2) binaries done
+OBJECTS  = $(addprefix $(OBJ_DIR)/, $(SOURCES:.c=.o) tiny.o)
+PROGRAMS = $(SOURCES:.c=.exe)
+
+all: $(PROGRAMS)
+	@echo 'Protected-mode (djgpp2) binaries done.'
+
+$(OBJ_DIR):
+	-mkdir $(OBJ_DIR)
 
 ifeq ($(USE_YAMD),1)
   CFLAGS += -DYAMD_VERSION=\"0.32\" -Wl,--wrap,malloc,--wrap,realloc,--wrap,free
@@ -102,20 +100,23 @@ endif
 dxe_tst.exe: dxe_tst.c ../lib/dxe/libwatt.a
 	$(CC) $(CFLAGS) $*.c ../lib/dxe/libwatt.a -o $*.exe
 
-tracert_obj = $(addprefix $(OBJ_DIR)/, tracert.o geoip.o IP2Location.o tiny.o)
+tracert_obj = $(addprefix $(OBJ_DIR)/, tracert.o geoip.o IP2Loc.o tiny.o)
 
 tracert_CFLAGS = -DIS_WATT32 # -DPROBE_PROTOCOL=IPPROTO_TCP
 
 ifeq ($(GEOIP_LIB),1)
   tracert_CFLAGS += -DUSE_GEOIP
-else ifeq ($(GEOIP_LIB),2)
-  tracert_CFLAGS += -DUSE_IP2LOCATION
+else
+  ifeq ($(GEOIP_LIB),2)
+    tracert_CFLAGS += -DUSE_IP2LOCATION
+  endif
 endif
 
 $(tracert_obj): CFLAGS += $(tracert_CFLAGS)
 
-$(OBJ_DIR)/%.o: %.c
+$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 	$(CC) -c $(CFLAGS) -o $@ $<
+	@echo
 
 tracert.exe: $(tracert_obj)
 ifeq ($(DPMI_STUB),1)
@@ -124,30 +125,36 @@ ifeq ($(DPMI_STUB),1)
 else
 	$(call link_EXE, $@, $^, tracert.map)
 endif
-	rm -f $(OBJ_DIR)/geoip.o $(OBJ_DIR)/IP2Location.o
+	rm -f $(OBJ_DIR)/geoip.o $(OBJ_DIR)/IP2Loc.o
 	@echo
 
 
 %.exe: %.c ../lib/libwatt.a
 ifeq ($(PROFILE),1)
-	$(LINK) $(CFLAGS) -pg $*.c $(EXTRAS) $(WATTLIB) -o $*.pro
+	$(LINK) $(CFLAGS) -pg $*.c $(EXTRAS) ../lib/libwatt.a -o $*.pro
 	stubify $*.pro
         #
         # run "prog.exe [args]" as usual, then generate profile by
         # "gprof prog.pro > prog.res"
         #
-else ifeq ($(DPMI_STUB),1)
-	$(LINK) $(CFLAGS) -s $*.c $(EXTRAS) $(WATTLIB) -o $*
+else
+  ifeq ($(DPMI_STUB),1)
+	$(LINK) $(CFLAGS) -s $*.c $(EXTRAS) ../lib/libwatt.a -o $*
 	@copy /b $(subst /,\,$(DJDIR))\bin\cwsdstub.exe + $* $*.exe
 	@del $*
-else
-	$(LINK) $(CFLAGS) $*.c $(EXTRAS) $(WATTLIB) -o $*.exe
+  else
+	$(LINK) $(CFLAGS) $*.c $(EXTRAS) ../lib/libwatt.a -o $*.exe
+  endif
 endif
 
-$(PROGS): $(WATTLIB)
+$(PROGRAMS): ../lib/libwatt.a
 
 clean:
-	rm -f *.o $(PROGS)
+	rm -f $(PROGRAMS:.exe=.map)
+	rm -fr $(OBJ_DIR)
+
+vclean realclean: clean
+	rm -f $(PROGRAMS)
 
 install: ping.exe tcpinfo.exe
 	-mkdir -p "$(prefix)/bin"

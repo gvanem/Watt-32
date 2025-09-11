@@ -24,7 +24,7 @@ USE_Wall ?= 1
 
 #
 # Add support for Geo-location in the 'tracert.c' program:
-#   GEOIP_LIB = 2 ==> compile with 'ip2location.c'
+#   GEOIP_LIB = 2 ==> compile with 'IP2Loc.c'
 #   GEOIP_LIB = 1 ==> compile with 'geoip.c'
 #   GEOIP_LIB = 0 ==> compile with neither.
 #
@@ -92,15 +92,13 @@ PROGRAMS = $(SOURCES:.c=.exe)
 all: $(PROGRAMS)
 	@echo 'Protected-mode (djgpp2) binaries done.'
 
-$(OBJECTS): $(OBJ_DIR)
-
 $(OBJ_DIR):
 	-mkdir $(OBJ_DIR)
 
 dxe_tst.exe: $(OBJ_DIR)/dxe_tst.o ../lib/dxe/libwatt.a
 	$(call link_EXE, $@, $^, $(@:.exe=.map))
 
-tracert_obj = $(addprefix $(OBJ_DIR)/, tracert.o geoip.o IP2Location.o tiny.o)
+tracert_obj = $(addprefix $(OBJ_DIR)/, tracert.o geoip.o IP2Loc.o tiny.o)
 
 tracert_CFLAGS = -DIS_WATT32 # -DPROBE_PROTOCOL=IPPROTO_TCP
 
@@ -112,7 +110,7 @@ endif
 
 $(tracert_obj): CFLAGS += $(tracert_CFLAGS)
 
-$(OBJ_DIR)/%.o: %.c
+$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 	$(CC) -c $(CFLAGS) -o $@ $<
 	@echo
 
@@ -123,7 +121,7 @@ ifeq ($(DPMI_STUB),1)
 else
 	$(call link_EXE, $@, $^, tracert.map)
 endif
-	rm -f $(OBJ_DIR)/geoip.o $(OBJ_DIR)/IP2Location.o
+	rm -f $(OBJ_DIR)/geoip.o $(OBJ_DIR)/IP2Loc.o
 	@echo
 
 
@@ -134,6 +132,8 @@ ifeq ($(DPMI_STUB),1)
 else
 	$(call link_EXE, $@, $^, $(@:.exe=.map))
 endif
+
+$(PROGRAMS): ../lib/libwatt.a
 
 clean:
 	rm -f $(PROGRAMS:.exe=.map)
