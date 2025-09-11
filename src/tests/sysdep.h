@@ -136,7 +136,7 @@
 /*
  * Hacks to shut-up Cygwin x64.
  */
-#if !defined(__CYGWIN__) || !defined(__USE_W32_SOCKETS)
+#if (!defined(__CYGWIN__) && !defined(__LP64__)) || !defined(__USE_W32_SOCKETS)
   #define __ms_u_long   u_long
   #define __ms_timeval  timeval
 #endif
