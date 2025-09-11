@@ -496,7 +496,7 @@ static BOOL pkt_win_init (void)
  */
 static const char *_list_lookup (DWORD value, const struct search_list *list, int num)
 {
-  static char buf [sizeof("_IF_TYPE_DIGITAL_WRAPPER_OVERHEAD_CHANNEL")+1]; /* Longest return */
+  static char buf [sizeof("_IF_TYPE_DIGITAL_WRAPPER_OVERHEAD_CHANNEL") + 1]; /* Longest return */
 
   while (num > 0 && list->name)
   {
@@ -529,6 +529,31 @@ static const char *get_wsock_err (void)
   return (buf);
 }
 #endif
+
+/**
+ * \todo Decode `WLAN_BSS_ENTRY::usCapabilityInformation` bits.
+ */
+static const char *get_capability_info (USHORT capa)
+{
+  static char buf [100];
+  char *p   = buf;
+  char *end = p + sizeof(buf);
+
+  if (capa & 0x01)
+     p += snprintf (p, end - p, "ESS,");
+  if (capa & 0x02)
+     p += snprintf (p, end - p, "IBSS,");
+  if (capa & 0x04)
+     p += snprintf (p, end - p, "CF-pollable,");
+  if (capa & 0x08)
+     p += snprintf (p, end - p, "CF-poll req,");
+  if (capa & 0x10)
+     p += snprintf (p, end - p, "Privacy,");
+
+  if (p > buf)
+     p[-1] = '\0';
+  return (buf);
+}
 
 static const char *get_guid_str (const GUID *guid)
 {
@@ -3377,7 +3402,7 @@ static void print_wlan_networklist (const WLAN_AVAILABLE_NETWORK_LIST *wlist)
 
     (*_printf) ("    # Phy types supported:  %lu: %s\n",
                 (u_long)bss->uNumberOfPhyTypes,
-                get_phy_types(bss->uNumberOfPhyTypes,bss->dot11PhyTypes));
+                get_phy_types(bss->uNumberOfPhyTypes, bss->dot11PhyTypes));
 
     if (bss->wlanSignalQuality == 0)
          dBm = -100;
@@ -3707,12 +3732,12 @@ static void print_wlan_bss_list (const WLAN_BSS_LIST *bss_list)
                 bss->uPhyId, _list_lookup(bss->dot11BssType, bss_types, DIM(bss_types)));
 
     (*_printf) ("        Phy type:         %s\n"
-                "        Capability:       0x%04X\n"
+                "        Capability:       0x%04X; %s\n"
                 "        Beacon-period:    %u ms, Time-stamp: %" U64_FMT "\n",
-                get_phy_types(1,&bss->dot11BssPhyType),
-                bss->usCapabilityInformation,
-                (bss->usBeaconPeriod*1024)/1000,
-                bss->ullTimestamp/1024);
+                get_phy_types(1, &bss->dot11BssPhyType),
+                bss->usCapabilityInformation, get_capability_info(bss->usCapabilityInformation),
+                (bss->usBeaconPeriod * 1024) / 1000,
+                bss->ullTimestamp / 1024);
 
     MHz = bss->ulChCenterFrequency / 1000;  /* kHz -> MHz */
     chan = convert_freq_to_ch (MHz);
