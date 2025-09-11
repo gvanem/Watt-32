@@ -24,13 +24,16 @@ MAKEFLAGS += --warn-undefined-variables
 ifneq ($(DJGPP_PREFIX),)
   BIN_PREFIX     = $(DJGPP_PREFIX)-
   MACHINE_PREFIX = i586-pc-msdosdjgpp
-else ifeq ($(OS),Windows_NT)
-  $(error Define a DJGPP_PREFIX to invoke the djgpp cross compiler).
 else
+  ifeq ($(OS),Windows_NT)
+    $(error Define a DJGPP_PREFIX to invoke the djgpp cross compiler).
+  endif
+
   #
   # A 'gcc -dumpmachine' on plain DOS, should print 'djgpp'.
   #
-  MACHINE_PREFIX  = djgpp
+  MACHINE_PREFIX = djgpp
+  BIN_PREFIX     =
 endif
 
 #
