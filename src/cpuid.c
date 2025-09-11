@@ -48,7 +48,7 @@ static char vendor_str [13];
    */
   static void TRACE (int level, const char *fmt, ...)
   {
-    ARGSUSED (color);
+    ARGSUSED (level);
     ARGSUSED (fmt);
   }
 
@@ -180,7 +180,6 @@ static const char *get_Intel_model (int family, int model, const void *features)
   }
   Intel_model [0] = '?';
   return itoa (model, Intel_model+1, 10);
-  return (NULL);
 }
 
 /*
