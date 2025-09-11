@@ -1174,6 +1174,10 @@ all: $(PKT_STUB) $(OBJPATH)cflags.h $(OBJPATH)cflagsbf.h $(TARGETS)
 WC_LIB_FOR_HIGHC ?= 1
 WC_LIB = $(realpath $(WATCOM))/binnt/lib
 
+#
+# And BTW, the '$(WATCOM)/binnt/dmpobj.exe' program can be used to dump
+# such "Pharlap EZ-OMF" object-files; dmpobj -t build\highc\accept.obj | more
+#
 $(STAT_LIB): $(OBJS)
 ifeq ($(OS),Windows_NT)
   ifeq ($(WC_LIB_FOR_HIGHC),1)
