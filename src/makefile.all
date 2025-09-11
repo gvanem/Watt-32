@@ -1744,12 +1744,14 @@ $(OBJPATH)cflagsbf.h: $(C_ARGS)
 #
 # Preprocess a .c-file and pipe through 'Astyle' to beautify it.
 #
-%.i: %.c
+%.i: %.c FORCE
 	@echo "Preprocessed result of $< with these CFLAGS:"    > $@
 	cat $(C_ARGS)                                          >> $@
 	@echo "----------------------------------------------" >> $@
 	$(CC) -E @$(C_ARGS) $< | astyle >> $@
 	@echo
+
+FORCE:
 
 DEP_REPLACE = sed -e 's/\(.*\)\.o: /\n$$(OBJPATH)\1.o: /' \
                   -e 's@/cygdrive/@:@'
