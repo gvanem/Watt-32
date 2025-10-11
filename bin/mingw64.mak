@@ -82,8 +82,8 @@ gui-test.exe: w32-test.c $(WATT_LIB)
 	$(CC) -DIS_GUI=1 $(CFLAGS) $(LDFLAGS) -Wl,--subsystem,windows -o $@ $^ $(MAPFILE)
 	@echo
 
-tracert.exe: tracert.c geoip.c IP2Location.c $(WATT_LIB)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ tracert.c geoip.c IP2Location.c $(WATT_LIB) $(MAPFILE)
+tracert.exe: tracert.c geoip.c IP2Loc.c $(WATT_LIB)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ tracert.c geoip.c IP2Loc.c $(WATT_LIB) $(MAPFILE)
 	@echo
 
 %.exe: %.c $(WATT_LIB)
@@ -141,5 +141,5 @@ wol.exe:      wol.c
 eth-wake.exe: eth-wake.c
 ident.exe:    ident.c
 country.exe:  country.c
-tracert.exe:  tracert.c geoip.c geoip.h IP2Location.c IP2Location.h
+tracert.exe:  tracert.c geoip.c geoip.h IP2Loc.c IP2Loc.h
 

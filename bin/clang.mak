@@ -35,7 +35,7 @@ USE_STATIC_LIB ?= 0
 
 #
 # Add support for Geo-location in the 'tracert.c' program:
-#   GEOIP_LIB = 2 ==> compile with 'ip2location.c'
+#   GEOIP_LIB = 2 ==> compile with 'IP2Loc.c'
 #   GEOIP_LIB = 1 ==> compile with 'geoip.c'
 #   GEOIP_LIB = 0 ==> compile with neither.
 #
@@ -204,9 +204,9 @@ else ifeq ($(GEOIP_LIB),2)
   TRACERT_CFLAGS += -DUSE_IP2LOCATION
 endif
 
-tracert.exe: tracert.c geoip.c IP2Location.c $(WATT_LIB)
-	$(CC) -c $(TRACERT_CFLAGS) tracert.c geoip.c IP2Location.c
-	$(call link_EXE, $@, tracert.obj geoip.obj IP2Location.obj $(WATT_LIB) $(EX_LIBS))
+tracert.exe: tracert.c geoip.c IP2Loc.c $(WATT_LIB)
+	$(CC) -c $(TRACERT_CFLAGS) tracert.c geoip.c IP2Loc.c
+	$(call link_EXE, $@, tracert.obj geoip.obj IP2Loc.obj $(WATT_LIB) $(EX_LIBS))
 
 %.exe: %.c $(WATT_LIB)
 	$(CC) -c $(CFLAGS) $<
@@ -272,6 +272,6 @@ wol.exe:      wol.c
 eth-wake.exe: eth-wake.c
 ident.exe:    ident.c
 country.exe:  country.c
-tracert.exe:  tracert.c geoip.c geoip.h IP2Location.c IP2Location.h
+tracert.exe:  tracert.c geoip.c geoip.h IP2Loc.c IP2Loc.h
 wol.exe:      wol.c
 

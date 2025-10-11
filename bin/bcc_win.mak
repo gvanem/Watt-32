@@ -48,8 +48,8 @@ gui-test.exe: w32-test.c
 con-test.exe: w32-test.c
       $(CC) -o con-test.exe $(CFLAGS) w32-test.c -l $(WATT_LIB)
 
-tracert.exe: tracert.c geoip.c IP2Location.c
-      $(CC) -o tracert.exe $(CFLAGS) -DUSE_IP2LOCATION -DIS_WATT32 -l $(WATT_LIB) tracert.c geoip.c IP2Location.c
+tracert.exe: tracert.c geoip.c IP2Loc.c
+      $(CC) -o tracert.exe $(CFLAGS) -DUSE_IP2LOCATION -DIS_WATT32 -l $(WATT_LIB) tracert.c geoip.c IP2Loc.c
 
 .c.exe:
      $(CC) -o $*.exe $(CFLAGS) $*.c -l $(WATT_LIB)

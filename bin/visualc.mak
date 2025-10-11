@@ -12,7 +12,7 @@ STATIC_LIB = 0
 
 #
 # Add support for Geo-location in the 'tracert.c' program:
-#   GEOIP_LIB = 2 ==> compile with 'ip2location.c'
+#   GEOIP_LIB = 2 ==> compile with 'IP2Loc.c'
 #   GEOIP_LIB = 1 ==> compile with 'geoip.c'
 #   GEOIP_LIB = 0 ==> compile with neither.
 #
@@ -126,9 +126,9 @@ TRACERT_CFLAGS = $(TRACERT_CFLAGS) -DUSE_GEOIP
 TRACERT_CFLAGS = $(TRACERT_CFLAGS) -DUSE_IP2LOCATION
 !endif
 
-tracert.exe: tracert.c geoip.c geoip.h ip2location.c ip2location.h # tmp.res
-      $(CC) -c $(TRACERT_CFLAGS) tracert.c geoip.c ip2location.c
-      link $(LDFLAGS) -verbose -map:$*.map -out:$*.exe tracert.obj geoip.obj IP2Location.obj $(LIBS) > link.tmp
+tracert.exe: tracert.c geoip.c geoip.h IP2Loc.c IP2Loc.h # tmp.res
+      $(CC) -c $(TRACERT_CFLAGS) tracert.c geoip.c IP2Loc.c
+      link $(LDFLAGS) -verbose -map:$*.map -out:$*.exe tracert.obj geoip.obj IP2Loc.obj $(LIBS) > link.tmp
       cat link.tmp >> tracert.map
 
 .c.exe: # tmp.res
