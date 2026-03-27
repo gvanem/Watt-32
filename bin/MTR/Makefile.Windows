@@ -150,10 +150,10 @@ endif
 ifeq ($(USE_CURSES),1)
   ifeq ($(USE_SLANG),1)
     CFLAGS  += -I$(SLANG_ROOT)/src -DUSE_SLANG
-    mtr_LIBS = $(SLANG_ROOT)/src/wslang-$(CPU).lib
+    mtr_LIBS = $(SLANG_ROOT)/lib/wslang-$(CPU).lib
   else
     CFLAGS  += -I$(PDCURSES_ROOT)
-    mtr_LIBS = $(PDCURSES_ROOT)/wincon/pdcurses-$(CPU).lib
+    mtr_LIBS = $(PDCURSES_ROOT)/lib/pdcurses-$(CPU).lib
   endif
 else
   CFLAGS += -DNO_CURSES
