@@ -80,6 +80,12 @@ def show_version (opt):
      else:
         cprint (Colour.WHITE, "Not built with '-DUSE_SOCKET_API'\n")
 
+     print ("Is GIL-enabled: ", end="")
+     if getattr(sys, "_is_gil_enabled", None):
+        print (sys._is_gil_enabled())
+     else:
+        print ("<N/A>")
+
   print ("Version:   %s"        % w32.wattcpVersion())
   print ("$(CC):     %s (-D%s)" % (w32.wattcpBuildCCexe(), w32.wattcpBuildCC()))
   print ("$(CFLAGS): %s"        % w32.wattcpBuildCflags())

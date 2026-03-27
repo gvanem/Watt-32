@@ -1,10 +1,7 @@
 __pycache__/
-MSVC_obj/
-clang_obj/
-gcc_obj/
+objects/
 _watt32.pyd
 watt32_swig_wrap.c
 watt32_swig_wrap.i
-check-for-unused-libs.py
 watt32.py
 watt32.pyo

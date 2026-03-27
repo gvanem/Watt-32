@@ -11,7 +11,7 @@
 define Usage
 
   Usage:
-    make CC=[cl | clang-cl | gcc] <PYTHON="py -2.x" | "py -3.x"> <WATT32_STATIC=1> [all | clean | vclean | install]'
+    make CC=[cl | clang-cl | gcc] <PYTHON="py -2.x" | "py -3.x"> <WATT32_STATIC=1> [all | clean | vclean | install]
       CC=gcc      - use MinGW
       CC=cl       - use MSVC
       CC=clang-cl - use clang-cl
@@ -22,28 +22,26 @@ endef
 # invokations, things could look like this:
 #
 #   %WATT_ROOT%\src\Python> make CC=cl PYTHON="py -2" py_info
-#   PY_ROOT:      F:/ProgramFiler/Python27.
-#   PY_MAJOR_VER: 2.
-#   PY_MINOR_VER: 7.
-#
-#   %WATT_ROOT%\src\Python> make CC=cl PYTHON="py -3.6" py_info
-#   PY_ROOT:      F:/ProgramFiler/Python36.
-#   PY_MAJOR_VER: 3.
-#   PY_MINOR_VER: 6.
+#   PY_ROOT:       F:/ProgramFiler/Python27
+#   PY_MAJOR_VER:  2
+#   PY_MINOR_VER:  7
+#   PY_GIL_STATUS: 0
 #
 #   %WATT_ROOT%\src\Python> make CC=cl PYTHON="py -3.9" py_info
-#   PY_ROOT:      F:/ProgramFiler/Python39.
-#   PY_MAJOR_VER: 3.
-#   PY_MINOR_VER: 9.
+#   PY_ROOT:       F:/ProgramFiler/Python39
+#   PY_MAJOR_VER:  3
+#   PY_MINOR_VER:  9
+#   PY_GIL_STATUS: 0
 #
-#   %WATT_ROOT%\src\Python> make CC=cl PYTHON="py -3" py_info
-#   PY_ROOT:      F:/ProgramFiler/Python310.
-#   PY_MAJOR_VER: 3.
-#   PY_MINOR_VER: 10.
+#   %WATT_ROOT%\src\Python> make CC=cl PYTHON="py -3.14t" py_info
+#   PY_ROOT:       F:/ProgramFiler/Python314
+#   PY_MAJOR_VER:  3
+#   PY_MINOR_VER:  14
+#   PY_GIL_STATUS: 1
 #
 # A 'PYTHON="py -3"', reporting Python 3.9 just means that the default
-# Python version 3 is '3.9'. Allthough one have a version 3.6 installed
-# as non-default.
+# Python version 3 is '3.9'. Allthough one could have a version 3.6
+# installed as non-default.
 #
 
 export CL=
@@ -77,60 +75,83 @@ endif
 WATT32_STATIC ?= 1
 
 #
+# Do e.g. a 'make CC=clang-cl cpp_swig' to inspect the preprocessed Swig code.
+#
 # Add support for BSD sockets?
-#
-# Do a:
-#   make CC=clang-cl cpp_swig
-#
-# to inspect the preprocessed Swig code.
 #
 USE_SOCKET_API ?= 1
 
 #
-# Could be set in envronment of on the cmd-line:
+# Enable Py 3.13+ no-GIL (or free-threading) mode.
+# Ref: https://docs.python.org/3/howto/free-threading-python.html
+#
+USE_NO_GIL ?= 0
+
+#
+# Could be set in environment or on the cmd-line:
 #
 PYTHON ?= py -3
 
-PY_ROOT      = $(realpath  $(shell $(PYTHON) -c "import sys; print (sys.prefix)"))
-PY_MAJOR_VER = $(shell $(PYTHON) -c "import sys; print(sys.version_info.major)" )
-PY_MINOR_VER = $(shell $(PYTHON) -c "import sys; print(sys.version_info.minor)" )
+PY_ROOT       = $(realpath  $(shell $(PYTHON) -c "import sys; print (sys.prefix)"))
+PY_MAJOR_VER  = $(shell $(PYTHON) -c "import sys; print(sys.version_info.major)" )
+PY_MINOR_VER  = $(shell $(PYTHON) -c "import sys; print(sys.version_info.minor)" )
+PY_MAXSIZE    = $(shell $(PYTHON) -c "import sys; print(sys.maxsize)" )
+PY_GIL_STATUS = $(shell $(PYTHON) -c "import sysconfig; print(sysconfig.get_config_var('Py_GIL_DISABLED'))" )
+
+#
+# For 'make cpp_swig'
+#
+DEBUG_MACROS ?= 0
+CLANG_CHECK  ?= 0
+MSVC_CHECK   ?= 0
 
 ifeq ($(CC),cl)
   OBJ_DIR = objects/MSVC
-  CFLAGS  = -nologo -MD -Ox -Zi -W3
-  RCFLAGS = -nologo -D_MSC_VER
-  LDFLAGS = -nologo -debug -dll -map -verbose -incremental:no -nodefaultlib:uuid.lib -libpath:$(PY_ROOT)/libs
-  PY_LIB  = $(wildcard $(PY_ROOT)/libs/python$(PY_MAJOR_VER)*.lib)
+  RCFLAGS = -D_MSC_VER
+  MSVC_CHECK  = 1
 
 else ifeq ($(CC),clang-cl)
   OBJ_DIR = objects/clang
-  CFLAGS  = -nologo -MD -Ox -Zi -W3
-  RCFLAGS = -nologo -D__clang__
-  LDFLAGS = -nologo -debug -dll -map -verbose -incremental:no -nodefaultlib:uuid.lib -libpath:$(PY_ROOT)/libs
-  PY_LIB  = $(wildcard $(PY_ROOT)/libs/python$(PY_MAJOR_VER)*.lib)
+  RCFLAGS = -D__clang__
+  CLANG_CHECK = 1
 
 else ifeq ($(CC),gcc)
   OBJ_DIR = objects/gcc
   CFLAGS  =  -m$(BITS) -Wall -O2 -s
   RCFLAGS = -O COFF -D__MINGW32__ $(WINDRES_FLAGS)
-  LDFLAGS = -m$(BITS) -s -shared -static-libgcc -Wl,--print-map
-  PY_LIB  = $(wildcard $(PY_ROOT)/libs/libpython$(PY_MAJOR_VER)*.a)
+  LDFLAGS = -m$(BITS) -s -shared -static-libgcc
 
 else
   $(error $(Usage))
 endif
 
+ifneq ($(CC),gcc)
+  RCFLAGS += -nologo
+  CFLAGS   = -nologo -MD -Ox -Zi -W3 -Fd./$(OBJ_DIR)/vc14x.pdb
+  LDFLAGS  = -nologo -debug -dll -verbose -incremental:no -nodefaultlib:uuid.lib -libpath:$(PY_ROOT)/libs
+endif
+
+CFLAGS += $(intcmp $(USE_NO_GIL),1,,-DPy_GIL_DISABLED,)
+
+T = $(intcmp $(USE_NO_GIL),1,,t,)
+
+# $(info T=$(T))
+
+#
+# This should work for a MinGW 'gcc' too.
+#
+PY_LIB = $(word 1, $(wildcard $(PY_ROOT)/libs/python$(PY_MAJOR_VER)*$(T).lib))
+
 RCFLAGS += -DRC_BITS=$(BITS) \
            -I../../inc       \
            -I$(PY_ROOT)/include
 
-CFLAGS  += -I.. -I../../inc     \
-           -I$(PY_ROOT)/include \
-           -DPy_ENABLE_SHARED   \
-           -DSWIG
-
-# CFLAGS += -DSWIG_LINK_RUNTIME \
-#           -DSWIGRUNTIME_DEBUG
+CFLAGS += -I.. -I../../inc     \
+          -I$(PY_ROOT)/include \
+          -DPy_ENABLE_SHARED   \
+          -DSWIG               \
+        # -DSWIGRUNTIME_DEBUG  \
+        # -DSWIG_LINK_RUNTIME
 
 #
 # Without a '-DSWIG_PYTHON_SILENT_MEMLEAK', there is this exception:
@@ -178,50 +199,60 @@ else
   endif
 endif
 
-SWIG_FLAGS = -macroerrors -python $(filter -D% -I%, $(CFLAGS)) # -nodefaultctor -nodefaultdtor -debug-symbols
+SWIG_FLAGS = -macroerrors -python $(filter -D% -I%, $(CFLAGS))
 SWIG_FLAGS += -w451 -w454
+SWIG_FLAGS += # -nodefaultctor -nodefaultdtor -debug-symbols -debug-csymbols
 
-all: py_info py_check _watt32.pyd epilogue
+all: py_info py_check_1 py_check_2 _watt32.pyd epilogue
 
 epilogue:
-	$(call green_msg, Do a $(BRIGHT_WHITE)$(PYTHON) ./runme.py -d www.google.com $(BRIGHT_GREEN)to test it.)
-	$(call green_msg, Do a $(BRIGHT_WHITE)make CC=$(CC) install $(BRIGHT_GREEN)to install it.)
+	$(call green_msg, Do a $(BRIGHT_WHITE)$(PYTHON) ./runme.py -d www.google.com $(BRIGHT_GREEN)to test it)
+	$(call green_msg, Do a $(BRIGHT_WHITE)make CC=$(CC) install $(BRIGHT_GREEN)to install it)
 
 py_info:
 	$(call green_msg, Detected Python variables:)
-	$(call green_msg0,  PY_ROOT:      $(BRIGHT_WHITE)$(PY_ROOT).)
-	$(call green_msg0,  PY_MAJOR_VER: $(BRIGHT_WHITE)$(PY_MAJOR_VER).)
-	$(call green_msg0,  PY_MINOR_VER: $(BRIGHT_WHITE)$(PY_MINOR_VER).)
+	$(call green_msg0,  PY_ROOT:       $(BRIGHT_WHITE)$(PY_ROOT))
+	$(call green_msg0,  PY_MAJOR_VER:  $(BRIGHT_WHITE)$(PY_MAJOR_VER))
+	$(call green_msg0,  PY_MINOR_VER:  $(BRIGHT_WHITE)$(PY_MINOR_VER))
+	$(call green_msg0,  PY_MAXSIZE:    $(BRIGHT_WHITE)$(PY_MAXSIZE))
+	$(call green_msg0,  PY_GIL_STATUS: $(BRIGHT_WHITE)$(PY_GIL_STATUS))
 
-py_check:
+py_check_1:
 ifeq ($(PY_LIB),)
-	$(error A suiteable 'PY_LIB' was not found)
+	@echo "A suiteable 'PY_LIB' was not found" ; exit 1
 else
-	$(call green_msg0,  PY_LIB:       $(BRIGHT_WHITE)$(PY_LIB).)
+	$(call green_msg0,  PY_LIB:        $(BRIGHT_WHITE)$(PY_LIB))
 endif
 
-_watt32.pyd: $(OBJ_DIR)/watt32_swig_wrap.o $(OBJ_DIR)/_watt32.res $(W32_LIB) $(PY_LIB) | check-for-unused-libs.py
-	$(call link_PYD, $@, $^ $(OS_LIBS))
+py_check_2:
+ifeq ($(PY_MAXSIZE)-$(CPU),2147483647-x64)
+	@echo "This python not suiteable for 'CPU=$(CPU)'" ; exit 1
+else
+	$(call green_msg0,  PY_MAXSIZE and CPU okay)
+endif
 
-$(OBJ_DIR)/_watt32.res: _watt32.rc | $(OBJ_DIR)
-	$(call create_res, $@, $<)
+_watt32.pyd: $(OBJ_DIR)/watt32_swig_wrap.o $(OBJ_DIR)/_watt32.res $(W32_LIB) $(PY_LIB)
+	$(call link_PYD, $@, $^ $(OS_LIBS))
 
 watt32.py: watt32_swig_wrap.c
 
-watt32_swig_wrap.c: watt32.swg | $(OBJ_DIR)
-	$(call green_msg, Generating Swig wrapper $@)
+watt32_swig_wrap.c: watt32.swg
+	$(call green_msg, Generating Swig wrapper $(BRIGHT_WHITE)$@)
 	$(SWIG) $(SWIG_FLAGS) -o $@ watt32.swg
 	@echo
 
 $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 	$(call C_compile, $@, $<)
 
+$(OBJ_DIR)/_watt32.res: _watt32.rc | $(OBJ_DIR)
+	$(call RC_compile, $@, $<)
+
 $(OBJ_DIR):
 	mkdir --parents $@
 
 clean:
-	rm -f link.tmp check-for-unused-libs.py *.pdb *.pyc vc1*.pdb \
-	   _watt32.{exp,lib,map,pyc} watt32.py watt32.pyo watt32_swig_wrap.c watt32_swig_wrap.i
+	rm -f link.tmp *.pdb *.pyc \
+	      _watt32.{exp,lib,pyc} watt32.{py,pyo} watt32_swig_wrap.{c,i}
 	rm -fr $(OBJ_DIR) __pycache__
 	- @rmdir objects 2> /dev/null
 
@@ -239,20 +270,16 @@ uninstall:
 	rm -f $(PY_ROOT)/dlls/_watt32.{pyd,pdb}
 	rm -f $(PY_ROOT)/Lib/site-packages/watt32.py
 
-check-for-unused-libs.py: Makefile
-	$(call green_msg, Generating $@)
-	$(file >  $@,#!/usr/env/python)
-	$(file >> $@,if 1:)
-	$(file >> $@,$(check_for_unused_libs_PY))
-
-CPP_FILTER_ARGS = USE_ASTYLE=0       \
-                  USE_CLANG_FORMAT=0 \
-                  DEBUG_MACROS=1     \
-                  CLANG_CHECK=1      \
+CPP_FILTER_ARGS = DEBUG_MACROS=$(DEBUG_MACROS)           \
+                  CLANG_CHECK=$(CLANG_CHECK)             \
+                  MSVC_CHECK=$(MSVC_CHECK)               \
+                  REMOVE_DIRECTIVES=0                    \
+                  CPP_FILTER_PY=$(OBJ_DIR)/cpp-filter.py \
                   EXTRA_CFLAGS='$(CFLAGS)'
 
 cpp_swig: watt32_swig_wrap.c FORCE
-	$(call green_msg, Generating watt32_swig_wrap.i with no preprocess filters)
+	$(call green_msg, Generating $(BRIGHT_WHITE)watt32_swig_wrap.i $(BRIGHT_GREEN)with no preprocess filters\n)
+	@rm -f $(OBJ_DIR)/cpp-filter.py
 	$(MAKE) -f ../cpp_filter.mak $(CPP_FILTER_ARGS) watt32_swig_wrap.i
 
 FORCE:
@@ -284,8 +311,9 @@ watt32_swig_wrap.c: $(watt32_swig_wrap_DEPS)
 #
 BRIGHT_GREEN = \e[1;32m
 BRIGHT_WHITE = \e[1;37m
-green_msg    = @echo -e "$(BRIGHT_GREEN)$(strip $(1))\e[0m"
-green_msg0   = @echo -e "$(BRIGHT_GREEN)$(1)\e[0m"
+
+green_msg  = @echo -e "$(BRIGHT_GREEN)$(strip $(1))\e[0m"
+green_msg0 = @echo -e "$(BRIGHT_GREEN)$(1)\e[0m"
 
 ifeq ($(CC),gcc)
   define C_compile
@@ -293,14 +321,14 @@ ifeq ($(CC),gcc)
     @echo
   endef
 
-  define link_PYD
-    $(call green_msg, Linking $(1))
-    $(CC) -o $(1) $(LDFLAGS) $(2) > $(1:.pyd=.map)
+  define RC_compile
+    windres -o $(1) $(RCFLAGS) $(2)
     @echo
   endef
 
-  define create_res
-    windres -o $(1) $(RCFLAGS) $(2)
+  define link_PYD
+    $(call green_msg, Linking $(BRIGHT_WHITE)$(strip $(1)))
+    $(CC) -o $(1) $(LDFLAGS) $(2)
     @echo
   endef
 
@@ -310,27 +338,25 @@ else
     @echo
   endef
 
-  define link_PYD
-    $(call green_msg, Linking $(1))
-    link -out:$(strip $(1)) $(LDFLAGS) $(2) > link.tmp
-    @cat link.tmp >> $(1:.pyd=.map)
-    @rm -f $(1:.pyd=.exp) $(1:.pyd=.lib)
-    @$(PYTHON) check-for-unused-libs.py link.tmp
-  endef
-
-  define create_res
+  define RC_compile
     rc -Fo $(1) $(RCFLAGS) $(2)
     @echo
   endef
+
+  define link_PYD
+    $(file  > $(OBJ_DIR)/check-for-unused-libs.py,if 1:)
+    $(file >> $(OBJ_DIR)/check-for-unused-libs.py,$(CHECK_FOR_UNUSED_LIBS_PY))
+    $(call green_msg, Linking $(BRIGHT_WHITE)$(strip $(1)))
+    link -out:$(strip $(1)) $(LDFLAGS) $(2) > link.tmp
+    @rm -f $(1:.pyd=.exp) $(1:.pyd=.lib)
+    @$(PYTHON) $(OBJ_DIR)/check-for-unused-libs.py link.tmp
+  endef
 endif
 
-define check_for_unused_libs_PY
-  #
-  # Check a MSVC .map-file for lines after a 'Unused libraries:'
-  #
+define CHECK_FOR_UNUSED_LIBS_PY
   import os, sys
 
-  map_file    = sys.argv[1]
+  link_tmp    = sys.argv[1]
   ignore_libs = [ ]
 
   class State():
@@ -349,18 +375,9 @@ define check_for_unused_libs_PY
   except:
     pass
 
-  def report (unused):
-    num = len(unused)
-    plural = [ "library", "libraries" ]
-    if num > 0:
-       print ("%s%d unused %s in %s:%s" % (Color.RED, num, plural[num > 1], map_file, Color.RESET))
-       for u in sorted(unused):
-           print ("  " + u)
-    print ("%sDone%s\n" % (Color.WHITE, Color.RESET))
-
   def process_map (state):
     unused_libs = []
-    f = open (map_file, "rt")
+    f = open (link_tmp, "rt")
     lines = f.readlines()
     f.close()
     for l in lines:
@@ -375,6 +392,12 @@ define check_for_unused_libs_PY
             unused_libs.append (l)
     return unused_libs
 
-  report (process_map(State.IDLE))
+  unused = process_map (State.IDLE)
+  num = len(unused)
+  if num > 0:
+     print ("%s%d unused librar%s in %s:%s" % (Color.RED, num, [ "y", "ies" ][num > 1], link_tmp, Color.RESET))
+     for u in sorted(unused):
+         print ("  " + u)
+  print ("%sDone%s\n" % (Color.WHITE, Color.RESET))
 endef
 
