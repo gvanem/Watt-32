@@ -3277,8 +3277,11 @@ static int _pkt_win_print_WlanEnumInterfaces (void)
   }
 
   if (if_list)
+  {
+    if (if_list->dwNumberOfItems == 0)
+       (*_printf) ("  WlanEnumInterfaces() returned 0 entries!?\n");
     (*p_WlanFreeMemory) (if_list);
-
+  }
   (*p_WlanCloseHandle) (client, NULL);
   return (1);
 }
@@ -3350,7 +3353,7 @@ static const char *get_phy_types (DWORD num, const DOT11_PHY_TYPE *phy)
 static const char *get_ssid (const DOT11_SSID *ssid)
 {
   if (ssid->uSSIDLength == 0 || !isprint(ssid->ucSSID[0]))
-       strncpy (work_buf, "<none>", sizeof(work_buf));
+       strncpy (work_buf, "<none / hidden>", sizeof(work_buf));
   else SNPRINTF (work_buf, sizeof(work_buf), "%.*s", (int)ssid->uSSIDLength, ssid->ucSSID);
   return (work_buf);
 }
