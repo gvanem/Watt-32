@@ -39,16 +39,16 @@ PYTHON           ?= py -3
 DEBUG_MACROS ?= 0
 
 #
-# Remove all 'line' directives like:
+# Remove all '#pragma' and 'line' directives like:
 #  #line 14 "f:/gv/WinKit/Include/10.0.22621.0/ucrt/sys/types.h" 3 for MSVC or
 #  # 14 "f:/gv/WinKit/Include/10.0.22621.0/ucrt/sys/types.h" 3 for gcc / clang-cl
 #
-REMOVE_LINE_DIRECTIVES ?= 0
+REMOVE_DIRECTIVES ?= 0
 
 WATT_ROOT := $(realpath $(WATT_ROOT))
 
-THIS_FILE     = $(firstword $(MAKEFILE_LIST))
-CPP_FILTER_PY = $(dir $(THIS_FILE))cpp-filter.py
+THIS_FILE      = $(firstword $(MAKEFILE_LIST))
+CPP_FILTER_PY ?= $(dir $(THIS_FILE))cpp-filter.py
 
 ifeq ($(DJGPP_CHECK),1)
   ifeq ($(OS),Windows_NT)
@@ -109,6 +109,8 @@ CFLAGS += -I$(WATT_ROOT)/inc \
 ifeq ($(DEBUG_MACROS),1)
   ifeq ($(CC),gcc)
     CFLAGS += -dD
+  else ifeq ($(CC),cl)
+    CFLAGS += -PD -Zc:preprocessor
   else ifeq ($(CC),clang-cl)
     CFLAGS += -d1PP
   endif
@@ -164,7 +166,7 @@ $(CPP_FILTER_PY): $(THIS_FILE)
 define _CPP_FILTER_PY
   import sys, os
 
-  empty_lines = debug_lines = removed_lines = 0
+  empty_lines = debug_lines = removed_directives = 0
   while True:
     line = sys.stdin.readline()
     if not line:
@@ -179,11 +181,18 @@ define _CPP_FILTER_PY
     #
     l = line.lstrip()
     if l.startswith("#line") or l.startswith("# "):
-       if $(REMOVE_LINE_DIRECTIVES):
-          removed_lines += 1
+       if $(REMOVE_DIRECTIVES):
+          removed_directives += 1
           continue
 
        line = line.replace ("\\\\", "/")
+
+    #
+    # Remove '#pragma' lines?
+    #
+    if $(REMOVE_DIRECTIVES) and l.startswith("#pragma"):
+       removed_directives += 1
+       continue
 
     if l.startswith("#define "):
        debug_lines += 1
@@ -197,8 +206,8 @@ define _CPP_FILTER_PY
        print ("")
 
   print ("Removed %d empty lines." % empty_lines, file=sys.stderr)
-  if $(REMOVE_LINE_DIRECTIVES):
-     print ("Removed %d line directives." % removed_lines, file=sys.stderr)
+  if $(REMOVE_DIRECTIVES):
+     print ("Removed %d line/pragma directives." % removed_directives, file=sys.stderr)
   if $(DEBUG_MACROS):
      print ("Found %d '#define' lines." % debug_lines, file=sys.stderr)
 endef
