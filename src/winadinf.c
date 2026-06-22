@@ -3321,7 +3321,10 @@ static const struct search_list dot11_phy_types[] = {
      { dot11_phy_type_hrdsss,            "HRDSSS" },
      { dot11_phy_type_erp,               "802.11g" },
      { dot11_phy_type_ht,                "802.11n" },
-     { 8,                                "802.11ac" }  /* 'dot11_phy_type_vht'. Added in SDK 8.1? */
+     { dot11_phy_type_vht,               "802.11ac" },  /* 'dot11_phy_type_vht'. Added in SDK 8.1? */
+     { dot11_phy_type_dmg,               "802.11ad" },  /* WiGig, 60 GHz! */
+     { dot11_phy_type_he,                "802.11ax" },  /* Wi-Fi-6 */
+     { dot11_phy_type_eht,               "802.11be" }   /* Wi-Fi-7 */
    };
 
 static const char *get_phy_types (DWORD num, const DOT11_PHY_TYPE *phy)
