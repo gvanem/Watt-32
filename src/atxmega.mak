@@ -4,15 +4,16 @@
 #
 # This file is currently NOT generated.
 #
-AVR_TOOLS_ROOT ?= f:/gv/dx-radio/Embedded/arduino-1.8.16/hardware/tools/avr
-AVR_TOOLS_INC   = $(AVR_TOOLS_ROOT)/avr/include
-AVR_PREFIX      = $(AVR_TOOLS_ROOT)/bin/avr-
+AVR_TOOLS_ROOT ?= f:/gv/Prog/Arduino/86Duino/86Duino-IDE/hardware/tools/avr
+
+AVR_TOOLS_INC = $(AVR_TOOLS_ROOT)/avr/include
+AVR_PREFIX    = $(AVR_TOOLS_ROOT)/bin/avr-
 
 export C_INCLUDE_PATH=
 export CPLUS_INCLUDE_PATH=
 
 CORE_SOURCE = bsdname.c  btree.c    chksum.c   crc.c      \
-              dynip.c    echo.c     fortify.c  getopt.c   \
+              dynip.c    echo.c     getopt.c              \
               gettod.c   idna.c     ip4_frag.c ip4_in.c   \
               ip4_out.c  ip6_in.c   ip6_out.c  language.c \
               lookup.c   loopback.c misc.c     netback.c  \
@@ -62,6 +63,9 @@ CFLAGS = -O3 -g -I. -I../inc -DWATT32_BUILD \
 # Select target MCU:
 #
 # CFLAGS += -mmcu=atxmega128a1u
+#
+# Ref: https://gcc.gnu.org/onlinedocs/gcc/AVR-Options.html
+#
 CFLAGS += -mmcu=atmega16hva2
 
 STAT_LIB = ../lib/libwatt-atxmega.a

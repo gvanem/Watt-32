@@ -361,6 +361,16 @@ int _get_machine_name (char *buf, int size)
   return (rc);
 }
 
+#elif defined(__AVR__)
+/*
+ * Probably not possible.
+ */
+int _get_machine_name (char *buf, int size)
+{
+  (void) buf;
+  (void) size;
+  return (-1);
+}
 #else
 
 /*
@@ -415,9 +425,6 @@ int _get_machine_name (char *buf, int size)
      return (-1);
   reg.r_ds = _watt_dosTbSeg;
   reg.r_dx = 0;
-
-#elif (DOSX & ATMEL)
-  return (-1);  /** \todo */
 
 #elif (DOSX == 0)
   reg.r_ds = FP_SEG (dosBuf);

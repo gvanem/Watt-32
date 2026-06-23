@@ -357,6 +357,9 @@ void W32_CALL init_misc (void)
 #elif defined(__DJGPP__)
   _watt_os_ver = _get_dos_version (1);
 
+#elif defined(__AVR__)
+  _watt_os_ver = 0;
+
 #elif defined(MSC386)
   _watt_os_ver = 0x500;   /* Fake it for 32-bit MSVC */
 

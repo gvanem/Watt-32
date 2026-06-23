@@ -102,6 +102,21 @@ extern "C" {
   #define stricmp(s1, s2)        strcasecmp (s1, s2)
   #define strnicmp(s1, s2, len)  strncasecmp (s1, s2, len)
 
+  #pragma gcc diagnostic ignored "-Wpointer-to-int-cast"
+  #pragma gcc diagnostic ignored "-Wint-to-pointer-cast"
+
+  /**
+   * \todo This depends heavily on the chosen hardware
+   */
+  #define GEN_INTERRUPT(_i, _r)  ((void)0)
+
+  typedef struct IREGS {  /* fake it; never runs on an AVR target */
+          WORD r_ax;
+          WORD r_bx;
+          WORD r_cx;
+          WORD r_dx;
+        } IREGS;
+
 #else                            /* no other option */
   #include <conio.h>
 #endif
@@ -620,7 +635,7 @@ extern const char *short_strerror (int errnum);
           WORD   r_ip, r_cs, r_sp, r_ss;
         } IREGS;
 
-#elif defined(__MSDOS__)  /* r-mode targets */
+#elif defined(__MSDOS__) /* r-mode targets */
 
   /* IREGS must have same layout and size as Borland's 'struct REGPACK'
    * and Watcom's 'union REGPACK'. This is checked in `check_reg_struct()'.
@@ -668,10 +683,6 @@ extern const char *short_strerror (int errnum);
   #endif
 
 #elif (DOSX & ATMEL)
-  /**
-   * \todo This depends heavily on the chosen hardware
-   */
-  #define GEN_INTERRUPT(_i, _r)  ((void)0)
 
 #elif (DOSX & WINWATT)
   /*
