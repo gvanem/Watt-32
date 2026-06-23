@@ -1130,7 +1130,7 @@ void print_perf_times (void)
   {
     ULONG64 x;
 
-    TRACE_CONSOLE (2, "CPU %lu:%s", (u_long)i, (i == 0) ? "\t\t\t  CPU clocks\n" : "\n");
+    TRACE_CONSOLE (2, "CPU %lu:%s", (u_long)i, (i == 0) ? "                    CPU clocks\n" : "\n");
 
     x = info[i].KernelTime.QuadPart - info[i].IdleTime.QuadPart;
     TRACE_CONSOLE (2, "  KernelTime:     %18s\n", qword_str(x));
