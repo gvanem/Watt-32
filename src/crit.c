@@ -4,7 +4,7 @@
 
 /* Targets:
  *    Metaware HighC / PharLap
- *    WatcomC (real/prot mode)  \todo finish suport for Watcom
+ *    WatcomC (real/prot mode)  \todo finish support for Watcom
  *    GNU C / djgpp2
  *    real-mode DOS targets
  *

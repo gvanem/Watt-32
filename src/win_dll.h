@@ -91,11 +91,11 @@ typedef NTSTATUS (WINAPI *func_RtlGetVersion) (
 
 /*
  * MSDN forgot to tell us what values are in the 'THREAD_INFORMATION_CLASS'
- * enum type. According [1], the only suported value is 'ThreadMemoryPriority'.
+ * enum type. According [1], the only supported value is 'ThreadMemoryPriority'.
  * Will figure out this later.
  *
  * When using 'p_GetThreadInformation()', cast 2nd parameter
- * [1] http://msdn.microsoft.com/en-us/library/windows/desktop/hh448382(v=vs.85).aspx
+ * [1] https://learn.microsoft.com/en-gb/windows/win32/api/processthreadsapi/nf-processthreadsapi-getthreadinformation
  */
 typedef BOOL (WINAPI *func_GetThreadInformation) (
         IN        HANDLE   thread_handle,
