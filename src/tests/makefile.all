@@ -319,44 +319,19 @@ CC_ARGS = $(CC).arg
   export C_INCLUDE_PATH=
   export CPLUS_INCLUDE_PATH=
 
-  COMMON_CFLAGS += -Wall                                  \
-                   -Wno-cast-align                        \
-                   -Wno-cast-function-type                \
-                   -Wno-cast-function-type-strict         \
-                   -Wno-cast-qual                         \
-                   -Wno-covered-switch-default            \
-                   -Wno-disabled-macro-expansion          \
-                   -Wno-documentation                     \
-                   -Wno-extra-semi-stmt                   \
-                   -Wno-float-conversion                  \
-                   -Wno-format-non-iso                    \
-                   -Wno-format-nonliteral                 \
-                   -Wno-gnu-zero-variadic-macro-arguments \
-                   -Wno-implicit-fallthrough              \
-                   -Wno-implicit-int-conversion           \
-                   -Wno-implicit-int-float-conversion     \
-                   -Wno-invalid-utf8                      \
-                   -Wno-language-extension-token          \
-                   -Wno-missing-noreturn                  \
-                   -Wno-missing-prototypes                \
-                   -Wno-missing-variable-declarations     \
-                   -Wno-nonportable-system-include-path   \
-                   -Wno-reserved-id-macro                 \
-                   -Wno-reserved-identifier               \
-                   -Wno-shorten-64-to-32                  \
-                   -Wno-sign-compare                      \
-                   -Wno-sign-conversion                   \
-                   -Wno-switch-enum                       \
-                   -Wno-tautological-type-limit-compare   \
-                   -Wno-undef                             \
-                   -Wno-unreachable-code                  \
-                   -Wno-unreachable-code-break            \
-                   -Wno-unreachable-code-return           \
-                   -Wno-unsafe-buffer-usage               \
-                   -Wno-unused-function                   \
-                   -Wno-unused-macros                     \
-                   -Wno-unused-value                      \
-                   -Wno-unknown-warning-option
+  #
+  # As got gcc, turn off colours
+  #
+  ifeq ($(USER),gv)
+    COMMON_CFLAGS += -fdiagnostics-color=never
+  endif
+
+  COMMON_CFLAGS += -W3                              \
+                   -Wno-alloc-size                  \
+                   -Wno-unused-function             \
+                   -Wno-unused-value                \
+                   -Wno-uninitialized-const-pointer \
+                   -Wno-default-const-init-var-unsafe
 
   WATT_LIB = $(LIB_DIR)/wattcp_clang.lib
 

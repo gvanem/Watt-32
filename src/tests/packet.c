@@ -20,7 +20,7 @@ static const char *pkt_type (int type)
   switch (type)
   {
     case PACKET_HOST:
-         return ("host ");
+         return ("host");
     case PACKET_BROADCAST:
          return ("bcast");
     case PACKET_MULTICAST:
@@ -28,9 +28,9 @@ static const char *pkt_type (int type)
     case PACKET_OTHERHOST:
          return ("other");
     case PACKET_OUTGOING:
-         return ("out  ");
+         return ("out");
     case PACKET_LOOPBACK:
-         return ("loop ");
+         return ("loop");
     case PACKET_FASTROUTE:
          return ("fastr");
   }
@@ -49,6 +49,7 @@ static void packet_recv (int sk)
   int   addr_len = sizeof(addr);
   const char *eth_src = NULL;
 
+  memset ((void*)&eth, '\0', sizeof(eth));
   recvfrom (sk, (char*)&eth, sizeof(eth), 0,
             (struct sockaddr*)&addr, &addr_len);
 
@@ -56,7 +57,7 @@ static void packet_recv (int sk)
   eth_src = ether_ntohost (eth.ether_shost);
 #endif
 
-  printf ("%d  %04Xh: %s, %02X:%02X:%02X:%02X:%02X:%02X %s\n",
+  printf ("%d  %04Xh: %-5s %02X:%02X:%02X:%02X:%02X:%02X %s\n",
           sk, ntohs(addr.sll_protocol), pkt_type(addr.sll_pkttype),
           eth.ether_shost[0], eth.ether_shost[1],
           eth.ether_shost[2], eth.ether_shost[3],
@@ -86,6 +87,7 @@ int main (int argc, char **argv)
     PERROR ("socket");
     return (-1);
   }
+
   s2 = socket (AF_PACKET, SOCK_PACKET, 0);
   if (s2 < 0)
   {
