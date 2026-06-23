@@ -18,7 +18,10 @@ echo ---- running watcom_f.mak %1 ---- >> all_dos.log
 wmake -h -f watcom_f.mak %1 >> all_dos.log
 
 echo ---- running watcom_w.mak %1 ---- >> all_dos.log
-wmake -h -f watcom_s.mak %1 >> all_dos.log
+wmake -h -f watcom_w.mak %1 >> all_dos.log
+
+echo ---- running watcom_3.mak %1 ---- >> all_dos.log
+wmake -h -f watcom_3.mak %1 >> all_dos.log
 
 call setbcc 4
 echo ---- running bcc_s.mak %1 ---- >> all_dos.log
