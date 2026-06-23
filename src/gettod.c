@@ -116,7 +116,9 @@ const char *ULONGLONG_to_ctime (ULONGLONG ts)
   LARGE_INTEGER ft;
   time_t        t;
   const struct  tm *tm;
-  static char   buf[30];
+  static char   buf [2][30];   /* Use 2 buffers in round-robin */
+  static int    idx = 0;
+  char         *ret = buf [idx];
   static        BOOL tz_set = FALSE;
 
   if (!tz_set)
@@ -127,12 +129,33 @@ const char *ULONGLONG_to_ctime (ULONGLONG ts)
   t = FILETIME_to_unix_epoch ((const FILETIME*)&ft) / U64_SUFFIX(1000000);
   tm = localtime (&t);
   if (tm)
-       strftime (buf, sizeof(buf), "%Y-%m-%d/%H:%M:%S", tm);
-  else SNPRINTF (buf, sizeof(buf), "%lu/%" U64_FMT, (u_long)t, ts);
-  return (buf);
+       strftime (ret, sizeof(buf[0]), "%Y-%m-%d/%H:%M:%S", tm);
+  else SNPRINTF (ret, sizeof(buf[0]), "%lu/%" U64_FMT, (u_long)t, ts);
+  idx ^= 1;
+  return (ret);
 }
 
 W32_GCC_PRAGMA (GCC diagnostic pop)
+
+const char *SYSTEMTIME_to_str (const SYSTEMTIME *st)
+{
+  static char buf [2][50];   /* Use 2 buffers in round-robin */
+  static int  idx = 0;
+  char       *ret = buf [idx];
+
+  SNPRINTF (ret, sizeof(buf[0]), "%4u-%02u-%02u/%02u:%02u:%02u",
+            st->wYear, st->wMonth, st->wDay, st->wHour, st->wMinute, st->wSecond);
+  idx ^= 1;
+  return (ret);
+}
+
+const char *FILETIME_to_str (const FILETIME *ft)
+{
+  SYSTEMTIME st;
+
+  FileTimeToSystemTime (ft, &st);
+  return SYSTEMTIME_to_str (&st);
+}
 
 W32_FUNC int W32_CALL W32_NAMESPACE (gettimeofday) (
          struct timeval  *tv,
