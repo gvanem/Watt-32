@@ -26,7 +26,7 @@ LFLAGS = +standard -I../inc -I$(DJDIR)/include -sysdirs $(DJDIR)/include \
 
 SOURCES = accept.c   adr2asc.c  asc2adr.c  bind.c     bsddbug.c  bsdname.c  \
           btree.c    chksum.c   close.c    connect.c  country.c  crc.c      \
-          echo.c     fcntl.c    fortify.c  fsext.c    get_ai.c   get_ni.c   \
+          echo.c     fcntl.c               fsext.c    get_ai.c   get_ni.c   \
           geteth.c   gethost.c  gethost6.c getname.c  getnet.c   getopt.c   \
           getprot.c  getput.c   getserv.c  gettod.c   highc.c    ioctl.c    \
           ip4_frag.c ip4_in.c   ip4_out.c  ip6_in.c   ip6_out.c  language.c \

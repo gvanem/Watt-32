@@ -55,7 +55,7 @@ ARGS += -DCPPCHECK_RUN -DWATT32_BUILD -DWIN32 \
       # -UUSE_UDP_ONLY
 
 CORE_SOURCE = bsdname.c  btree.c    chksum.c   country.c  crc.c      \
-              echo.c     fortify.c  getopt.c   gettod.c   highc.c    \
+              echo.c     getopt.c   gettod.c   highc.c               \
               ip4_frag.c ip4_in.c   ip4_out.c  ip6_in.c   ip6_out.c  \
               language.c lookup.c   loopback.c misc.c     netback.c  \
               oldstuff.c pc_cbrk.c  pcarp.c    pcbootp.c  powerpak.c \
