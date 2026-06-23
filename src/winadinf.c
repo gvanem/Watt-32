@@ -356,7 +356,9 @@ struct setup_info_st {
        char                 *NetCfgInstanceId;
        char                 *MatchingDeviceId;
        char                 *DriverDate;
+       char                 *DriverDateData;
        char                 *DriverVersion;
+       char                 *InstallTimeStamp;
        char                 *ComponentId;
        char                 *DeviceInstanceID;
        ULONGLONG             NetworkInterfaceInstallTimestamp;
@@ -822,12 +824,14 @@ static void setup_info_dump (void)
   struct setup_info_st *inf = setup_info + 0;
   int    i;
 
-  (*_printf) ("\nFrom setup_info:\n");
+  (*_printf) ("\n%s():\n", __FUNCTION__);
   for (i = 0; inf; inf = inf->next, i++)
   {
     (*_printf) (" %2d: NetCfgInstanceId: %s\n"
                 "     DriverDate:       %s\n"
                 "     DriverVersion:    %s\n"
+                "     DriverDateData:   %s\n"
+                "     InstallTimeStamp: %s\n"
                 "     ComponentId:      %s\n"
                 "     DeviceInstanceID: %s\n"
                 "     IfTypePreStart:   %s (%lu)\n"
@@ -836,6 +840,8 @@ static void setup_info_dump (void)
                 inf->NetCfgInstanceId,
                 inf->DriverDate,
                 inf->DriverVersion,
+                inf->DriverDateData,
+                inf->InstallTimeStamp,
                 inf->ComponentId,
                 inf->DeviceInstanceID,
                 get_if_type(inf->IfTypePreStart), inf->IfTypePreStart,
@@ -894,14 +900,25 @@ static void setup_info_free (void)
   {
     if (inf->NetCfgInstanceId)
        free (inf->NetCfgInstanceId);
+
     if (inf->MatchingDeviceId)
        free (inf->MatchingDeviceId);
+
     if (inf->DriverDate)
        free (inf->DriverDate);
+
+   if (inf->DriverDateData)
+      free (inf->DriverDateData);
+
+   if (inf->InstallTimeStamp)
+      free (inf->InstallTimeStamp);
+
     if (inf->DriverVersion)
        free (inf->DriverVersion);
+
     if (inf->ComponentId)
        free (inf->ComponentId);
+
     if (inf->DeviceInstanceID)
        free (inf->DeviceInstanceID);
   }
@@ -922,7 +939,7 @@ static const char *reg_type_name (DWORD type)
           type == REG_DWORD_BIG_ENDIAN ? "REG_DWORD_BIG_ENDIAN" : "?");
 }
 
-static BOOL trace_REG_BINARY (HKEY key, const char *value, DWORD num)
+static char *trace_REG_BINARY (HKEY key, const char *value, DWORD num)
 {
   DWORD       bin_type = REG_BINARY;
   DWORD       bin_len = 0;
@@ -933,26 +950,28 @@ static BOOL trace_REG_BINARY (HKEY key, const char *value, DWORD num)
   if (RegQueryValueExA(key, value, NULL, &bin_type, (BYTE*)bin_buf, &bin_len) != ERROR_SUCCESS)
   {
     TRACE (3, "    %2lu: %-12s ?\n", num, "REG_BINARY");
-    return (FALSE);
+    return (NULL);
   }
 
   bin_buf = alloca (bin_len);
   if (RegQueryValueExA(key, value, NULL, &bin_type, (BYTE*)bin_buf, &bin_len) == ERROR_SUCCESS)
   {
-    if (bin_len == 8)  /* A FILETIME probably coming from "DriverDateData" */
+    if (bin_len == 8)  /* A FILETIME from "DriverDateData" */
     {
       t_val = ULONGLONG_to_ctime (*(ULONGLONG*) &bin_buf[0]);
       TRACE (3, "    %2lu: %-12s %-35s -> %s (FILETIME)\n", num, "REG_BINARY", value, t_val);
+      return (char*) t_val;
     }
-    else if (bin_len == 16)    /* A SYSTEMTIME probably coming from "InstallTimestamp" */
+    if (bin_len == 16)   /* A SYSTEMTIME from "InstallTimestamp" */
     {
       t_val = SYSTEMTIME_to_str ((const SYSTEMTIME*) &bin_buf[0]);
       TRACE (3, "    %2lu: %-12s %-35s -> %s (SYSTEMTIME)\n", num, "REG_BINARY", value, t_val);
+      return (char*) t_val;
     }
     else
       TRACE (3, "    %2lu: %-12s %-35s -> ??\n", num, "REG_BINARY", value);
   }
-  return (TRUE);
+  return (NULL);
 }
 
 static int setup_info_populate (const char *key_name, struct setup_info_st *info)
@@ -977,6 +996,7 @@ static int setup_info_populate (const char *key_name, struct setup_info_st *info
     DWORD  type        = REG_NONE;
     DWORD  val32;
     LONG64 val64;
+    char       *t_ret;
     const char *t_val = "";
 
     rc = RegEnumValue (key, num, value, &value_size, NULL, &type, (BYTE*)&data, &data_size);
@@ -1048,8 +1068,16 @@ static int setup_info_populate (const char *key_name, struct setup_info_st *info
            break;
 
       case REG_BINARY:
-           if (trace_REG_BINARY (key, value, num))
-              added++;
+           if (!stricmp(value, "InstallTimeStamp") && (t_ret = trace_REG_BINARY(key, value, num)) != NULL)
+           {
+             info->InstallTimeStamp = strdup (t_ret);
+             added++;
+           }
+           else if (!stricmp(value, "DriverDateData") && (t_ret = trace_REG_BINARY(key, value, num)) != NULL)
+           {
+             info->DriverDateData = strdup (t_ret);
+             added++;
+           }
            break;
 
       default:
