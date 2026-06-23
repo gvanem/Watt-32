@@ -330,6 +330,10 @@ int MS_CDECL main (int argc, char **argv)
        debug_on = verbose_level = 1;
     else if (!stricmp(argv[1],"-dd") || !stricmp(argv[1],"/dd"))
        debug_on = verbose_level = 2;
+    else if (!stricmp(argv[1],"-ddd") || !stricmp(argv[1],"/ddd"))
+       debug_on = verbose_level = 3;
+    else if (!stricmp(argv[1],"-dddd") || !stricmp(argv[1],"/dddd"))
+       debug_on = verbose_level = 4;
   }
 
   check_setup();
