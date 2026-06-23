@@ -157,6 +157,17 @@ const char *FILETIME_to_str (const FILETIME *ft)
   return SYSTEMTIME_to_str (&st);
 }
 
+/*
+ * Return FILETIME in seconds as a double.
+ */
+double FILETIME_sec (const FILETIME *filetime)
+{
+  const LARGE_INTEGER *ft = (const LARGE_INTEGER*) filetime;
+  long double          rc = (long double) ft->QuadPart;
+
+  return (double) (rc/1E7);    /* from 100 nano-sec periods to sec */
+}
+
 W32_FUNC int W32_CALL W32_NAMESPACE (gettimeofday) (
          struct timeval  *tv,
          struct timezone *tz)

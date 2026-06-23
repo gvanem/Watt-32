@@ -86,11 +86,11 @@
 #define PRINT_RAS_ERROR(spaces, ret) \
         (*_printf) ("%s%s(%u): error: %s\n", spaces, __FILE__, __LINE__, ras_strerror(ret))
 
-#define TRACE(level, ...)  do {                                         \
-                             if (verbose_level >= level) {              \
-                               printf ("%s(%u): ", __FILE__, __LINE__); \
-                               printf (__VA_ARGS__);                    \
-                             }                                          \
+#define TRACE(level, ...)  do {                                          \
+                             if (verbose_level >= level) {               \
+                                printf ("%s(%u): ", __FILE__, __LINE__); \
+                                printf (__VA_ARGS__);                    \
+                             }                                           \
                            } while (0)
 
 #ifndef __in
@@ -509,27 +509,6 @@ static const char *_list_lookup (DWORD value, const struct search_list *list, in
   return (buf);
 }
 
-#if defined(NOT_USED)
-static const struct search_list wsock_err_tab[] = {
-                  { 10004, "Call interrupted" },  /* WSAEINTR */
-                };
-
-static const char *get_wsock_err (void)
-{
-  static char buf [100];
-  int    err;
-
-  if (!p_WSAGetLastError)
-     return ("WS2_32.DLL not loaded");
-
-  err = (*p_WSAGetLastError)();
-
-  SNPRINTF (buf, sizeof(buf), "%s", err ?
-            _list_lookup(err, wsock_err_tab, DIM(wsock_err_tab)) : NONE_STR);
-  return (buf);
-}
-#endif
-
 /**
  * \todo Decode `WLAN_BSS_ENTRY::usCapabilityInformation` bits.
  */
@@ -785,7 +764,7 @@ static const char *duration_string (DWORD msec)
  *
  * This is the "System-Defined Device Setup Classes Available to Vendors".
  * Ref:
- *   https://docs.microsoft.com/en-us/windows-hardware/drivers/install/system-defined-device-setup-classes-available-to-vendors
+ *   https://learn.microsoft.com/en-us/windows-hardware/drivers/install/system-defined-device-setup-classes-available-to-vendors
  *
  * \note A "Software Loopback Interface" does not have a key under the KEY_NAME branch.
  */
@@ -943,6 +922,39 @@ static const char *reg_type_name (DWORD type)
           type == REG_DWORD_BIG_ENDIAN ? "REG_DWORD_BIG_ENDIAN" : "?");
 }
 
+static BOOL trace_REG_BINARY (HKEY key, const char *value, DWORD num)
+{
+  DWORD       bin_type = REG_BINARY;
+  DWORD       bin_len = 0;
+  ULONGLONG   bin_val;
+  char       *bin_buf = NULL;
+  const char *t_val = "";
+
+  if (RegQueryValueExA(key, value, NULL, &bin_type, (BYTE*)bin_buf, &bin_len) != ERROR_SUCCESS)
+  {
+    TRACE (3, "    %2lu: %-12s ?\n", num, "REG_BINARY");
+    return (FALSE);
+  }
+
+  bin_buf = alloca (bin_len);
+  if (RegQueryValueExA(key, value, NULL, &bin_type, (BYTE*)bin_buf, &bin_len) == ERROR_SUCCESS)
+  {
+    if (bin_len == 8)  /* A FILETIME probably coming from "DriverDateData" */
+    {
+      t_val = ULONGLONG_to_ctime (*(ULONGLONG*) &bin_buf[0]);
+      TRACE (3, "    %2lu: %-12s %-35s -> %s (FILETIME)\n", num, "REG_BINARY", value, t_val);
+    }
+    else if (bin_len == 16)    /* A SYSTEMTIME probably coming from "InstallTimestamp" */
+    {
+      t_val = SYSTEMTIME_to_str ((const SYSTEMTIME*) &bin_buf[0]);
+      TRACE (3, "    %2lu: %-12s %-35s -> %s (SYSTEMTIME)\n", num, "REG_BINARY", value, t_val);
+    }
+    else
+      TRACE (3, "    %2lu: %-12s %-35s -> ??\n", num, "REG_BINARY", value);
+  }
+  return (TRUE);
+}
+
 static int setup_info_populate (const char *key_name, struct setup_info_st *info)
 {
   HKEY  key = NULL;
@@ -967,7 +979,7 @@ static int setup_info_populate (const char *key_name, struct setup_info_st *info
     LONG64 val64;
     const char *t_val = "";
 
-    rc = RegEnumValue (key, num, value, &value_size, NULL, &type, (LPBYTE)&data, &data_size);
+    rc = RegEnumValue (key, num, value, &value_size, NULL, &type, (BYTE*)&data, &data_size);
     if (rc == ERROR_NO_MORE_ITEMS)
        break;
 
@@ -1031,8 +1043,13 @@ static int setup_info_populate (const char *key_name, struct setup_info_st *info
              t_val = ULONGLONG_to_ctime (info->NetworkInterfaceInstallTimestamp);
              added++;
            }
-           TRACE (3, "    %2lu: %-12s %-35s -> %" S64_FMT " %s\n",
-                  num, reg_type_name(type), value[0] ? value : "(no value)", val64, t_val);
+           TRACE (3, "    %2lu: %-12s %-35s -> %s\n",
+                  num, reg_type_name(type), value[0] ? value : "(no value)", t_val);
+           break;
+
+      case REG_BINARY:
+           if (trace_REG_BINARY (key, value, num))
+              added++;
            break;
 
       default:
@@ -1157,6 +1174,7 @@ static BOOL skip_filter_iface (const BYTE *descr_a, const wchar_t *descr_w)
 #define ADD_VALUE(v) { v, #v }
 
 static const struct search_list if_types[] = {
+                  { 0,                           "None" }, /* for Software Loopback Interface */
                   { _IF_TYPE_OTHER,              "Other type" },
                   { _IF_TYPE_ETHERNET_CSMACD,    "Ethernet" },
                   { _IF_TYPE_ISO88025_TOKENRING, "Token Ring" },
@@ -1610,7 +1628,53 @@ static const char *socket_addr_str (const SOCKET_ADDRESS *addr)
 }
 #endif
 
-#ifdef NOT_USED
+#if defined(NOT_USED)  /* could come in handly later */
+static const char *hex_string (const void *data, size_t len)
+{
+  static char buf [1000];
+  static char digits[] = "0123456789ABCDEF";
+  char          *to = buf;
+  char          *end = to + sizeof(buf);
+  const uint8_t *p   = (const BYTE*) data;
+  size_t         i;
+
+  for (i = 0; i < len && to < end - 4; i++)
+  {
+    *to++ = digits [p[i] >> 4];
+    *to++ = digits [p[i] & 0x0F];
+    *to++ = ' ';
+  }
+
+  if (to > buf)
+     to--;
+  if (i < len)
+  {
+    strcpy (to, "..");
+    to += 2;
+  }
+  *to = '\0';
+  return (buf);
+}
+
+static const struct search_list wsock_err_tab[] = {
+                  { 10004, "Call interrupted" },  /* WSAEINTR */
+                };
+
+static const char *get_wsock_err (void)
+{
+  static char buf [100];
+  int    err;
+
+  if (!p_WSAGetLastError)
+     return ("WS2_32.DLL not loaded");
+
+  err = (*p_WSAGetLastError)();
+
+  SNPRINTF (buf, sizeof(buf), "%s", err ?
+            _list_lookup(err, wsock_err_tab, DIM(wsock_err_tab)) : NONE_STR);
+  return (buf);
+}
+
 static const char *socket_addr_str2 (const SOCKET_ADDRESS *addr)
 {
   if (addr->iSockaddrLength == 0)
@@ -1635,7 +1699,7 @@ static const char *socket_addr_str2 (const SOCKET_ADDRESS *addr)
   }
   return (work_buf);
 }
-#endif
+#endif  /* NOT_USED */
 
 static const char *get_netmask_prefix (const IP_ADAPTER_PREFIX *pf)
 {
@@ -3293,7 +3357,11 @@ static const struct search_list dot11_auth_algo[] = {
      { DOT11_AUTH_ALGO_WPA_PSK,          "WPA-PSK" },
      { DOT11_AUTH_ALGO_WPA_NONE,         "WPA-None" },
      { DOT11_AUTH_ALGO_RSNA,             "RSNA" },
-     { DOT11_AUTH_ALGO_RSNA_PSK,         "RSNA with PSK (WEP2)" }
+     { DOT11_AUTH_ALGO_RSNA_PSK,         "RSNA with PSK (WEP2)" },
+     { 8,                                "WPA3-Enterprise (192-bit)" },         /* DOT11_AUTH_ALGO_WPA3 */
+     { 9,                                "WPA3-SAE" },                          /* DOT11_AUTH_ALGO_WPA3_SAE */
+     { 10,                               "Opportunistic wireless encryption" }, /* DOT11_AUTH_ALGO_OWE */
+     { 11,                               "WPA3-Enterprise" }                    /* DOT11_AUTH_ALGO_WPA3_ENT */
    };
 
 static const struct search_list dot11_cipher_algo[] = {
@@ -3369,7 +3437,7 @@ static const char *get_dot11_auth (enum _DOT11_AUTH_ALGORITHM auth)
     SNPRINTF (work_buf, sizeof(work_buf), "proprietary %lu", (unsigned long)auth);
     return (work_buf);
   }
-  return _list_lookup (auth,dot11_auth_algo,DIM(dot11_auth_algo));
+  return _list_lookup (auth, dot11_auth_algo, DIM(dot11_auth_algo));
 }
 
 static const char *get_dot11_cipher (enum _DOT11_CIPHER_ALGORITHM cipher)
@@ -3525,19 +3593,6 @@ static void print_wlan_stats (const WLAN_STATISTICS *stats, int indent)
   }
 #endif
 }
-
-#if defined(NOT_USED)
-/*
- * Return FILETIME in seconds as a double.
- */
-static double filetime_sec (const FILETIME *filetime)
-{
-  const LARGE_INTEGER *ft = (const LARGE_INTEGER*) filetime;
-  long double          rc = (long double) ft->QuadPart;
-
-  return (double) (rc/1E7);    /* from 100 nano-sec periods to sec */
-}
-#endif  /* NOT_USED */
 
 /*
  * Convert a frequency in the 2.4GHz band to a channel number.
