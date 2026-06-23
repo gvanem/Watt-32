@@ -41,7 +41,7 @@
 #undef USE_TCP_SACK    /* Include TCP Selective ACK feature (not yet) */
 #undef USE_ECHO_DISC   /* Include echo/discard servers */
 #undef USE_PPPOE       /* PPP-over-Ethernet encapsulation */
-#undef USE_FAST_PKT    /* Use faster all real-mode PKTDRVR receiver (DOSX only) */
+#undef USE_FAST_PKT    /* Use faster real-mode PKTDRVR receiver (DOSX only) */
 #undef USE_DEAD_GWD    /* Dead Gateway detection in ARP module */
 #undef USE_GZIP        /* Use gzip compression for PPP and/or pcap debug file. Also for SCTP. */
 #undef USE_PROFILER    /* Include simple execution profiler (only DOSX with 64-bit types) */
