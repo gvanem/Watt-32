@@ -288,7 +288,7 @@
   /*
    * MinGW's libmingex.a messes up the printing of GetAddress:
    *
-   * snprintf (buf, sizeof(buf), " %-*s", 30-indent, GetAddress(src));
+   * snprintf (buf, sizeof(buf), " %-*s", 30 - indent, GetAddress(src));
    *
    * MSVC does it right. So use that.
    */
@@ -454,6 +454,8 @@ double throughput  = 0;          /* percentage packets not lost */
 int    consecutive = 0;          /* the number of consecutive lost packets */
 int    automagic   = 0;          /* automatically quit after 10 lost packets? */
 int    drop_domain = 0;          /* drop domain name from localnet names */
+int    longest_name = 0;         /* to align name and address a bit nicer */
+int    longest_addr = 0;         /* ditto */
 
 int    as_lookup   = 0;          /* Look up AS path in routing registries (not yet) */
 size_t new_mtu     = 0;                   /* reported mtu changed */
@@ -1139,10 +1141,18 @@ void CheckReply (const struct ip *ip, int ttl, int probe, int seq, double delta_
   {
     char buf [100];
     char *p = buf;
+    int   indent2 = max (30 - indent, longest_name);
 
-    p += snprintf (buf, sizeof(buf), " %-*s", 30-indent, GetAddress(src));
+    p += snprintf (buf, sizeof(buf), " %-*s", indent2, GetAddress(src));
     if (!nflag)
-       p += snprintf (p, sizeof(buf) - (p - buf), " (%s)", inet_ntoa(src));
+    {
+      const char *addr = inet_ntoa (src);
+      size_t      len = strlen (addr);
+
+      if (len > longest_addr && len < 16)
+         longest_addr =  16 - len;
+      p += snprintf (p, sizeof(buf) - (p - buf), " (%s)%-*s", inet_ntoa(src), longest_addr, "");
+    }
 
     printf (nflag ? "%-30s" : "%-50s", buf);
     last_addr = src;
@@ -1277,8 +1287,8 @@ int Check_ICMP (const struct ip *ip, int seq, int *ret_type, int *ret_code)
  */
 const char *GetAddress (struct in_addr addr)
 {
-  static char name  [MAXHOSTNAMELEN+1];
-  static char domain[MAXHOSTNAMELEN+1];
+  static char name   [MAXHOSTNAMELEN+1];
+  static char domain [MAXHOSTNAMELEN+1];
   static int  got_domain = 0;
 
   if (!got_domain && !nflag)
@@ -1298,9 +1308,11 @@ const char *GetAddress (struct in_addr addr)
 
       strncpy (name, hp->h_name, sizeof(name)-1);
       name [MAXHOSTNAMELEN] = '\0';
-      cp = strchr (name,'.');
+      cp = strchr (name, '.');
       if (drop_domain && cp && !strcmp(cp+1,domain))
          *cp = '\0';
+      if (strlen(name) > longest_name)
+         longest_name = strlen (name);
       return (name);
     }
   }
