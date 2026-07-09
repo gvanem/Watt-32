@@ -173,7 +173,7 @@ size_t W32_CALL sock_setbuf (sock_type *s, BYTE *rx_buf, size_t rx_len)
   }
   else
   {
-    size_t len = min (rx_len, USHRT_MAX-1) - 8;
+    size_t len = min (rx_len, 2 * USHRT_MAX) - 8;
 
     *(DWORD*)rx_buf         = SAFETY_TCP;
     *(DWORD*)(rx_buf+4+len) = SAFETY_TCP;

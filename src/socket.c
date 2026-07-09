@@ -231,7 +231,7 @@ BOOL _sock_dos_fd (int s)
  */
 int _sock_set_rcv_buf (sock_type *s, size_t len)
 {
-  len = min (len+8,USHRT_MAX);  /* add room for head/tail markers */
+  len = 2 * min (len, USHRT_MAX) + 8;  /* add room for head/tail markers */
   return sock_setbuf (s, (BYTE*)malloc(len), len);
 
   /* Note: the ret-val from above malloc() is freed below.
