@@ -284,7 +284,7 @@ BOOL get_file_version (const char *file_name,
   /* Create the file version string for the first (i.e. the only
    * one) language.
    */
-  snprintf (sub_block, sizeof(sub_block),
+  SNPRINTF (sub_block, sizeof(sub_block),
             "\\StringFileInfo\\%04x%04x\\FileVersion",
            lang_info->language, lang_info->code_page);
 

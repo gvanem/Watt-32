@@ -521,15 +521,15 @@ static const char *get_capability_info (USHORT capa)
   char *end = p + sizeof(buf);
 
   if (capa & 0x01)
-     p += snprintf (p, end - p, "ESS,");
+     p += SNPRINTF (p, end - p, "ESS,");
   if (capa & 0x02)
-     p += snprintf (p, end - p, "IBSS,");
+     p += SNPRINTF (p, end - p, "IBSS,");
   if (capa & 0x04)
-     p += snprintf (p, end - p, "CF-pollable,");
+     p += SNPRINTF (p, end - p, "CF-pollable,");
   if (capa & 0x08)
-     p += snprintf (p, end - p, "CF-poll req,");
+     p += SNPRINTF (p, end - p, "CF-poll req,");
   if (capa & 0x10)
-     p += snprintf (p, end - p, "Privacy,");
+     p += SNPRINTF (p, end - p, "Privacy,");
 
   if (p > buf)
      p[-1] = '\0';
@@ -1560,7 +1560,7 @@ static const char *get_phys_address (const void *a, ULONG len, BOOL show_manuf)
       if (strcmp(rc, "Unknown OUI"))  /* found it */
          comment = ", Locally Administered";
     }
-    snprintf (p, p_max - p, " (%s%s)", rc, comment);
+    SNPRINTF (p, p_max - p, " (%s%s)", rc, comment);
   }
 #endif
   return (work_buf);
