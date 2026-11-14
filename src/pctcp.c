@@ -1844,13 +1844,23 @@ static int tcp_read (_tcp_Socket *s, BYTE *buf, int maxlen)
        to_move += s->missed_seq[1] - s->recv_next;
 
     if (to_move > 0)
-    {
-      memmove (s->rx_data, s->rx_data + len, to_move);
+       memmove (s->rx_data, s->rx_data + len, to_move);
 
-      TCP_SENDSOON (s);     /* delayed ACK */
-    }
+    /* Window update. The peer only knows the window of our last segment
+     * (adv_win). Once reading has opened the window by a full segment, or
+     * by half the buffer, beyond that (receiver SWS avoidance, RFC 1122,
+     * 4.2.3.3), tell the peer now. Otherwise a peer that stopped at a
+     * small window waits for its persist timer: the test in tcp_upd_win()
+     * only fires while the buffer is nearly full, and LF_WINUPDATE is only
+     * set after a window of exactly 0.
+     */
+    if ((UINT)(s->max_rx_data - s->rx_datalen) >=
+        s->adv_win + min ((UINT)s->max_seg, (UINT)s->max_rx_data / 2))
+       TCP_SEND (s);
+    else if (to_move > 0)
+       TCP_SENDSOON (s);     /* delayed ACK */
     else
-      tcp_upd_win (s, __LINE__);
+       tcp_upd_win (s, __LINE__);
   }
   else if (s->state == tcp_StateCLOSWT)
           _tcp_close (s);
