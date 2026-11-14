@@ -175,9 +175,7 @@ NO_W32_CFLAGS = -D_Windows
   # These stupid '$GCC_COLORS' messed up my shell big-time.
   # Turn colours off.
   #
-  ifeq ($(USER),gv)
-    COMMON_CFLAGS += -fdiagnostics-color=never
-  endif
+  COMMON_CFLAGS += -fdiagnostics-color=never
 
   ifeq ($(filter 2 3 4,$(word 3, $(shell true | $(CC) -E -dD -x c - | grep 'define\ *__GNUC__'))),)
     #
@@ -320,11 +318,9 @@ CC_ARGS = $(CC).arg
   export CPLUS_INCLUDE_PATH=
 
   #
-  # As got gcc, turn off colours
+  # As for gcc, turn off colours
   #
-  ifeq ($(USER),gv)
-    COMMON_CFLAGS += -fdiagnostics-color=never
-  endif
+  COMMON_CFLAGS += -fdiagnostics-color=never
 
   COMMON_CFLAGS += -W3                              \
                    -Wno-alloc-size                  \
@@ -332,6 +328,11 @@ CC_ARGS = $(CC).arg
                    -Wno-unused-value                \
                    -Wno-uninitialized-const-pointer \
                    -Wno-default-const-init-var-unsafe
+
+  #
+  # Older 'clang-cl' compilers may not have some of the above
+  #
+  COMMON_CFLAGS += -Wno-unknown-warning-option
 
   WATT_LIB = $(LIB_DIR)/wattcp_clang.lib
 

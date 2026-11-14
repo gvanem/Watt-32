@@ -768,7 +768,7 @@ LDFLAGS = -machine:$(CPU)
 @ifdef DEBUG
 CFLAGS = $(CFLAGS) -MDd -Ot -D_DEBUG -EHsc -RTCc -RTCs -RTCu -GF -GS # -Gr
 @else
-CFLAGS = $(CFLAGS) -MD -Ox -GS- # -Gr
+CFLAGS = $(CFLAGS) -MD -Ox -GS- -Gr
 @endif
 
 @ifdef WIN64
@@ -961,6 +961,11 @@ USE_ASAN  ?= 0
 USE_UBSAN ?= 0
 
 #
+# Use "fastcall" convention for clang-cl(x86)?
+#
+USE_FASTCALL ?= 0
+
+#
 # Enable full Microsoft Visual C++ compatibility
 #
 CFLAGS += -fms-compatibility
@@ -969,6 +974,11 @@ CFLAGS += -fms-compatibility
 # Turn off console-colours; blue on blue background is not readable.
 #
 CFLAGS += -fno-color-diagnostics
+
+ifeq ($(CPU)-1,x86-$(USE_FASTCALL))
+  CFLAGS  += -Gr
+  RCFLAGS += -DUSE_FASTCALL
+endif
 
 LDFLAGS = -dll -nologo -map -debug -debugtype:cv -incremental:no -machine:$(CPU)
 
