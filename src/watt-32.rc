@@ -114,7 +114,7 @@ BEGIN
       VALUE "ProductName",      "Watt-32 tcp/ip stack" RC_DATE2
       VALUE "ProductVersion",   WATTCP_VER_STRING " (" BUILDER ")"
       VALUE "LegalCopyright",   "This library carries a BSD-style licence.\r\n"
-                                "\t\t\tCopyright 1997-2023, Gisle Vanem <gvanem@yahoo.no>."
+                                "\t\t\tCopyright 1997-2026, Gisle Vanem <gvanem@yahoo.no>."
     END
   END
 
