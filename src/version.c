@@ -41,7 +41,7 @@ const char *wattcpCopyright = "See COPYRIGHT.H for details";
 #if defined(__GNUC__)
   const char *gcc_get_cpu_tune (void);
 
-#elif defined(_MSC_VER) && (_MSC_VER >= 1000)    /* Visual-C 4+ */
+#elif defined(_MSC_VER) && (_MSC_VER >= 1000)    /* Visual-C 4+ / clang-cl */
   static const char *msvc_check_fastcall (void);
   static const char *msvc_get_patch_build (void);
 #endif
@@ -181,8 +181,9 @@ const char * W32_CALL wattcpVersion (void)
   #endif
 
 #elif defined(__clang__)
-  p += sprintf (p, "clang %d.%d.%d (%s), ",
-                __clang_major__, __clang_minor__, __clang_patchlevel__, DBG_RELEASE ASAN_COMPILED UBSAN_COMPILED);
+  p += sprintf (p, "clang %d.%d.%d (%s, %s), ",
+                __clang_major__, __clang_minor__, __clang_patchlevel__,
+                DBG_RELEASE ASAN_COMPILED UBSAN_COMPILED, msvc_check_fastcall());
 
 #elif defined(_MSC_VER)
   /*
@@ -848,13 +849,15 @@ const char *gcc_get_cpu_tune (void)
 }
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1000)  /* Visual-C 4+ */
-#if !defined(_M_X64)
+#if defined(_MSC_VER) && (_MSC_VER >= 1000)  /* Visual-C 4+ / clang-cl */
+#if !defined(_M_X64 )
   /*
-   * cl/x64 doesn't support reg-calls. Does any other 64-bit compilers do that?
+   * cl / clang-cl (x64) doesn't support reg-calls.
+   * Does any other 64-bit compilers do that?
+   *
    * If compiled as fastcall (-Gr), the 1st argument is in ECX.
    */
-  _declspec(naked) static DWORD echo_1st_arg_Gr (DWORD arg)
+  __declspec(naked) static DWORD echo_1st_arg_Gr (DWORD arg)
   {
     __asm mov eax, ecx
     __asm ret
