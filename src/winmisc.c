@@ -874,7 +874,7 @@ static int is_real_key (const INPUT_RECORD *k)
  * and getch(). Hence we make them for all Win32 targets here
  * (but prefixed with '_w32_').
  */
-int W32_NAMESPACE(kbhit) (void)
+int W32_CALL W32_NAMESPACE(kbhit) (void)
 {
   INPUT_RECORD r;
   DWORD num;
@@ -914,7 +914,7 @@ static int do_getch (HANDLE h)
   return (EOF);
 }
 
-int W32_NAMESPACE(getch) (void)
+int W32_CALL W32_NAMESPACE(getch) (void)
 {
   DWORD mode;
   int   c;
@@ -935,7 +935,7 @@ int W32_NAMESPACE(getch) (void)
  */
 #if 0
 
-char *W32_NAMESPACE(itoa) (int value, char *buf, int radix)
+char * W32_CALL W32_NAMESPACE(itoa) (int value, char *buf, int radix)
 {
   WATT_ASSERT (radix == 8 || radix == 10);
   sprintf (buf, (radix == 8) ? "%o" : "%d", value);
@@ -947,7 +947,7 @@ char *W32_NAMESPACE(itoa) (int value, char *buf, int radix)
 /* This version should be a lot faster. Ref:
  * http://stackoverflow.com/questions/190229/where-is-the-itoa-function-in-linux
  */
-char *W32_NAMESPACE(itoa) (int value, char *buf, int radix)
+char * W32_CALL W32_NAMESPACE(itoa) (int value, char *buf, int radix)
 {
   int sign, i = 0;
 

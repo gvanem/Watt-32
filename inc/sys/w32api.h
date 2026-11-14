@@ -91,8 +91,7 @@
   #endif
 #endif
 
-
-/*
+/**
  * For all Windows targets, we export functions and data prefixed with
  * 'W32_FUNC' or 'W32_DATA'. Unless we use the static Watt-32 library
  * (./lib/libwatt32.a). Using the static lib requires that the user to
@@ -122,12 +121,21 @@
   #define W32_DATA  extern
 #endif
 
-/*
+/**
  * W32_CALL is defined to `__cdecl' to ease the interface
  * to OpenWatcom which uses register calls (-3r) as default.
  *
  * So it should be possible to use e.g. a MSVC linked watt-32.dll
  * with a Watcom / MinGW / CygWin compiled program.
+ *
+ * \note This is the only accepted syntax for a `W32_CALL` function:
+ * ```c
+ *   static void W32_CALL foo (void);
+ * ```
+ * Not:
+ * ```c
+ *   static W32_CALL void foo (void);
+ * ```
  */
 #if defined(WATT32_ON_WINDOWS)
   #define W32_CALL __cdecl

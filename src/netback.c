@@ -16,7 +16,7 @@
 
 
 #if (DOSX)
-  void backgroundon (void)
+  void W32_CALL backgroundon (void)
   {
     outsnl (_LANG("Use wintr_init() / wintr_enable() instead"));
     exit (3);

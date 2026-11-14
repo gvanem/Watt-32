@@ -57,9 +57,9 @@
 /*
  * gethostbyY_r..
  */
-int gethostbyaddr_r (const void *addr, socklen_t addr_len, int addr_type,
-                     struct hostent *ret, char *buf, size_t buf_len,
-                     struct hostent **result, int *p_errno)
+int W32_CALL gethostbyaddr_r (const void *addr, socklen_t addr_len, int addr_type,
+                              struct hostent *ret, char *buf, size_t buf_len,
+                              struct hostent **result, int *p_errno)
 {
   struct hostent *he;
 
@@ -81,9 +81,9 @@ int gethostbyaddr_r (const void *addr, socklen_t addr_len, int addr_type,
   return (0);
 }
 
-int gethostbyname_r (const char *name, struct hostent *ret,
-                     char *buf, size_t buf_len, struct hostent **result,
-                     int *p_errno)
+int W32_CALL gethostbyname_r (const char *name, struct hostent *ret,
+                              char *buf, size_t buf_len, struct hostent **result,
+                              int *p_errno)
 {
   UNFINISHED();
   *p_errno = ERANGE;
@@ -96,7 +96,8 @@ int gethostbyname_r (const char *name, struct hostent *ret,
   return (-1);
 }
 
-int gethostent_r (struct hostent *ret, char *buf, size_t buf_len, struct hostent **result, int *h_errnop)
+int W32_CALL gethostent_r (struct hostent *ret, char *buf, size_t buf_len,
+                           struct hostent **result, int *h_errnop)
 {
   UNFINISHED();
   ARGSUSED (ret);
@@ -107,7 +108,7 @@ int gethostent_r (struct hostent *ret, char *buf, size_t buf_len, struct hostent
   return (-1);
 }
 
-int sethostent_r (int stayopen, struct hostent *buf)
+int W32_CALL sethostent_r (int stayopen, struct hostent *buf)
 {
   UNFINISHED();
   ARGSUSED (stayopen);
@@ -115,7 +116,7 @@ int sethostent_r (int stayopen, struct hostent *buf)
   return (-1);
 }
 
-int endhostent_r (struct hostent *buf)
+int W32_CALL endhostent_r (struct hostent *buf)
 {
   UNFINISHED();
   ARGSUSED (buf);
@@ -125,7 +126,7 @@ int endhostent_r (struct hostent *buf)
 /*
  * getprotobyY_r..
  */
-int getprotobynumber_r (int proto, struct protoent *ret, char *buf, size_t buf_len, struct protoent **result)
+int W32_CALL getprotobynumber_r (int proto, struct protoent *ret, char *buf, size_t buf_len, struct protoent **result)
 {
   UNFINISHED();
   ARGSUSED (proto);
@@ -136,7 +137,7 @@ int getprotobynumber_r (int proto, struct protoent *ret, char *buf, size_t buf_l
   return (-1);
 }
 
-int getprotobyname_r (const char *name, struct protoent *ret, char *buf, size_t buf_len, struct protoent **result)
+int W32_CALL getprotobyname_r (const char *name, struct protoent *ret, char *buf, size_t buf_len, struct protoent **result)
 {
   UNFINISHED();
   ARGSUSED (name);
@@ -147,7 +148,7 @@ int getprotobyname_r (const char *name, struct protoent *ret, char *buf, size_t 
   return (-1);
 }
 
-int getprotoent_r (struct protoent *ret, char *buf, size_t buf_len, struct protoent **result)
+int W32_CALL getprotoent_r (struct protoent *ret, char *buf, size_t buf_len, struct protoent **result)
 {
   UNFINISHED();
   ARGSUSED (ret);
@@ -157,7 +158,7 @@ int getprotoent_r (struct protoent *ret, char *buf, size_t buf_len, struct proto
   return (-1);
 }
 
-int setprotoent_r (int stayopen, struct protoent *buffer)
+int W32_CALL setprotoent_r (int stayopen, struct protoent *buffer)
 {
   UNFINISHED();
   ARGSUSED (stayopen);
@@ -165,7 +166,7 @@ int setprotoent_r (int stayopen, struct protoent *buffer)
   return (-1);
 }
 
-int endprotoent_r (struct protoent *buffer)
+int W32_CALL endprotoent_r (struct protoent *buffer)
 {
   UNFINISHED();
   ARGSUSED (buffer);
@@ -175,7 +176,7 @@ int endprotoent_r (struct protoent *buffer)
 /*
  * getservbyY_r..
  */
-int getservbyname_r (const char *name, const char *proto, struct servent *ret, char *buf, size_t buf_len, struct servent **result)
+int W32_CALL getservbyname_r (const char *name, const char *proto, struct servent *ret, char *buf, size_t buf_len, struct servent **result)
 {
   UNFINISHED();
   ARGSUSED (name);
@@ -187,7 +188,7 @@ int getservbyname_r (const char *name, const char *proto, struct servent *ret, c
   return (-1);
 }
 
-int getservbyport_r (int port, const char *proto, struct servent *ret, char *buf, size_t buf_len, struct servent **result)
+int W32_CALL getservbyport_r (int port, const char *proto, struct servent *ret, char *buf, size_t buf_len, struct servent **result)
 {
   UNFINISHED();
   ARGSUSED (port);

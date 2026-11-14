@@ -24,7 +24,7 @@
  * \deprecated.
  * Actually simply a macro in <tcp.h>
  */
-int tcp_cbrk (int mode)
+int W32_CALL tcp_cbrk (int mode)
 {
   return tcp_cbreak (mode);
 }
@@ -33,7 +33,7 @@ int tcp_cbrk (int mode)
  * \deprecated.
  * Not needed in Watt-32. Return timeout from ticks.
  */
-unsigned long set_ttimeout (unsigned ticks)
+unsigned long W32_CALL set_ttimeout (unsigned ticks)
 {
 #ifdef WIN32
   DWORD now = set_timeout (0);
@@ -127,7 +127,7 @@ W32_FUNC void W32_CALL unixtodos (time_t time, struct date *d, struct time *t)
 }
 #endif
 
-WORD inchksum (const void *ptr, int len)
+WORD W32_CALL inchksum (const void *ptr, int len)
 {
 #ifdef HAVE_IN_CHECKSUM_FAST
   return _w32_in_checksum_fast (ptr, len);
@@ -136,7 +136,7 @@ WORD inchksum (const void *ptr, int len)
 #endif
 }
 
-WORD _w32_inchksum (const void *ptr, int len)
+WORD W32_CALL _w32_inchksum (const void *ptr, int len)
 {
 #ifdef HAVE_IN_CHECKSUM_FAST
   return _w32_in_checksum_fast (ptr, len);

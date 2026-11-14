@@ -766,10 +766,18 @@ LDFLAGS = -machine:$(CPU)
 # CFLAGS = $(CFLAGS) -D_CRT_NO_POSIX_ERROR_CODE
 
 @ifdef DEBUG
-CFLAGS = $(CFLAGS) -MDd -Ot -D_DEBUG -EHsc -RTCc -RTCs -RTCu -GF -GS # -Gr
+CFLAGS = $(CFLAGS) -MDd -Ot -D_DEBUG -EHsc -RTCc -RTCs -RTCu -GF -GS
 @else
-CFLAGS = $(CFLAGS) -MD -Ox -GS- -Gr
+CFLAGS = $(CFLAGS) -MD -Ox -GS-
 @endif
+
+#
+# Use 'nmake -f visualc-release_32.mak clean all USE_FASTCALL=1' for this.
+#
+!if "$(USE_FASTCALL)-$(CPU)" == "1-x86"
+CFLAGS  = $(CFLAGS) -Gr
+RCFLAGS = $(RCFLAGS) -DUSE_FASTCALL
+!endif
 
 @ifdef WIN64
 AS     = ml64
@@ -961,7 +969,7 @@ USE_ASAN  ?= 0
 USE_UBSAN ?= 0
 
 #
-# Use "fastcall" convention for clang-cl(x86)?
+# Use "fastcall" convention for cl + clang-cl on x86?
 #
 USE_FASTCALL ?= 0
 

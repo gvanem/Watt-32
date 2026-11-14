@@ -308,7 +308,7 @@ static int raw_connect (Socket *socket)
 /*
  * Check for catched signals
  */
-static int chk_signals (void)
+static int W32_CALL chk_signals (void)
 {
   if (_sock_sig_pending())
   {

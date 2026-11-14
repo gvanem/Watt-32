@@ -4188,7 +4188,7 @@ quit:
   }
 #endif  /* ON_WIN_VISTA && HAVE_NETIOAPI_H */
 
-static int compare_ipnetrow (const void *_a, const void *_b)
+static int MS_CDECL compare_ipnetrow (const void *_a, const void *_b)
 {
   const MIB_IPNETROW *a = (const MIB_IPNETROW*)_a;
   const MIB_IPNETROW *b = (const MIB_IPNETROW*)_b;
@@ -4199,7 +4199,7 @@ static int compare_ipnetrow (const void *_a, const void *_b)
   return (int) (a->dwType - b->dwType);
 }
 
-static int compare_ipnetrow2 (const void *_a, const void *_b)
+static int MS_CDECL compare_ipnetrow2 (const void *_a, const void *_b)
 {
   const MIB_IPNET_ROW2 *a = (const MIB_IPNET_ROW2*)_a;
   const MIB_IPNET_ROW2 *b = (const MIB_IPNET_ROW2*)_b;

@@ -39,6 +39,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 
+#include <sys/cdefs.h>
+
 /*
  * Change this for your MinGW.
  * '-D_WIN32_WINNT' is now set in the generated 'MinGW*.mak' files.
@@ -91,6 +93,10 @@
 #if defined(_WIN32_MAXVER) && (_WIN32_MAXVER > _WIN32_WINNT) && 0
   #undef  _WIN32_WINNT
   #define _WIN32_WINNT _WIN32_MAXVER
+#endif
+
+#ifndef W32_CALL
+#define W32_CALL __cdecl
 #endif
 
 #undef ON_WIN_VISTA
@@ -1121,8 +1127,8 @@
   static void print_mib_ipnet_row2     (DWORD index, const MIB_IPNET_ROW2 *row);
   static void print_mib_ipforward_row2 (DWORD index, const MIB_IPFORWARD_ROW2 *row, int family);
 
-  static int compare_ipnetrow  (const void *_a, const void *_b);
-  static int compare_ipnetrow2 (const void *_a, const void *_b);
+  static int MS_CDECL compare_ipnetrow  (const void *_a, const void *_b);
+  static int MS_CDECL compare_ipnetrow2 (const void *_a, const void *_b);
 
   static void print_mib_if_row (DWORD index, const MIB_IFROW *row);
 

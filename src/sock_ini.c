@@ -307,7 +307,7 @@ static void except_handler (excReg *regs)
  * This is dead code on Windows since except_handler()
  * isn't installed yet.
  */
-static void except_handler (int sig, int code)
+static void MS_CDECL except_handler (int sig, int code)
 {
 #if defined(__WATCOMC__) && !defined(W32_NO_8087)
   if (sig == SIGFPE && code == FPE_IOVERFLOW)

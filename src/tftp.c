@@ -168,7 +168,7 @@ static const char *tftp_strerror (int code)
 /**
  * Watch out for "ICMP port unreachable".
  */
-static void udp_callback (_udp_Socket *s, int icmp_type, int icmp_code)
+static void W32_CALL udp_callback (_udp_Socket *s, int icmp_type, int icmp_code)
 {
   if (s->ip_type == UDP_PROTO && s == (_udp_Socket*)sock &&
       (s->locflags & LF_GOT_ICMP) && icmp_type == ICMP_UNREACH)

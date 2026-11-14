@@ -43,7 +43,7 @@
  * Does it support fdopen() ?
  */
 
-int sock_fgets (char *buf, int max, FILE *stream)
+int W32_CALL sock_fgets (char *buf, int max, FILE *stream)
 {
   int        rc, s = fileno (stream);
   Socket    *sock  = _socklist_find (s);
@@ -62,7 +62,7 @@ int sock_fgets (char *buf, int max, FILE *stream)
   return (rc);
 }
 
-int sock_fputs (const char *text, FILE *stream)
+int W32_CALL sock_fputs (const char *text, FILE *stream)
 {
   int     s    = fileno (stream);
   Socket *sock = _socklist_find (s);

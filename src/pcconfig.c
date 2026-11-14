@@ -261,7 +261,7 @@ const char *expand_var_str (const char *str)
   return strcat (buf, p+1);
 }
 
-const char *_w32_ExpandVarStr (const char *str)
+const char * W32_CALL _w32_ExpandVarStr (const char *str)
 {
   return expand_var_str (str);
 }

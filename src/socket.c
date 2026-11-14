@@ -1901,7 +1901,7 @@ static __inline const char *ip_proto_str (WORD prot)
  * Return number of BSD-sockets the ICMP-event matched
  * (retval not used yet).
  */
-static int icmp_callback (sock_type *s, BYTE icmp_type, BYTE icmp_code)
+static int W32_CALL icmp_callback (sock_type *s, BYTE icmp_type, BYTE icmp_code)
 {
   const char *type_str = "??";
   int   error;
