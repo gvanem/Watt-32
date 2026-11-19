@@ -146,7 +146,7 @@ W32_CLANG_PACK_WARN_DEF()
   static void tcp_rtt_win  (_tcp_Socket *s);
   static void tcp_upd_win  (_tcp_Socket *s, unsigned line);
   static BOOL tcp_checksum (const in_Header *ip, const tcp_Header *tcp, int len);
-#endif
+#endif  /* USE_UDP_ONLY */
 
 static void udp_close (const _udp_Socket *s);
 
