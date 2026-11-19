@@ -346,8 +346,20 @@ typedef char address_buf [MAX_IP6_SZ+1];
 W32_DATA int                      _w32_errno;
 W32_FUNC unsigned long  W32_CDECL _w32_intel (unsigned long x);
 W32_FUNC unsigned short W32_CDECL _w32_intel16 (unsigned short x);
-W32_FUNC const char *W32_CALL     _w32_inet_ntop (int af, const void *src,
-                                                  char *dst, size_t size);
+
+#if defined(USE_BSD_API)
+  W32_FUNC const char *W32_CALL _w32_inet_ntop (int af, const void *src,
+                                                char *dst, size_t size);
+#else
+  W32_FUNC const char *_w32_inet_ntop (int af, const void *src,
+                                       char *dst, size_t size)
+  {
+    strcpy (dst, "?");
+    _w32_errno = EAFNOSUPPORT;
+    return (NULL);
+  }
+#endif
+
 /*
  * Some of the values under the Registry key
  *   HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}\000x
