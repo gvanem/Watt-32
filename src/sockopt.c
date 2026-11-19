@@ -203,7 +203,7 @@ static int set_sol_opt (Socket *s, int opt, const void *val, unsigned len)
          if (tv->tv_sec == 0)        /* i.e. use system default */
               s->timeout = sock_delay;
          else s->timeout = (DWORD)tv->tv_sec + tv->tv_usec/1000000UL;
-         SOCK_DEBUGF ((" %d", s->timeout));
+         SOCK_DEBUGF ((" %lu", (u_long)s->timeout));
          break;
 
     case SO_SNDTIMEO:    /* Don't think we need this */
