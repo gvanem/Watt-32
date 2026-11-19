@@ -1078,7 +1078,7 @@ extern const char *short_strerror (int errnum);
 #endif
 
 /*
- * The MinGW compiler (espesially the one used on AppVeyor), does not understand
+ * The MinGW compiler (especially the one used on AppVeyor), does not understand
  * '%llu' as used in 'ADDR_FMT'. And '%4zu' as used in the 'PRINT_SIZE()' macro.
   Just turn these warnings off globally.
  */
