@@ -56,7 +56,7 @@
          uint64 tstamp_get;          /* timestamp when polled */
          WORD   rx_length;           /* length from PacketReceivePacket() */
          BYTE   rx_buf [ETH_MAX+10]; /* add some margin */
-       };
+       };  /* = 1542 bytes */
 #else
   struct pkt_rx_element {
          DWORD  tstamp_put[2];       /* RDTSC timestamp on 1st upcall */
