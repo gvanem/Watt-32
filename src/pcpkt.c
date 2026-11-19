@@ -90,6 +90,12 @@ int pkt_reset_handle (WORD handle);
 #define PKT_FIRST_VEC_11 0x20
 #define PKT_LAST_VEC_11  0xFF
 
+/**
+ * The Tx area must hold a whole link_Packet: _eth_init() clears it with
+ * sizeof(link_Packet), which is larger than RX_SIZE (AX.25).
+ * Ref. https://github.com/gvanem/Watt-32/issues/133
+ */
+#define TX_SIZE  (sizeof(link_Packet) > RX_SIZE ? sizeof(link_Packet) : RX_SIZE)
 
 #if (DOSX & PHARLAP)
   #include <mw/exc.h>
@@ -103,7 +109,7 @@ int pkt_reset_handle (WORD handle);
    */
   #define PKT_TMP()     (WORD) 0x40
   #define TX_BUF()      (PKT_TMP() + PKT_TMP_SIZE)  /* DWORD boundary */
-  #define RX_BUF()      (TX_BUF() + RX_SIZE)
+  #define RX_BUF()      (TX_BUF() + TX_SIZE)
   #define RDATA_SIZE    (RX_BUF() + RX_SIZE)
   #define RP_SEGM()     RP_SEG (rm_base)
 
@@ -112,7 +118,7 @@ int pkt_reset_handle (WORD handle);
 
   #define PKT_TMP()     (WORD) 0x40
   #define TX_BUF()      (PKT_TMP() + PKT_TMP_SIZE)
-  #define RX_BUF()      (TX_BUF() + RX_SIZE)
+  #define RX_BUF()      (TX_BUF() + TX_SIZE)
   #define RDATA_SIZE    (RX_BUF() + RX_SIZE)
   #define RP_SEGM()     RP_SEG (rm_base)
 
@@ -133,7 +139,7 @@ int pkt_reset_handle (WORD handle);
    */
   #define PKT_TMP()     0
   #define TX_BUF()      (PKT_TMP() + PKT_TMP_SIZE)
-  #define RX_BUF()      (TX_BUF() + RX_SIZE)
+  #define RX_BUF()      (TX_BUF() + TX_SIZE)
   #define RDATA_SIZE    (RX_BUF() + RX_SIZE)
   #define RP_SEGM()     _pkt_inf->rm_seg
 
@@ -174,7 +180,7 @@ int pkt_reset_handle (WORD handle);
 
   #define PKT_TMP()     0
   #define TX_BUF()      (PKT_TMP() + PKT_TMP_SIZE)
-  #define RX_BUF()      (TX_BUF() + RX_SIZE)
+  #define RX_BUF()      (TX_BUF() + TX_SIZE)
   #define RDATA_SIZE    (RX_BUF() + RX_SIZE)
   #define RP_SEGM()     _pkt_inf->rm_seg
 
@@ -1732,7 +1738,7 @@ static int find_vector (int first, int num)
 
     /* Allocate DOS-memory for pkt_receiver4_rm() and temp/Tx buffers.
      */
-    length = TX_BUF() + RX_SIZE;
+    length = TX_BUF() + TX_SIZE;
     _pkt_inf->rm_seg = dpmi_real_malloc (length, &_pkt_inf->rm_sel);
     if (!_pkt_inf->rm_seg)
        return (-2);

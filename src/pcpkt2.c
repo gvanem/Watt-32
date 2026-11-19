@@ -56,7 +56,12 @@ static DWORD setup_pkt_inf_fast (void)
   size_t stub_size  = sizeof(real_stub_array);
 
 #if (DOSX)
-  rdata_size += PKT_TMP_SIZE + ETH_MAX + 10;
+  /*
+   * Allocate at least the size we `memset()` to zero in `_eth_init()`.
+   * Otherwise we will overwrite the next MCB.
+   * Ref. https://github.com/gvanem/Watt-32/issues/133
+   */
+  rdata_size += PKT_TMP_SIZE + sizeof(link_Packet);
 #endif
 
   if (rdata_size >= 64*1024UL)
