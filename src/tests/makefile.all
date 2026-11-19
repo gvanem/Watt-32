@@ -326,6 +326,7 @@ CC_ARGS = $(CC).arg
                    -Wno-alloc-size                  \
                    -Wno-unused-function             \
                    -Wno-unused-value                \
+                   -Wno-unknown-argument            \
                    -Wno-uninitialized-const-pointer \
                    -Wno-default-const-init-var-unsafe
 
